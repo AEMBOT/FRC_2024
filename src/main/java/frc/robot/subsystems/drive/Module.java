@@ -35,7 +35,6 @@ public class Module {
   private final PIDController driveFeedback;
   private final PIDController turnFeedback;
 
-  @AutoLogOutput(key = "Module{index}/AngleSetpoint")
   private Rotation2d angleSetpoint = null; // Setpoint for closed loop control, null for open loop
 
   private Double speedSetpoint = null; // Setpoint for closed loop control, null for open loop
@@ -92,6 +91,8 @@ public class Module {
 
     // Run closed loop turn control
     if (angleSetpoint != null) {
+      Logger.recordOutput("Module{index}/AngleSetpoint", angleSetpoint);
+
       io.setTurnVoltage(
           turnFeedback.calculate(getAngle().getRadians(), angleSetpoint.getRadians()));
 
@@ -107,6 +108,8 @@ public class Module {
 
         // Run drive controller
         double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+        Logger.recordOutput("Module{index}/DriveSetpointRadPerSec", velocityRadPerSec);
+
         io.setDriveVoltage(
             driveFeedforward.calculate(velocityRadPerSec)
                 + driveFeedback.calculate(inputs.driveVelocityRadPerSec, velocityRadPerSec));
