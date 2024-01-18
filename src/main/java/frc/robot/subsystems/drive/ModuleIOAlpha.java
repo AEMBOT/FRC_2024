@@ -58,28 +58,28 @@ public class ModuleIOAlpha implements ModuleIO {
   public ModuleIOAlpha(int index) {
     switch (index) {
       case 0: // FL
-        driveSparkMax = new CANSparkMax(1, MotorType.kBrushless);
+        driveSparkMax = new CANSparkMax(9, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(2, MotorType.kBrushless);
-        cancoder = new CANcoder(20);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        cancoder = new CANcoder(12);
+        absoluteEncoderOffset = new Rotation2d(5.589815 - Math.PI); // MUST BE CALIBRATED
         break;
       case 1: // FR
         driveSparkMax = new CANSparkMax(3, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(4, MotorType.kBrushless);
-        cancoder = new CANcoder(21);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        cancoder = new CANcoder(13);
+        absoluteEncoderOffset = new Rotation2d(2.919160 + Math.PI); // MUST BE CALIBRATED
         break;
       case 2: // BL
         driveSparkMax = new CANSparkMax(5, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(6, MotorType.kBrushless);
-        cancoder = new CANcoder(22);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        cancoder = new CANcoder(14);
+        absoluteEncoderOffset = new Rotation2d(3.186072 - Math.PI); // MUST BE CALIBRATED
         break;
       case 3: // BR
         driveSparkMax = new CANSparkMax(7, MotorType.kBrushless);
         turnSparkMax = new CANSparkMax(8, MotorType.kBrushless);
-        cancoder = new CANcoder(23);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        cancoder = new CANcoder(15);
+        absoluteEncoderOffset = new Rotation2d(2.426753 + Math.PI); // MUST BE CALIBRATED
         break;
       default:
         throw new RuntimeException("Invalid module index");

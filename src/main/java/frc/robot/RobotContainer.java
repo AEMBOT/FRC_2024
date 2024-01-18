@@ -65,7 +65,7 @@ public class RobotContainer {
                 new ModuleIOAlpha(1),
                 new ModuleIOAlpha(2),
                 new ModuleIOAlpha(3));
-        flywheel = new Flywheel(new FlywheelIOSparkMax());
+        // flywheel = new Flywheel(new FlywheelIOSparkMax());
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
