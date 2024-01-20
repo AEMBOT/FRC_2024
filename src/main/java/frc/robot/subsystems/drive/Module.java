@@ -208,9 +208,4 @@ public class Module {
   public double getCharacterizationVelocity() {
     return inputs.driveVelocityRadPerSec;
   }
-
-  @AutoLogOutput(key = "Module{index}/DriveSetpoint")
-  public double getSpeedSetpoint() {
-    return speedSetpoint;
-  }
 }
