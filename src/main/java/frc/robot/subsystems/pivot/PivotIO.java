@@ -16,7 +16,10 @@ public interface PivotIO {
   public default void updateInputs(PivotIOInputs inputs) {}
 
   /** Sets the angle of the pivot, in radians. */
-  public default void setPosition(double positionRad) {}
+  public default void setPosition(double positionRad, double ffVolts) {}
+
+  /** Run open loop at the specified voltage. */
+  public default void setVoltage(double volts) {}
 
   /** Stop in open loop. */
   public default void stop() {}

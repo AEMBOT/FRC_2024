@@ -7,14 +7,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
-
-  // Pivot Systems
-
-  // Shooter Systems
   private final SimpleMotorFeedforward shooterFFModel; // FF + P optimal flywheel control, no I/D
   private final PIDController shooterPIDController; // Low inertia system, use onboard PID?
-
-  // Indexing Systems
 
   public Shooter(ShooterIO io) {
     this.io = io;

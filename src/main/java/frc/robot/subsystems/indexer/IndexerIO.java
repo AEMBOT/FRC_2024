@@ -12,6 +12,9 @@ public interface IndexerIO {
     public double intakeIndexerAppliedVolts = 0.0;
   }
 
+  /** Updates the set of loggable inputs. */
+  public default void updateInputs(IndexerIOInputs inputs) {}
+
   public default void runShooterIndexer(boolean state) {}
 
   public default void runIntakeIndexer(boolean state) {}
