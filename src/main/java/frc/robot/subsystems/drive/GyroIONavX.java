@@ -21,14 +21,16 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import java.util.Queue;
 
-/** IO implementation for Pigeon2 */
+/** IO implementation for NavX */
 public class GyroIONavX implements GyroIO {
   private final AHRS navX = new AHRS(SPI.Port.kMXP, (byte) ODOMETRY_FREQUENCY); // 200Hz update rate
   private final Queue<Double> yawPositionQueue;
+  private final Queue<Double> yawTimestampQueue;
 
   public GyroIONavX() {
     navX.reset();
     yawPositionQueue = SparkMaxOdometryThread.getInstance().registerSignal(() -> navX.getAngle());
+    yawTimestampQueue = SparkMaxOdometryThread.getInstance().makeTimestampQueue();
   }
 
   @Override
@@ -37,10 +39,13 @@ public class GyroIONavX implements GyroIO {
     inputs.yawPosition = Rotation2d.fromDegrees(navX.getAngle());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(navX.getRate());
 
+    inputs.odometryYawTimestamps =
+            yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryYawPositions =
         yawPositionQueue.stream()
             .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
+    yawTimestampQueue.clear();
     yawPositionQueue.clear();
   }
 }
