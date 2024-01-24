@@ -35,6 +35,6 @@ public final class Constants {
     REPLAY
   }
 public static int beltPortL = 0;
-public static int beltPortR - 0;
+public static int beltPortR = 0;
 
 }
