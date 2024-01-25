@@ -26,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
@@ -63,7 +66,8 @@ public class RobotContainer {
                 new ModuleIOAlpha(0),
                 new ModuleIOAlpha(1),
                 new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3));
+                new ModuleIOAlpha(3),
+                new AprilTagVisionIOReal());
         flywheel = new Flywheel(new FlywheelIO() {});
         // drive = new Drive(
         // new GyroIOPigeon2(true),
@@ -82,7 +86,8 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new ModuleIOSim());
+                new ModuleIOSim(),
+                new AprilTagVisionIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
         break;
 
@@ -94,7 +99,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                new AprilTagVisionIO() {});
         flywheel = new Flywheel(new FlywheelIO() {});
         break;
     }
