@@ -22,7 +22,7 @@ public class PivotIOSparkMax implements PivotIO {
         inputs.appliedVolts = leader.getAppliedOutput() * leader.getBusVoltage();
         inputs.currentAmps = new double[] {leader.getOutputCurrent(), follower.getOutputCurrent()};
 
-    // Change naming of PivotIOInputs to match FlywheelIoInputs, don't need to re-specify pivot in variable name.
+    // Consider changing naming of PivotIOInputs to not re-specify pivot in variable name.
         
     public double pivotAbsolutePositionRad = 0.0;
     public double pivotAbsoluteVelocityRadPerSec = 0.0;
