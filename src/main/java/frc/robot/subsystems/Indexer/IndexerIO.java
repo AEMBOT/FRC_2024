@@ -10,5 +10,5 @@ public interface IndexerIO {
     public boolean gamepieceIn = true;
   }
 
-  public default void setVoltage(double volts) {}
+  public default void SetVoltage(double volts) {}
 }
