@@ -10,15 +10,15 @@ public class Intake extends SubsystemBase {
     this.io = io;
   }
 
-  public void IndexerIn() {
-    io.SetVoltage(Constants.IndexerConstants.indexerMotorVoltage);
+  public void IntakeIn() {
+    io.SetVoltage(Constants.IntakeConstants.intakeMotorVoltage);
   }
 
-  public void IndexerOut() {
-    io.SetVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
+  public void IntakeOut() {
+    io.SetVoltage(-Constants.IntakeConstants.intakeMotorVoltage);
   }
 
-  public void IndexerStop() {
+  public void IntakeStop() {
     io.SetVoltage(0);
   }
 }
