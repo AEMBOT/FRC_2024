@@ -193,8 +193,8 @@ public class RobotContainer {
   }
 
 @AutoLogOutput
-  public void log3DPoses{
-    Pose3d[] mechanismPoses = new Pose3d[];
+  public log3DPoses{
+    Pose3d[] mechanismPoses = new Pose3d[1];
     mechanismPoses[0] = pivot.get3DPose();
     return mechanismPoses;
   }
