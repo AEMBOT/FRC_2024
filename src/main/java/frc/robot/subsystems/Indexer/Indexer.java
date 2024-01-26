@@ -11,14 +11,14 @@ public class Indexer extends SubsystemBase {
   }
 
   public void IndexerIn() {
-    io.SetVoltage(Constants.IndexerConstants.indexerMotorVoltage);
+    io.SetIndexerVoltage(Constants.IndexerConstants.indexerMotorVoltage);
   }
 
   public void IndexerOut() {
-    io.SetVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
+    io.SetIndexerVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
   }
 
   public void IndexerStop() {
-    io.SetVoltage(0);
+    io.SetIndexerVoltage(0);
   }
 }

@@ -12,9 +12,22 @@ public class IndexerIOSparkMax implements IndexerIO {
       new CANSparkMax(
           Constants.IndexerConstants.indexerMotorPortBottom, CANSparkLowLevel.MotorType.kBrushless);
 
+  private final CANSparkMax intakeMotorTop =
+      new CANSparkMax(
+          Constants.IntakeConstants.intakeMotorPortTop, CANSparkLowLevel.MotorType.kBrushless);
+  private final CANSparkMax intakeMotorBottom =
+      new CANSparkMax(
+          Constants.IntakeConstants.intakeMotorPortBottom, CANSparkLowLevel.MotorType.kBrushless);
+
   @Override
-  public void SetVoltage(double voltage) {
+  public void SetIndexerVoltage(double voltage) {
     indexerMotorTop.setVoltage(voltage);
     indexerMotorBottom.setVoltage(voltage);
+  }
+
+  @Override
+  public void SetIntakeVoltage(double voltage) {
+    intakeMotorTop.setVoltage(voltage);
+    intakeMotorBottom.setVoltage(voltage);
   }
 }
