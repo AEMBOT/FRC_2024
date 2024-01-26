@@ -11,9 +11,11 @@ public class IntakeIOSparkMax implements IntakeIO {
   private final CANSparkMax intakeMotorBottom =
       new CANSparkMax(
           Constants.IntakeConstants.intakeMotorPortBottom, CANSparkLowLevel.MotorType.kBrushless);
-    public IntakeIOSparkMax(){
-        intakeMotorBottom.setInverted(true);
-    }
+
+  public IntakeIOSparkMax() {
+    intakeMotorBottom.setInverted(true);
+  }
+
   @Override
   public void SetVoltage(double voltage) {
     intakeMotorTop.setVoltage(voltage);

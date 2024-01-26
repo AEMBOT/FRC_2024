@@ -1,4 +1,5 @@
 package frc.robot.subsystems.Intake;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
@@ -10,4 +11,3 @@ public interface IntakeIO {
 
   public default void SetVoltage(double volts) {}
 }
-
