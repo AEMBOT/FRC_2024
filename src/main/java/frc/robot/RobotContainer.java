@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -192,10 +193,10 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-@AutoLogOutput
-  public Pose3d[] log3DPoses{
+  @AutoLogOutput
+  public Pose3d[] log3DPoses() {
     Pose3d[] mechanismPoses = new Pose3d[1];
-    mechanismPoses[0] = pivot.get3DPose();
+    mechanismPoses[0] = pivot.getPose3D();
     return mechanismPoses;
   }
 }
