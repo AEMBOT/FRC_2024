@@ -33,6 +33,8 @@ import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOSim;
+
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -190,9 +192,10 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+@AutoLogOutput
   public void log3DPoses{
     Pose3d[] mechanismPoses = new Pose3d[];
     mechanismPoses[0] = pivot.get3DPose();
-    Logger.recordOutput("3D Poses", mechanismPoses);
+    return mechanismPoses;
   }
 }
