@@ -189,4 +189,10 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  public void log3DPoses{
+    Pose3d[] mechanismPoses = new Pose3d[];
+    mechanismPoses[0] = pivot.get3DPose();
+    Logger.recordOutput("3D Poses", mechanismPoses);
+  }
 }
