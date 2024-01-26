@@ -17,5 +17,9 @@ public interface IndexerIO {
 
   public default void runShooterIndexer(boolean state) {}
 
+  public default void reverseShooterIndexer() {}
+
   public default void runIntakeIndexer(boolean state) {}
+
+  public default void reverseIntakeIndexer() {}
 }

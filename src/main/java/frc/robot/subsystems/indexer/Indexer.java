@@ -9,4 +9,16 @@ public class Indexer extends SubsystemBase {
   public Indexer(IndexerIO io) {
     this.io = io;
   }
+
+  public void IndexerIn() {
+    io.runShooterIndexer(true);
+  }
+
+  public void IndexerOut() {
+    io.reverseShooterIndexer();
+  }
+
+  public void IndexerStop() {
+    io.reverseIntakeIndexer();
+  }
 }
