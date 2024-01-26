@@ -5,6 +5,10 @@ import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+//
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
+//
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -49,5 +53,10 @@ public class Pivot extends SubsystemBase {
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
+  }
+
+  public Pose3d getPose3D{
+    return new Pose3d(
+      0, 0, 0, new Rotation3d(0, Units.degreesToRadians(inputs.pivotMotorPosition), 0));
   }
 }
