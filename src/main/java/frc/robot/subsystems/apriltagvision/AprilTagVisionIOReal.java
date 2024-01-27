@@ -27,9 +27,9 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
   private final PhotonCamera rightCam;
   private final PhotonPoseEstimator rightPhotonPoseEstimator;
 
-  private Pose3d[] poseArray;
-  private double[] timestampArray;
-  private double[] visionStdArray;
+  private Pose3d[] poseArray = new Pose3d[3];
+  private double[] timestampArray = new double[3];
+  private double[] visionStdArray = new double[9];
 
   public AprilTagVisionIOReal() {
     frontCam = new PhotonCamera("front");
