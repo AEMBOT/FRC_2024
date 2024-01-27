@@ -7,31 +7,21 @@ import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
   private final PivotIO io;
   private final PivotIOInputsAutoLogged inputs = new PivotIOInputsAutoLogged();
 
-  private final double pivotkS = 0.1;
-  private final double pivotkG = 0.24;
-  private final double pivotkV = 5.85;
-  private final double pivotkA = 0.02;
-
-  private final ArmFeedforward pivotFFModel;
-  private final ExponentialProfile pivotProfile =
-      new ExponentialProfile(
-          ExponentialProfile.Constraints.fromCharacteristics(10, pivotkV, pivotkA));
-  private ExponentialProfile.State pivotGoal = new ExponentialProfile.State();
-  private ExponentialProfile.State pivotSetpoint = new ExponentialProfile.State();
-
+  private double pivotSetpoint = 0.0;
   private final SysIdRoutine sysId;
 
   public Pivot(PivotIO io) {
     this.io = io;
 
-    pivotFFModel = new ArmFeedforward(0.1, 0.24, 5.85, 0.02); // Recalc estimate, TODO characterize
     io.configurePID(0.1, 0.0, 0.02); // TODO characterize
+    io.resetExp(Constants.PivotSimConstants.exponentialKV, Constants.PivotSimConstants.exponentialKA); // Currently Set up to run Sim, needs a switch statement
 
     // Configure SysId
     sysId =
@@ -46,14 +36,9 @@ public class Pivot extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double currentVel = pivotSetpoint.velocity;
-    pivotSetpoint = pivotProfile.calculate(0.02, pivotSetpoint, pivotGoal);
     io.setPosition(
-        pivotSetpoint.position,
-        pivotFFModel.calculate(
-            pivotSetpoint.position,
-            pivotSetpoint.velocity,
-            (pivotSetpoint.velocity - currentVel) / 0.02));
+        pivotSetpoint
+    );
   }
 
   public void runVolts(double volts) {
@@ -61,7 +46,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public void runPosition(double positionRad) {
-    pivotGoal = new ExponentialProfile.State(positionRad, 0);
+    pivotSetpoint = positionRad;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
