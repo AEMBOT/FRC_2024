@@ -34,4 +34,10 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public class PivotSimConstants{
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+  }
 }
