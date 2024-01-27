@@ -18,7 +18,7 @@ public class PivotIOSim implements PivotIO {
       appliedVolts = feedForward;
     } else {
       appliedVolts =
-              MathUtil.clamp(controller.calculate(sim.getAngularVelocityRadPerSec()) + feedForward, -12.0, 12.0);
+              MathUtil.clamp(controller.calculate(sim.getAngularPositionRad()) + feedForward, -12.0, 12.0);
       sim.setInputVoltage(appliedVolts);
     }
     sim.setInputVoltage(appliedVolts);
