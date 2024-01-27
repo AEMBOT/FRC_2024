@@ -5,39 +5,20 @@ import static frc.robot.subsystems.apriltagvision.AprilTagConstants.*;
 import static frc.robot.subsystems.apriltagvision.AprilTagConstants.normalMultiTagStdDev;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import java.util.ArrayList;
-import java.util.stream.DoubleStream;
-import org.littletonrobotics.junction.LogTable;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
+import org.littletonrobotics.junction.AutoLog;
 import org.photonvision.EstimatedRobotPose;
 
 public interface AprilTagVisionIO {
-  public static class AprilTagVisionIOInputs implements LoggableInputs {
-    public ArrayList<Pair<EstimatedRobotPose, Matrix<N3, N1>>> visionPoses = new ArrayList<>();
-
-    @Override
-    public void toLog(LogTable table) {
-      table.put(
-          "Estimated Vision Poses",
-          visionPoses.stream().map(pair -> pair.getFirst().estimatedPose).toArray(Pose3d[]::new));
-      table.put(
-          "Calculated Vision StdDevs",
-          visionPoses.stream()
-              .flatMapToDouble(pair -> DoubleStream.of(pair.getSecond().getData()))
-              .toArray());
-    }
-
-    @Override
-    public void fromLog(LogTable table) {
-      table.get("Estimated Vision Poses");
-      table.get("Calculated Vision StdDevs");
-    }
+  @AutoLog
+  public static class AprilTagVisionIOInputs {
+    public Pose3d[] visionPoses = new Pose3d[3];
+    public double[] timestamps = new double[3];
+    public double[] visionStdDevs = new double[9];
   }
 
   /** Updates the set of loggable inputs. */

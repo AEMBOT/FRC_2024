@@ -20,8 +20,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,8 +30,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -46,7 +43,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.EstimatedRobotPose;
 
 public class Drive extends SubsystemBase {
   private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
@@ -190,16 +186,21 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+    }
 
-      // Update vision
-      aprilTagVisionIO.updatePose(getPose());
-      aprilTagVisionIO.updateInputs(aprilTagVisionInputs);
+    // Update vision
+    aprilTagVisionIO.updatePose(getPose());
+    aprilTagVisionIO.updateInputs(aprilTagVisionInputs);
 
-      for (Pair<EstimatedRobotPose, Matrix<N3, N1>> pair : aprilTagVisionInputs.visionPoses) {
+    for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
+      if (aprilTagVisionInputs.timestamps[i] != 0.0) {
         poseEstimator.addVisionMeasurement(
-            pair.getFirst().estimatedPose.toPose2d(),
-            pair.getFirst().timestampSeconds,
-            pair.getSecond());
+            aprilTagVisionInputs.visionPoses[i].toPose2d(),
+            aprilTagVisionInputs.timestamps[i],
+            VecBuilder.fill(
+                aprilTagVisionInputs.visionStdDevs[3 * i],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 1],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
       }
     }
   }

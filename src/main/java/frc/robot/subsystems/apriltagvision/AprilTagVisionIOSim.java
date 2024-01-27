@@ -2,16 +2,14 @@ package frc.robot.subsystems.apriltagvision;
 
 import static frc.robot.Constants.aprilTagFieldLayout;
 import static frc.robot.subsystems.apriltagvision.AprilTagConstants.*;
+import static java.lang.System.arraycopy;
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Optional;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.photonvision.EstimatedRobotPose;
@@ -35,6 +33,10 @@ public class AprilTagVisionIOSim implements AprilTagVisionIO {
   // Right Side Camera
   private final PhotonCameraSim rightCam;
   private final PhotonPoseEstimator rightPhotonPoseEstimator;
+
+  private Pose3d[] poseArray;
+  private double[] timestampArray;
+  private double[] visionStdArray;
 
   public AprilTagVisionIOSim() {
     PhotonCamera front = new PhotonCamera("front");
@@ -83,33 +85,55 @@ public class AprilTagVisionIOSim implements AprilTagVisionIO {
 
   @Override
   public void updateInputs(AprilTagVisionIOInputs inputs) {
-    inputs.visionPoses = getEstimatedPoseUpdates();
+    getEstimatedPoseUpdates();
+    inputs.visionPoses = poseArray;
+    inputs.timestamps = timestampArray;
   }
 
   public void updatePose(Pose2d pose) {
     visionSim.update(pose);
   }
 
-  public ArrayList<Pair<EstimatedRobotPose, Matrix<N3, N1>>> getEstimatedPoseUpdates() {
-    ArrayList<Pair<EstimatedRobotPose, Matrix<N3, N1>>> results = new ArrayList<>(3);
-
+  public void getEstimatedPoseUpdates() {
     Optional<EstimatedRobotPose> pose = frontPhotonPoseEstimator.update();
-    pose.ifPresent(
-        estPose ->
-            results.add(
-                Pair.of(estPose, getEstimationStdDevs(estPose, CameraResolution.HIGH_RES))));
+    pose.ifPresentOrElse(
+        estimatedRobotPose -> {
+          poseArray[0] = estimatedRobotPose.estimatedPose;
+          timestampArray[0] = estimatedRobotPose.timestampSeconds;
+          Matrix<N3, N1> stdDevs =
+              getEstimationStdDevs(estimatedRobotPose, CameraResolution.HIGH_RES);
+          arraycopy(stdDevs.getData(), 0, visionStdArray, 0, 3);
+        },
+        () -> {
+          poseArray[0] = new Pose3d();
+          timestampArray[0] = 0.0;
+        });
     pose = leftPhotonPoseEstimator.update();
-    pose.ifPresent(
-        estPose ->
-            results.add(Pair.of(estPose, getEstimationStdDevs(estPose, CameraResolution.NORMAL))));
+    pose.ifPresentOrElse(
+        estimatedRobotPose -> {
+          poseArray[1] = estimatedRobotPose.estimatedPose;
+          timestampArray[1] = estimatedRobotPose.timestampSeconds;
+          Matrix<N3, N1> stdDevs =
+              getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
+          arraycopy(stdDevs.getData(), 0, visionStdArray, 3, 3);
+        },
+        () -> {
+          poseArray[1] = new Pose3d();
+          timestampArray[1] = 0.0;
+        });
     pose = rightPhotonPoseEstimator.update();
-    pose.ifPresent(
-        estPose ->
-            results.add(Pair.of(estPose, getEstimationStdDevs(estPose, CameraResolution.NORMAL))));
-
-    results.sort(Comparator.comparingDouble(p -> p.getFirst().timestampSeconds));
-
-    return results;
+    pose.ifPresentOrElse(
+        estimatedRobotPose -> {
+          poseArray[2] = estimatedRobotPose.estimatedPose;
+          timestampArray[2] = estimatedRobotPose.timestampSeconds;
+          Matrix<N3, N1> stdDevs =
+              getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
+          arraycopy(stdDevs.getData(), 0, visionStdArray, 6, 3);
+        },
+        () -> {
+          poseArray[2] = new Pose3d();
+          timestampArray[2] = 0.0;
+        });
   }
 
   @AutoLogOutput
