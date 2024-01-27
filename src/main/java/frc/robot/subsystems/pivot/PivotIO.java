@@ -3,6 +3,7 @@ package frc.robot.subsystems.pivot;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface PivotIO {
+
   @AutoLog
   public static class PivotIOInputs {
     public double pivotAbsolutePositionRad = 0.0;
@@ -16,7 +17,7 @@ public interface PivotIO {
   public default void updateInputs(PivotIOInputs inputs) {}
 
   /** Sets the angle of the pivot, in radians. */
-  public default void setPosition(double positionRad, double ffVolts) {}
+  public default void setPosition(double positionRad) {}
 
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
@@ -26,4 +27,6 @@ public interface PivotIO {
 
   /** Set position PID constants. */
   public default void configurePID(double kP, double kI, double kD) {}
+  /** Set Exponential Profile constants */
+  public default void resetExp(double kV, double kA){}
 }
