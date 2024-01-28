@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static java.lang.Math.abs;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -22,10 +23,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -197,10 +195,18 @@ public class Drive extends SubsystemBase {
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
       if (aprilTagVisionInputs.timestamps[i] != 0.0) {
+        // Bounds check the pose is actually on the field
+        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 2.0
+            || aprilTagVisionInputs.visionPoses[i].getX() < 0
+            || aprilTagVisionInputs.visionPoses[i].getX() > 20
+            || aprilTagVisionInputs.visionPoses[i].getY() < 0
+            || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
+
         Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
         Logger.recordOutput(
             "Drive/AprilTagStdDevs" + i,
             Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
+
         poseEstimator.addVisionMeasurement(
             aprilTagVisionInputs.visionPoses[i].toPose2d(),
             aprilTagVisionInputs.timestamps[i],
