@@ -9,9 +9,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import java.util.Optional;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -134,10 +132,5 @@ public class AprilTagVisionIOSim implements AprilTagVisionIO {
           poseArray[2] = new Pose3d();
           timestampArray[2] = 0.0;
         });
-  }
-
-  @AutoLogOutput
-  public Field2d getSimDebugField() {
-    return visionSim.getDebugField();
   }
 }

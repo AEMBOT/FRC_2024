@@ -1,0 +1,25 @@
+{
+  "name": "2024 Lightcycle",
+  "sourceUrl": "",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "y",
+      "degrees": 0
+    },
+    {
+      "axis": "z",
+      "degrees": 180
+    }
+  ],
+  "position": [
+    0.2794,
+    0.3556,
+    0.285
+  ],
+  "cameras": [],
+  "components": []
+}

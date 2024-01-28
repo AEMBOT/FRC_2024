@@ -37,7 +37,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIO.AprilTagVisionIOInputs;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -71,7 +71,8 @@ public class Drive extends SubsystemBase {
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
   private final AprilTagVisionIO aprilTagVisionIO;
-  private final AprilTagVisionIOInputs aprilTagVisionInputs = new AprilTagVisionIOInputs();
+  private final AprilTagVisionIOInputsAutoLogged aprilTagVisionInputs =
+      new AprilTagVisionIOInputsAutoLogged();
 
   public Drive(
       GyroIO gyroIO,
@@ -191,6 +192,7 @@ public class Drive extends SubsystemBase {
     // Update vision
     aprilTagVisionIO.updatePose(getPose());
     aprilTagVisionIO.updateInputs(aprilTagVisionInputs);
+    Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
       if (aprilTagVisionInputs.timestamps[i] != 0.0) {
