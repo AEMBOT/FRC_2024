@@ -39,6 +39,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -196,6 +197,10 @@ public class Drive extends SubsystemBase {
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
       if (aprilTagVisionInputs.timestamps[i] != 0.0) {
+        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
+        Logger.recordOutput(
+            "Drive/AprilTagStdDevs" + i,
+            Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
         poseEstimator.addVisionMeasurement(
             aprilTagVisionInputs.visionPoses[i].toPose2d(),
             aprilTagVisionInputs.timestamps[i],
