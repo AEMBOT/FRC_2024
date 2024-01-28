@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import java.util.Optional;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -67,7 +66,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           timestampArray[0] = estimatedRobotPose.timestampSeconds;
           Matrix<N3, N1> stdDevs =
               getEstimationStdDevs(estimatedRobotPose, CameraResolution.HIGH_RES);
-          Logger.recordOutput("Vision/StdDevArray0", stdDevs.getData());
           arraycopy(stdDevs.getData(), 0, visionStdArray, 0, 3);
         },
         () -> {
@@ -81,7 +79,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           timestampArray[1] = estimatedRobotPose.timestampSeconds;
           Matrix<N3, N1> stdDevs =
               getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
-          Logger.recordOutput("Vision/StdDevArray1", stdDevs.getData());
           arraycopy(stdDevs.getData(), 0, visionStdArray, 3, 3);
         },
         () -> {
@@ -95,7 +92,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           timestampArray[2] = estimatedRobotPose.timestampSeconds;
           Matrix<N3, N1> stdDevs =
               getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
-          Logger.recordOutput("Vision/StdDevArray1", stdDevs.getData());
           arraycopy(stdDevs.getData(), 0, visionStdArray, 6, 3);
         },
         () -> {

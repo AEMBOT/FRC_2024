@@ -86,6 +86,7 @@ public class AprilTagVisionIOSim implements AprilTagVisionIO {
     getEstimatedPoseUpdates();
     inputs.visionPoses = poseArray;
     inputs.timestamps = timestampArray;
+    inputs.visionStdDevs = visionStdArray;
   }
 
   public void updatePose(Pose2d pose) {
