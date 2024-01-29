@@ -11,6 +11,11 @@ public interface PivotIO {
     public double pivotAppliedVolts = 0.0;
     public double[] pivotCurrentAmps =
         new double[] {}; // Log motors individually, useful for failure analysis
+
+    public double pivotGoalPosition = 0.0;
+    public double pivotSetpointPosition = 0.0;
+    public double pivotSetpointVelocity = 0.0;
+    public boolean openLoopStatus = false;
   }
 
   /** Updates the set of loggable inputs. */

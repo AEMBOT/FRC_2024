@@ -6,7 +6,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import org.littletonrobotics.junction.Logger;
 
 public class PivotIOSim implements PivotIO {
   private boolean openLoop = false;
@@ -50,11 +49,10 @@ public class PivotIOSim implements PivotIO {
     inputs.pivotAppliedVolts = appliedVolts;
     inputs.pivotCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
     inputs.pivotAbsoluteVelocityRadPerSec = sim.getVelocityRadPerSec();
-
-    Logger.recordOutput("Pivot/PivotGoalPosition", pivotGoal.position);
-    Logger.recordOutput("Pivot/PivotSetpointPosition", pivotSetpoint.position);
-    Logger.recordOutput("Pivot/PivotSetpointVelocity", pivotSetpoint.velocity);
-    Logger.recordOutput("Pivot/OpenLoopStatus", openLoop);
+    inputs.pivotGoalPosition = pivotGoal.position;
+    inputs.pivotSetpointPosition = pivotSetpoint.position;
+    inputs.pivotSetpointVelocity = pivotSetpoint.velocity;
+    inputs.openLoopStatus = openLoop;
   }
 
   /** Sets the angle of the pivot, in radians. */
