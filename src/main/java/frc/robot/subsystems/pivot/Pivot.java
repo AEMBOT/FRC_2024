@@ -2,16 +2,11 @@ package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -59,7 +54,6 @@ public class Pivot extends SubsystemBase {
   }
 
   public Pose3d getPose3D() {
-    return new Pose3d(
-        0, 0, 0, new Rotation3d(0, Units.degreesToRadians(inputs.pivotAbsolutePositionRad), 0));
+    return new Pose3d(0, 0, 0, new Rotation3d(0, inputs.pivotAbsolutePositionRad, 0));
   }
 }
