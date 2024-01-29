@@ -34,7 +34,6 @@ import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOSim;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
