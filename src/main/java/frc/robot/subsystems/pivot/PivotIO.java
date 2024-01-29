@@ -24,9 +24,4 @@ public interface PivotIO {
 
   /** Stop in open loop. */
   public default void stop() {}
-
-  /** Set position PID constants. */
-  public default void configurePID(double kP, double kI, double kD) {}
-  /** Set Exponential Profile constants */
-  public default void resetExp(double kV, double kA){}
 }

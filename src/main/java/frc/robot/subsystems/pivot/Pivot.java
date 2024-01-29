@@ -2,26 +2,18 @@ package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Volts;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
   private final PivotIO io;
   private final PivotIOInputsAutoLogged inputs = new PivotIOInputsAutoLogged();
-
-  private double pivotSetpoint = 0.0;
   private final SysIdRoutine sysId;
 
   public Pivot(PivotIO io) {
     this.io = io;
-
-    io.configurePID(0.1, 0.0, 0.02); // TODO characterize
-    io.resetExp(Constants.PivotSimConstants.exponentialKV, Constants.PivotSimConstants.exponentialKA); // Currently Set up to run Sim, needs a switch statement
 
     // Configure SysId
     sysId =
@@ -36,9 +28,8 @@ public class Pivot extends SubsystemBase {
 
   @Override
   public void periodic() {
-    io.setPosition(
-        pivotSetpoint
-    );
+    io.updateInputs(inputs);
+    Logger.processInputs("Pivot", inputs);
   }
 
   public void runVolts(double volts) {
@@ -46,7 +37,8 @@ public class Pivot extends SubsystemBase {
   }
 
   public void runPosition(double positionRad) {
-    pivotSetpoint = positionRad;
+    Logger.recordOutput("Pivot/GoalRad", positionRad);
+    io.setPosition(positionRad);
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
