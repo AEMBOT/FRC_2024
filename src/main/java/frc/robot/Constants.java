@@ -34,16 +34,4 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
-
-  public class PivotSimConstants{
-    public static double kP = 0.0;
-    public static double kI = 0.0;
-    public static double kD = 0.0;
-    public static double exponentialKV = 0.0;
-    public static double exponentialKA = 0.0;
-    public static double FFkS = 0.1;
-    public static double FFkG = 0.24;
-    public static double FFkV = 5.85;
-    public static double FFkA = 0.02;
-  }
 }
