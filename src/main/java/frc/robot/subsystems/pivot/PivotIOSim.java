@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import org.littletonrobotics.junction.Logger;
 
 public class PivotIOSim implements PivotIO {
   private boolean openLoop = false;
@@ -13,14 +14,18 @@ public class PivotIOSim implements PivotIO {
   private final SingleJointedArmSim sim =
       new SingleJointedArmSim(DCMotor.getNEO(2), 300, 0.17, 0.508, 0.0, Math.PI, true, 1.05);
 
-  private final PIDController controller = new PIDController(0.0, 0.0, 0.0);
-  private final ArmFeedforward pivotFFModel =
-      new ArmFeedforward(0.1, 0.24, 5.85, 0.02); // From recalc
+  private final PIDController controller = new PIDController(50, 0.0, 0.0);
+  private final ArmFeedforward pivotFFModel = new ArmFeedforward(0.0, 0.0379, 5.85, 0.04);
   private final ExponentialProfile pivotProfile =
       new ExponentialProfile(
           ExponentialProfile.Constraints.fromCharacteristics(10, pivotFFModel.kv, pivotFFModel.ka));
-  private ExponentialProfile.State pivotGoal = new ExponentialProfile.State();
-  private ExponentialProfile.State pivotSetpoint = new ExponentialProfile.State();
+  private ExponentialProfile.State pivotGoal;
+  private ExponentialProfile.State pivotSetpoint;
+
+  public PivotIOSim() {
+    pivotGoal = new ExponentialProfile.State(1.05, 0);
+    pivotSetpoint = new ExponentialProfile.State(1.05, 0);
+  }
 
   /** Updates the set of loggable inputs. */
   @Override
@@ -34,7 +39,10 @@ public class PivotIOSim implements PivotIO {
               pivotSetpoint.velocity,
               (pivotSetpoint.velocity - currentVelocity) / 0.02);
       appliedVolts =
-          MathUtil.clamp(controller.calculate(pivotSetpoint.position) + feedForward, -12.0, 12.0);
+          MathUtil.clamp(
+              controller.calculate(sim.getAngleRads(), pivotSetpoint.position) + feedForward,
+              -12.0,
+              12.0);
     }
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
@@ -42,6 +50,11 @@ public class PivotIOSim implements PivotIO {
     inputs.pivotAppliedVolts = appliedVolts;
     inputs.pivotCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
     inputs.pivotAbsoluteVelocityRadPerSec = sim.getVelocityRadPerSec();
+
+    Logger.recordOutput("Pivot/PivotGoalPosition", pivotGoal.position);
+    Logger.recordOutput("Pivot/PivotSetpointPosition", pivotSetpoint.position);
+    Logger.recordOutput("Pivot/PivotSetpointVelocity", pivotSetpoint.velocity);
+    Logger.recordOutput("Pivot/OpenLoopStatus", openLoop);
   }
 
   /** Sets the angle of the pivot, in radians. */
