@@ -11,6 +11,11 @@ public class Indexer extends SubsystemBase {
     this.io = io;
   }
 
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+  }
+
   public void indexerIn() {
     io.setShooterIndexer(IndexerIO.IndexerIOInputs.MotorState.IN);
   }
@@ -34,6 +39,8 @@ public class Indexer extends SubsystemBase {
   public void intakeStop() {
     io.setIntakeIndexer(IndexerIO.IndexerIOInputs.MotorState.OFF);
   }
+
+  public void intake() {io.intakeRun();}
 
   // Commands
 
@@ -59,5 +66,9 @@ public class Indexer extends SubsystemBase {
 
   public Command indexerStopCommand() {
     return runOnce(this::indexerStop);
+  }
+
+  public Command intakeCommand() {
+    return runOnce(this::intake);
   }
 }

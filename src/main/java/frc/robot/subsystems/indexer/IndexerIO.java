@@ -24,4 +24,7 @@ public interface IndexerIO {
   public default void setShooterIndexer(IndexerIOInputs.MotorState state) {}
 
   public default void setIntakeIndexer(IndexerIOInputs.MotorState state) {}
+
+  public default void intakeRun() {}
+  public default void indexerRun() {}
 }

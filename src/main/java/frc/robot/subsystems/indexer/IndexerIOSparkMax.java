@@ -30,6 +30,9 @@ public class IndexerIOSparkMax implements IndexerIO {
   public boolean intakeBeamBreakState = false;
   public boolean shooterBeamBreakState = true;
 
+  public boolean intaking = false;
+  public boolean indexing = false;
+
   public IndexerIOInputs.MotorState indexerMotorsState = IndexerIOInputs.MotorState.OFF;
   public IndexerIOInputs.MotorState intakeMotorsState = IndexerIOInputs.MotorState.OFF;
 
@@ -44,9 +47,31 @@ public class IndexerIOSparkMax implements IndexerIO {
   }
 
   @Override
+  public void intakeRun() {
+    intaking = true;
+    setIntakeIndexer(IndexerIOInputs.MotorState.IN);
+  }
+
+  @Override
+  public void indexerRun() {
+    indexing = true;
+    setShooterIndexer(IndexerIOInputs.MotorState.IN);
+  }
+
+  @Override
   public void updateInputs(IndexerIOInputs inputs) {
     inputs.intakeBeamBreakState = !intakeBeamBreak.get();
     inputs.shooterBeamBreakState = !shooterBeamBreak.get();
+
+    if (intakeBeamBreakState&&intaking) {
+      intakeMotorsState = IndexerIOInputs.MotorState.OFF;
+      indexerRun();
+      intaking = false;
+    }
+    if(shooterBeamBreakState&&indexing) {
+      indexerMotorsState = IndexerIOInputs.MotorState.OFF;
+      indexing = false;
+    }
 
     switch (intakeMotorsState) {
       case OFF:
@@ -60,6 +85,19 @@ public class IndexerIOSparkMax implements IndexerIO {
       case OUT:
         intakeMotorBottom.setVoltage(-Constants.IntakeConstants.intakeMotorVoltage);
         intakeMotorTop.setVoltage(-Constants.IntakeConstants.intakeMotorVoltage);
+    }
+
+    switch (indexerMotorsState) {
+      case OFF:
+        indexerMotorTop.setVoltage(0);
+        indexerMotorBottom.setVoltage(0);
+        break;
+      case IN:
+        indexerMotorTop.setVoltage(Constants.IndexerConstants.indexerMotorVoltage);
+        indexerMotorBottom.setVoltage(Constants.IndexerConstants.indexerMotorVoltage);
+      case OUT:
+        indexerMotorTop.setVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
+        indexerMotorBottom.setVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
     }
   }
 }
