@@ -24,9 +24,6 @@ public class IndexerIOSparkMax implements IndexerIO {
   public DigitalInput shooterBeamBreak =
       new DigitalInput(Constants.IndexerConstants.indexerBeamBrake);
 
-  public DigitalInput intakeBeamBreak;
-  public DigitalInput shooterBeamBreak;
-
   public boolean intakeBeamBreakState = false;
   public boolean shooterBeamBreakState = true;
 
