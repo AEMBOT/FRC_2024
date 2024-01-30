@@ -11,14 +11,26 @@ public class Indexer extends SubsystemBase {
   }
 
   public void IndexerIn() {
-    io.runShooterIndexer(true);
+    io.setShooterIndexer(IndexerIO.IndexerIOInputs.MotorState.IN);
   }
 
   public void IndexerOut() {
-    io.reverseShooterIndexer();
+    io.setShooterIndexer(IndexerIO.IndexerIOInputs.MotorState.OUT);
   }
 
   public void IndexerStop() {
-    io.reverseIntakeIndexer();
+    io.setShooterIndexer(IndexerIO.IndexerIOInputs.MotorState.OFF);
+  }
+
+  public void IntakeIn() {
+    io.setIntakeIndexer(IndexerIO.IndexerIOInputs.MotorState.IN);
+  }
+
+  public void IntakeOut() {
+    io.setIntakeIndexer(IndexerIO.IndexerIOInputs.MotorState.OUT);
+  }
+
+  public void IntakeStop() {
+    io.setIntakeIndexer(IndexerIO.IndexerIOInputs.MotorState.OFF);
   }
 }

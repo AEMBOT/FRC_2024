@@ -5,21 +5,23 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IndexerIO {
   @AutoLog
   public static class IndexerIOInputs {
-    public boolean intakeBeamBreak = false;
-    public boolean shooterBeamBreak = true;
+    public boolean intakeBeamBreakState = false;
+    public boolean shooterBeamBreakState = true;
 
     public double shooterIndexerAppliedVolts = 0.0;
     public double intakeIndexerAppliedVolts = 0.0;
+
+    public enum MotorState {
+      IN,
+      OFF,
+      OUT
+    }
   }
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IndexerIOInputs inputs) {}
 
-  public default void runShooterIndexer(boolean state) {}
+  public default void setShooterIndexer(IndexerIOInputs.MotorState state) {}
 
-  public default void reverseShooterIndexer() {}
-
-  public default void runIntakeIndexer(boolean state) {}
-
-  public default void reverseIntakeIndexer() {}
+  public default void setIntakeIndexer(IndexerIOInputs.MotorState state) {}
 }

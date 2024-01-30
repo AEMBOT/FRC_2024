@@ -39,6 +39,7 @@ public final class Constants {
     /* PORTS */
     public static final int indexerMotorPortBottom = 0; // PLACEHOLDER VALUE
     public static final int indexerMotorPortTop = 1; // PLACEHOLDER VALUE
+    public static final int indexerBeamBrake = 1; // PLACEHOLDER VALUE
 
     /* VOLTAGES */
     public static final double indexerMotorVoltage = 1; // PLACEHOLDER VALUE
@@ -47,6 +48,7 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int intakeMotorPortBottom = 2; // PLACEHOLDER VALUE
     public static final int intakeMotorPortTop = 3; // PLACEHOLDER VALUE
+    public static final int intakeBeamBrake = 2; // PLACEHOLDER VALUE
 
     /*VOLTAGES*/
     public static final double intakeMotorVoltage = 1; // PLACEHOLDER VALUE
