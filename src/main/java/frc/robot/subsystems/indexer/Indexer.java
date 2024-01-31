@@ -4,6 +4,7 @@ import static frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState.
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
@@ -59,6 +60,31 @@ public class Indexer extends SubsystemBase {
         intakeStop();
         break;
     }
+  }
+
+  public Command getDefaultCommand(BooleanSupplier pivotHandoff) {
+    return run(this::indexOffIntakeOn)
+        .until(() -> inputs.intakeBeamBreakState)
+        .andThen(run(this::indexOffIntakeOff))
+        .until(pivotHandoff)
+        .andThen(run(this::indexOnIntakeOn))
+        .until(() -> inputs.shooterBeamBreakState)
+        .finallyDo(this::indexOffIntakeOff);
+  }
+
+  public void indexOffIntakeOn() {
+    io.setShooterIndexer(OFF);
+    io.setIntakeIndexer(IN);
+  }
+
+  public void indexOnIntakeOn() {
+    io.setShooterIndexer(IN);
+    io.setIntakeIndexer(IN);
+  }
+
+  public void indexOffIntakeOff() {
+    io.setIntakeIndexer(OFF);
+    io.setShooterIndexer(OFF);
   }
 
   public void indexerIn() {
