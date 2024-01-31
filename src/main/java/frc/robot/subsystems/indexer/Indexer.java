@@ -6,7 +6,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
-
+  public enum indexerStates{
+    INDEX_ON_INTAKE_ON,
+    INDEX_ON_INTAKE_OFF,
+    INDEX_OFF_INTAKE_ON,
+    INDEX_OFF_INTAKE_OFF,
+  }
+  indexerStates state = indexerStates.INDEX_OFF_INTAKE_ON;
   public Indexer(IndexerIO io) {
     this.io = io;
   }
@@ -14,6 +20,39 @@ public class Indexer extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+
+    switch (state) {
+      case INDEX_ON_INTAKE_ON:
+        indexerIn();
+        intakeIn();
+        if(inputs.shooterBeamBreakState){
+          state = indexerStates.INDEX_OFF_INTAKE_OFF;
+        }
+        break;
+      case INDEX_ON_INTAKE_OFF:
+        indexerIn();
+        intakeStop();
+        if(!inputs.shooterBeamBreakState){
+          state = indexerStates.INDEX_OFF_INTAKE_ON;
+        }
+        break;
+      case INDEX_OFF_INTAKE_ON:
+        indexerStop();
+        intakeIn();
+        if(inputs.intakeBeamBreakState){
+          state = indexerStates.INDEX_ON_INTAKE_ON;
+        }
+        break;
+      case INDEX_OFF_INTAKE_OFF:
+        indexerStop();
+        intakeStop();
+        break;   
+      default:
+        indexerStop();
+        intakeStop();
+        break;
+    }
+
   }
 
   public void indexerIn() {

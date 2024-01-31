@@ -17,14 +17,13 @@ public class IndexerIOSim implements IndexerIO {
   private boolean indexing = false;
   private boolean intaking = false;
   public DigitalInput intakeBeamBreak = new DigitalInput(Constants.IntakeConstants.intakeBeamBrake);
-  public DigitalInput shooterBeamBreak =
-      new DigitalInput(Constants.IndexerConstants.indexerBeamBrake);
+  public DigitalInput shooterBeamBreak = new DigitalInput(Constants.IndexerConstants.indexerBeamBrake);
   public boolean intakeBeamBreakState = false;
   public boolean shooterBeamBreakState = true;
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
-
+    
     intakeSim.update(0.02);
     indexerSim.update(0.02);
 
