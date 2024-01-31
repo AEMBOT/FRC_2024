@@ -30,6 +30,10 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -43,6 +47,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Flywheel flywheel;
+  private final Indexer indexer;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -65,6 +70,7 @@ public class RobotContainer {
                 new ModuleIOAlpha(2),
                 new ModuleIOAlpha(3));
         flywheel = new Flywheel(new FlywheelIO() {});
+        indexer = new Indexer(new IndexerIOSparkMax());
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -84,6 +90,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
+        indexer = new Indexer(new IndexerIOSim());
         break;
 
       default:
@@ -96,6 +103,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         flywheel = new Flywheel(new FlywheelIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         break;
     }
 
@@ -157,6 +165,8 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+    indexer.setDefaultCommand(indexer.getDefaultCommand());
+
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     controller
         .b()
