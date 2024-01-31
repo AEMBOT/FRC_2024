@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.LocalADStarAK;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -99,12 +100,18 @@ public class Drive extends SubsystemBase {
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+              "PathPlanner/ActivePath", activePath.toArray(new Pose2d[activePath.size()]));
         });
     PathPlannerLogging.setLogTargetPoseCallback(
         (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          Logger.recordOutput("PathPlanner/Target", targetPose);
+          Logger.recordOutput(
+              "PathPlanner/AbsoluteTranslationError",
+              targetPose.minus(getPose()).getTranslation().getNorm());
         });
+
+    Logger.recordOutput("PathPlanner/Target", new Pose2d());
+    Logger.recordOutput("PathPlanner/AbsoluteTranslationError", 0.0);
 
     // Configure SysId
     sysId =
@@ -192,6 +199,9 @@ public class Drive extends SubsystemBase {
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
 
+    Logger.recordOutput("Swerve/TargetSpeeds", discreteSpeeds);
+    Logger.recordOutput("Swerve/SpeedError", discreteSpeeds.minus(getVelocity()));
+
     // Send setpoints to modules
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
@@ -243,13 +253,27 @@ public class Drive extends SubsystemBase {
   }
 
   /** Returns the module positions (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
       states[i] = modules[i].getPosition();
     }
     return states;
+  }
+
+  @AutoLogOutput(key = "Odometry/Velocity")
+  public ChassisSpeeds getVelocity() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        kinematics.toChassisSpeeds(
+            Arrays.stream(modules).map(Module::getState).toArray(SwerveModuleState[]::new)),
+        getRotation());
+  }
+
+  @AutoLogOutput(key = "Odometry/RobotRelativeVelocity")
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return kinematics.toChassisSpeeds(
+        (SwerveModuleState[])
+            Arrays.stream(modules).map((m) -> m.getState()).toArray(SwerveModuleState[]::new));
   }
 
   /** Returns the current odometry pose. */
