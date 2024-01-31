@@ -1,5 +1,6 @@
 package frc.robot.subsystems.indexer;
 
+import frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IndexerIO {
@@ -11,6 +12,9 @@ public interface IndexerIO {
     public double shooterIndexerAppliedVolts = 0.0;
     public double intakeIndexerAppliedVolts = 0.0;
 
+    public double[] intakeIndexerCurrentAmps = new double[] {};
+    public double[] shooterIndexerCurrentAmps = new double[] {};
+
     public enum MotorState {
       IN,
       OFF,
@@ -21,10 +25,7 @@ public interface IndexerIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IndexerIOInputs inputs) {}
 
-  public default void setShooterIndexer(IndexerIOInputs.MotorState state) {}
+  public default void setShooterIndexer(MotorState state) {}
 
-  public default void setIntakeIndexer(IndexerIOInputs.MotorState state) {}
-
-  public default void intakeRun() {}
-  public default void indexerRun() {}
+  public default void setIntakeIndexer(MotorState state) {}
 }

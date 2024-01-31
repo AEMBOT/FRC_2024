@@ -1,87 +1,66 @@
 package frc.robot.subsystems.indexer;
 
+import static frc.robot.Constants.IndexerConstants.indexerMotorVoltage;
+import static frc.robot.Constants.IntakeConstants.intakeMotorVoltage;
+
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.Constants;
+import frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState;
 
 public class IndexerIOSim implements IndexerIO {
+  private final DIOSim intakeBeamBreak = new DIOSim(0);
+  private final DIOSim indexerBeamBreak = new DIOSim(1);
+  private final DCMotorSim intakeSim = new DCMotorSim(DCMotor.getNEO(2), 1, 0.01);
+  private final DCMotorSim indexerSim = new DCMotorSim(DCMotor.getNEO(2), 1, 0.01);
 
-  private DIOSim intakeSensor = new DIOSim(0);
-  private DIOSim indexerSensor = new DIOSim(0);
-  private DCMotorSim intakeSim = new DCMotorSim(DCMotor.getNEO(2), 0, 0);
-  private DCMotorSim indexerSim = new DCMotorSim(DCMotor.getNEO(2), 0, 0);
-  private IndexerIOInputs.MotorState indexerMotorsState = IndexerIOInputs.MotorState.OFF;
-  private IndexerIOInputs.MotorState intakeMotorsState = IndexerIOInputs.MotorState.OFF;
-  private boolean indexing = false;
-  private boolean intaking = false;
-  public DigitalInput intakeBeamBreak = new DigitalInput(Constants.IntakeConstants.intakeBeamBrake);
-  public DigitalInput shooterBeamBreak = new DigitalInput(Constants.IndexerConstants.indexerBeamBrake);
-  public boolean intakeBeamBreakState = false;
-  public boolean shooterBeamBreakState = true;
+  private double intakeAppliedVolts = 0.0;
+  private double indexerAppliedVolts = 0.0;
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
-    
     intakeSim.update(0.02);
     indexerSim.update(0.02);
 
-    inputs.intakeBeamBreakState = !intakeSensor.getValue();
-    inputs.shooterBeamBreakState = !indexerSensor.getValue();
+    inputs.intakeBeamBreakState = !intakeBeamBreak.getValue();
+    inputs.shooterBeamBreakState = !indexerBeamBreak.getValue();
+    inputs.intakeIndexerAppliedVolts = intakeAppliedVolts;
+    inputs.shooterIndexerAppliedVolts = indexerAppliedVolts;
+    inputs.intakeIndexerCurrentAmps = new double[] {intakeSim.getCurrentDrawAmps()};
+    inputs.shooterIndexerCurrentAmps = new double[] {indexerSim.getCurrentDrawAmps()};
+  }
 
-    if (intakeBeamBreakState && intaking) {
-      intakeMotorsState = IndexerIOInputs.MotorState.OFF;
-      indexerRun();
-      intaking = false;
-    }
-    if (shooterBeamBreakState && indexing) {
-      indexerMotorsState = IndexerIOInputs.MotorState.OFF;
-      indexing = false;
-    }
-
-    switch (intakeMotorsState) {
-      case OFF:
-        intakeSim.setInputVoltage(0);
-        break;
-      case IN:
-        intakeSim.setInputVoltage(Constants.IntakeConstants.intakeMotorVoltage);
-        break;
-      case OUT:
-        intakeSim.setInputVoltage(-Constants.IntakeConstants.intakeMotorVoltage);
-    }
-
-    switch (indexerMotorsState) {
+  @Override
+  public void setShooterIndexer(MotorState state) {
+    switch (state) {
       case OFF:
         indexerSim.setInputVoltage(0);
+        indexerAppliedVolts = 0;
         break;
       case IN:
-        indexerSim.setInputVoltage(Constants.IndexerConstants.indexerMotorVoltage);
+        indexerSim.setInputVoltage(indexerMotorVoltage);
+        indexerAppliedVolts = indexerMotorVoltage;
         break;
       case OUT:
-        indexerSim.setInputVoltage(-Constants.IndexerConstants.indexerMotorVoltage);
+        indexerSim.setInputVoltage(-indexerMotorVoltage);
+        indexerAppliedVolts = -indexerMotorVoltage;
     }
   }
 
   @Override
-  public void setShooterIndexer(IndexerIOInputs.MotorState state) {
-    indexerMotorsState = state;
-  }
-
-  @Override
-  public void setIntakeIndexer(IndexerIOInputs.MotorState state) {
-    intakeMotorsState = state;
-  }
-
-  @Override
-  public void intakeRun() {
-    intaking = true;
-    setShooterIndexer(IndexerIOInputs.MotorState.IN);
-  }
-
-  @Override
-  public void indexerRun() {
-    indexing = true;
-    setIntakeIndexer(IndexerIOInputs.MotorState.IN);
+  public void setIntakeIndexer(MotorState state) {
+    switch (state) {
+      case OFF:
+        intakeSim.setInputVoltage(0);
+        intakeAppliedVolts = 0;
+        break;
+      case IN:
+        intakeSim.setInputVoltage(intakeMotorVoltage);
+        intakeAppliedVolts = intakeMotorVoltage;
+        break;
+      case OUT:
+        intakeSim.setInputVoltage(-intakeMotorVoltage);
+        intakeAppliedVolts = -intakeMotorVoltage;
+    }
   }
 }
