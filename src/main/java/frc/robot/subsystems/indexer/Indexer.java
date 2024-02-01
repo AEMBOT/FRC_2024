@@ -3,6 +3,7 @@ package frc.robot.subsystems.indexer;
 import static frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
@@ -22,12 +23,13 @@ public class Indexer extends SubsystemBase {
   }
 
   public Command getDefaultCommand(BooleanSupplier pivotHandoff) {
-    return run(this::indexOffIntakeOn)
-        .until(() -> inputs.intakeBeamBreakState)
-        .andThen(run(this::indexOffIntakeOff))
-        .until(pivotHandoff)
-        .andThen(run(this::indexOnIntakeOn))
-        .until(() -> inputs.shooterBeamBreakState)
+    return Commands.waitUntil(() -> inputs.shooterBeamBreakState)
+        .deadlineWith(
+            run(this::indexOffIntakeOn)
+                .until(() -> inputs.intakeBeamBreakState)
+                .andThen(run(this::indexOffIntakeOff))
+                .until(pivotHandoff)
+                .andThen(run(this::indexOnIntakeOn)))
         .finallyDo(this::indexOffIntakeOff);
   }
 
