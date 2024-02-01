@@ -12,6 +12,8 @@ public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
 
+  public boolean shootReady = false;
+
   public Indexer(IndexerIO io) {
     this.io = io;
   }
@@ -23,14 +25,20 @@ public class Indexer extends SubsystemBase {
   }
 
   public Command getDefaultCommand(BooleanSupplier pivotHandoff) {
-    return Commands.waitUntil(() -> inputs.shooterBeamBreakState)
-        .deadlineWith(
-            run(this::indexOffIntakeOn)
-                .until(() -> inputs.intakeBeamBreakState)
-                .andThen(run(this::indexOffIntakeOff))
-                .until(pivotHandoff)
-                .andThen(run(this::indexOnIntakeOn)))
-        .finallyDo(this::indexOffIntakeOff);
+    return runOnce(() -> shootReady = false)
+        .andThen(
+            Commands.waitUntil(() -> inputs.shooterBeamBreakState)
+                .deadlineWith(
+                    run(this::indexOffIntakeOn)
+                        .until(() -> inputs.intakeBeamBreakState)
+                        .andThen(run(this::indexOffIntakeOff))
+                        .until(pivotHandoff)
+                        .andThen(run(this::indexOnIntakeOn))))
+        .finallyDo(
+            () -> {
+              shootReady = true;
+              indexOffIntakeOff();
+            });
   }
 
   public void indexOffIntakeOn() {
