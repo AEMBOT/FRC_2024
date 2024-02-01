@@ -34,11 +34,12 @@ public class Indexer extends SubsystemBase {
                         .andThen(run(this::indexOffIntakeOff))
                         .until(pivotHandoff)
                         .andThen(run(this::indexOnIntakeOn))))
-        .finallyDo(
-            () -> {
-              shootReady = true;
-              indexOffIntakeBack();
-            });
+        .andThen(
+            run(
+                () -> {
+                  shootReady = true;
+                  indexOffIntakeBack();
+                }));
   }
 
   public void indexOffIntakeOn() {
@@ -55,6 +56,7 @@ public class Indexer extends SubsystemBase {
     io.setIntakeIndexer(OFF);
     io.setShooterIndexer(OFF);
   }
+
   public void indexOffIntakeBack() {
     io.setIntakeIndexer(OUT);
     io.setShooterIndexer(OFF);
