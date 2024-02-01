@@ -37,7 +37,7 @@ public class Indexer extends SubsystemBase {
         .finallyDo(
             () -> {
               shootReady = true;
-              indexOffIntakeOff();
+              indexOffIntakeBack();
             });
   }
 
@@ -53,6 +53,10 @@ public class Indexer extends SubsystemBase {
 
   public void indexOffIntakeOff() {
     io.setIntakeIndexer(OFF);
+    io.setShooterIndexer(OFF);
+  }
+  public void indexOffIntakeBack() {
+    io.setIntakeIndexer(OUT);
     io.setShooterIndexer(OFF);
   }
 
