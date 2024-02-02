@@ -1,13 +1,11 @@
 package frc.robot.subsystems.pivot;
 
-import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
-
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkPIDController.ArbFFUnits;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -21,20 +19,20 @@ public class PivotIOReal implements PivotIO {
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(1);
   private final Encoder velEncoder = new Encoder(2, 3);
   private final ArmFeedforward pivotFFModel = new ArmFeedforward(0.0, 0.0379, 5.85, 0.04);
+  private final PIDController pidController = new PIDController(1, 0, 0); // TODO tune
   private final ExponentialProfile pivotProfile =
       new ExponentialProfile(
           ExponentialProfile.Constraints.fromCharacteristics(10, pivotFFModel.kv, pivotFFModel.ka));
   private ExponentialProfile.State pivotGoal;
   private ExponentialProfile.State pivotSetpoint;
-  private SparkPIDController topMotorPID;
 
   public PivotIOReal() {
     pivotGoal = new ExponentialProfile.State(1.05, 0);
     pivotSetpoint = new ExponentialProfile.State(1.05, 0);
+
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
-    topMotorPID = motorLeader.getPIDController();
-    topMotorPID.setP(1); // TODO tune
+
     motorFollower.follow(motorLeader, true);
   }
 
@@ -49,10 +47,14 @@ public class PivotIOReal implements PivotIO {
               pivotSetpoint.velocity,
               (pivotSetpoint.velocity - currentVelocity) / 0.02);
 
-      topMotorPID.setReference(
-          pivotSetpoint.velocity, kVelocity, 0, feedForward, ArbFFUnits.kVoltage);
+      appliedVolts =
+          feedForward
+              + pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
     }
-    inputs.pivotAbsolutePositionRad = encoder.get();
+
+    motorLeader.setVoltage(appliedVolts);
+
+    inputs.pivotAbsolutePositionRad = getAbsoluteEncoderPosition();
     inputs.pivotAppliedVolts = appliedVolts;
     inputs.pivotCurrentAmps =
         new double[] {motorLeader.getOutputCurrent(), motorFollower.getOutputCurrent()};
@@ -74,7 +76,7 @@ public class PivotIOReal implements PivotIO {
   @Override
   public void setVoltage(double volts) {
     openLoop = true;
-    motorLeader.setVoltage(volts);
+    appliedVolts = volts;
   }
 
   /** Stop in open loop. */
@@ -82,5 +84,9 @@ public class PivotIOReal implements PivotIO {
   public void stop() {
     openLoop = true;
     setVoltage(0.0);
+  }
+
+  private double getAbsoluteEncoderPosition() {
+    return Units.rotationsToRadians(encoder.getAbsolutePosition() - encoder.getPositionOffset());
   }
 }
