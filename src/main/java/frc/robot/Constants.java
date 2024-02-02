@@ -34,4 +34,16 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static final class ClimberConstants{
+    public static final int winchMotorRightCanID = 1; //change this 
+    public static final int winchMotorLeftCanID = 2; //change this
+    public static final int homingCurrentLimit = 20;
+    public static final int extendCurrentLimit = 60;
+    public static final double extendToGrab = 10; //change this
+    public static final double extendToPullUp = 10; //change this
+    public static final double minExtendHardStop =0; 
+    public static final double maxExtendSoftStop = 10; //change this
+    public static final double extendMetersPerTick = 0.0160734375; //change this lmao
+  }
 }
