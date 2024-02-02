@@ -21,6 +21,8 @@ public interface ClimberIO {
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
 
+  public default void setVelocity(double velocityRadPerSec, double ffVolts) {}
+
   /** Stop in open loop. */
   public default void stop() {}
 

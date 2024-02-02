@@ -47,21 +47,7 @@ public class Climber extends SubsystemBase{
 
     public Climber(ClimberIO io){
         this.io = io;
-        m_winchMotorRight.restoreFactoryDefaults();
-        m_winchMotorLeft.restoreFactoryDefaults();
-        
-        m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
-        m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
-
-        m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-        m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit); //make sure to have logic for homing current limit
-
-        m_winchMotorRight.setInverted(false);
-        m_winchMotorLeft.setInverted(false);
-
-        m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-        m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit);
-
+    
         pidExtend.setSetpoint(0);
         pidExtend.setTolerance(0.01);
 
@@ -79,8 +65,6 @@ public class Climber extends SubsystemBase{
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Climber", inputs);
-        double pidExtendValueRight = pidExtend.calculate(rightEncoder.getPosition());
-        double pidExtendValueLeft = pidExtend.calculate(leftEncoder.getPosition()); 
     }
 
     public void runVolts(double volts) {
