@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ShooterIOSim implements ShooterIO {
 
   private final DCMotorSim motorSim = new DCMotorSim(DCMotor.getNEO(4), 1, 0.01);
-  private PIDController shooterPID = new PIDController(0.0, 0.0, 0.0);
+  private PIDController shooterPID = new PIDController(1.0, 0.0, 0.0);
 
   private double shooterAppliedVolts;
   private boolean closedLoop = false;
@@ -25,8 +25,8 @@ public class ShooterIOSim implements ShooterIO {
 
     motorSim.update(0.02);
 
-    inputs.shooterVelocityRadPerSec = motorSim.getAngularVelocityRadPerSec();
-    inputs.shooterAppliedVolts = shooterAppliedVolts;
+    inputs.shooterVelocityRadPerSec = new double[] {motorSim.getAngularVelocityRadPerSec()};
+    inputs.shooterAppliedVolts = new double[] {shooterAppliedVolts};
     inputs.shooterCurrentAmps = new double[] {motorSim.getCurrentDrawAmps()};
   }
 
@@ -44,9 +44,5 @@ public class ShooterIOSim implements ShooterIO {
 
   public void stop() {
     setVoltage(0.0);
-  }
-
-  public void configurePID(double kP, double kI, double kD) {
-    shooterPID.setPID(kP, kI, kD);
   }
 }

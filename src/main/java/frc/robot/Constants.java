@@ -38,6 +38,10 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class ShooterConstants {
+    public static final double shooterSpeedRPM = 7840;
+  }
+
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
     public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);

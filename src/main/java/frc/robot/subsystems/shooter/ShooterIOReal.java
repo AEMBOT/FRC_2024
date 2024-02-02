@@ -1,64 +1,82 @@
 package frc.robot.subsystems.shooter;
 
+import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
+
 import com.revrobotics.CANSparkMax;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 public class ShooterIOReal implements ShooterIO {
   private boolean closedLoop = false;
   private double voltage = 0.0;
-  private double targetVelocity = 0.0;
-  private double feedForward = 0.0;
-  private PIDController controller = new PIDController(0.0, 0.0, 0.0);
-  private CANSparkMax leftMotor1 = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
-  private CANSparkMax leftMotor2 = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
-  private CANSparkMax rightMotor1 = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
-  private CANSparkMax rightMotor2 = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax topMotorLeader = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax topMotorFollower = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax bottomMotorLeader =
+      new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax bottomMotorFollower =
+      new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+
+  private SparkPIDController topMotorPID;
+  private SparkPIDController bottomMotorPID;
+
+  public ShooterIOReal() {
+    // Tune acceptable current limit, don't want to use all power if shoot while moving
+    topMotorLeader.setSmartCurrentLimit(60);
+    topMotorFollower.setSmartCurrentLimit(60);
+    bottomMotorLeader.setSmartCurrentLimit(60);
+    bottomMotorFollower.setSmartCurrentLimit(60);
+
+    topMotorLeader.getEncoder().setVelocityConversionFactor(2);
+    topMotorFollower.getEncoder().setVelocityConversionFactor(2);
+    bottomMotorLeader.getEncoder().setVelocityConversionFactor(2);
+    bottomMotorFollower.getEncoder().setVelocityConversionFactor(2);
+
+    topMotorPID = topMotorLeader.getPIDController();
+    bottomMotorPID = bottomMotorLeader.getPIDController();
+
+    topMotorPID.setP(1); // TODO tune
+    bottomMotorPID.setP(1);
+
+    topMotorFollower.follow(topMotorLeader, true);
+    bottomMotorFollower.follow(bottomMotorLeader, true);
+  }
+
   /** Updates the set of loggable inputs. */
   public void updateInputs(ShooterIOInputs inputs) {
-    if (closedLoop) {
-      voltage =
-          MathUtil.clamp(
-              controller.calculate(leftMotor1.getEncoder().getVelocity(), targetVelocity)
-                  + feedForward,
-              -10,
-              10);
-    }
-    leftMotor1.setVoltage(voltage);
-    leftMotor2.setVoltage(voltage);
-    rightMotor1.setVoltage(voltage);
-    rightMotor2.setVoltage(voltage);
-    inputs.shooterAppliedVolts = voltage;
+    inputs.shooterAppliedVolts =
+        new double[] {
+          topMotorLeader.getAppliedOutput() * topMotorLeader.getBusVoltage(),
+          bottomMotorLeader.getAppliedOutput() * bottomMotorLeader.getBusVoltage()
+        };
     inputs.shooterCurrentAmps =
         new double[] {
-          leftMotor1.getOutputCurrent(),
-          leftMotor2.getOutputCurrent(),
-          rightMotor1.getOutputCurrent(),
-          rightMotor2.getOutputCurrent()
+          topMotorLeader.getOutputCurrent(),
+          topMotorFollower.getOutputCurrent(),
+          bottomMotorLeader.getOutputCurrent(),
+          bottomMotorFollower.getOutputCurrent()
         };
-    inputs.shooterVelocityRadPerSec = leftMotor1.getEncoder().getVelocity();
+    inputs.shooterVelocityRadPerSec =
+        new double[] {
+          topMotorLeader.getEncoder().getVelocity(), bottomMotorLeader.getEncoder().getVelocity()
+        };
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
   public void setVoltage(double volts) {
     closedLoop = false;
-    voltage = volts;
+    topMotorLeader.setVoltage(volts);
+    bottomMotorLeader.setVoltage(volts);
   }
 
   /** Run closed loop at the specified velocity. */
   public void setVelocity(double velocityRadPerSec, double ffVolts) {
     closedLoop = true;
-    targetVelocity = velocityRadPerSec;
-    feedForward = ffVolts;
+    topMotorPID.setReference(velocityRadPerSec, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(velocityRadPerSec, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
   }
 
   /** Stop in open loop. */
   public void stop() {
     setVoltage(0.0);
-  }
-
-  /** Set velocity PID constants. */
-  public void configurePID(double kP, double kI, double kD) {
-    controller.setPID(kP, kI, kD);
   }
 }
