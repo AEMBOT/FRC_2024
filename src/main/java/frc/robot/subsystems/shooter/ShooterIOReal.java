@@ -5,9 +5,12 @@ import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 
 public class ShooterIOReal implements ShooterIO {
   private boolean openLoop = false;
+  // Recalc estimate, TODO characterize
+  private final SimpleMotorFeedforward shooterFFModel = new SimpleMotorFeedforward(0.1, 0.26, 0.18);
   private final CANSparkMax topMotorLeader = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax topMotorFollower = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax bottomMotorLeader =
@@ -69,14 +72,17 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   /** Run closed loop at the specified velocity. */
-  public void setVelocity(double velocityRPM, double ffVolts) {
+  public void setVelocity(double velocityRPM) {
     openLoop = false;
-    topMotorPID.setReference(velocityRPM, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
-    bottomMotorPID.setReference(velocityRPM, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
+    topMotorPID.setReference(
+        velocityRPM, kVelocity, 0, shooterFFModel.calculate(velocityRPM), ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(
+        velocityRPM, kVelocity, 0, shooterFFModel.calculate(velocityRPM), ArbFFUnits.kVoltage);
   }
 
   /** Stop in open loop. */
   public void stop() {
+    openLoop = true;
     setVoltage(0.0);
   }
 }

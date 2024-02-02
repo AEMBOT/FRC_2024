@@ -40,6 +40,7 @@ public final class Constants {
 
   public static final class ShooterConstants {
     public static final double shooterSpeedRPM = 7840;
+    public static final double shooterIdleRPM = 1960;
   }
 
   public final class FieldConstants {

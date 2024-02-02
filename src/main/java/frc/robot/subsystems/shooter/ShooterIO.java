@@ -19,7 +19,7 @@ public interface ShooterIO {
   public default void setVoltage(double volts) {}
 
   /** Run closed loop at the specified velocity. */
-  public default void setVelocity(double velocityRPM, double ffVolts) {}
+  public default void setVelocity(double velocityRPM) {}
 
   /** Stop in open loop. */
   public default void stop() {}
