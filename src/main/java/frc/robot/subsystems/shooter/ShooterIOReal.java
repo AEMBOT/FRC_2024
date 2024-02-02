@@ -4,7 +4,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 
-public class ShooterIOReal implements ShooterIO  {
+public class ShooterIOReal implements ShooterIO {
   private boolean closedLoop = false;
   private double voltage = 0.0;
   private double targetVelocity = 0.0;
@@ -16,20 +16,26 @@ public class ShooterIOReal implements ShooterIO  {
   private CANSparkMax rightMotor2 = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
   /** Updates the set of loggable inputs. */
   public void updateInputs(ShooterIOInputs inputs) {
-    if(closedLoop){
-      voltage = MathUtil.clamp(controller.calculate(leftMotor1.getEncoder().getVelocity(), targetVelocity) + feedForward, -10, 10);
+    if (closedLoop) {
+      voltage =
+          MathUtil.clamp(
+              controller.calculate(leftMotor1.getEncoder().getVelocity(), targetVelocity)
+                  + feedForward,
+              -10,
+              10);
     }
     leftMotor1.setVoltage(voltage);
     leftMotor2.setVoltage(voltage);
     rightMotor1.setVoltage(voltage);
     rightMotor2.setVoltage(voltage);
     inputs.shooterAppliedVolts = voltage;
-    inputs.shooterCurrentAmps = new double[]{
-            leftMotor1.getOutputCurrent(),
-            leftMotor2.getOutputCurrent(),
-            rightMotor1.getOutputCurrent(),
-            rightMotor2.getOutputCurrent()
-    };
+    inputs.shooterCurrentAmps =
+        new double[] {
+          leftMotor1.getOutputCurrent(),
+          leftMotor2.getOutputCurrent(),
+          rightMotor1.getOutputCurrent(),
+          rightMotor2.getOutputCurrent()
+        };
     inputs.shooterVelocityRadPerSec = leftMotor1.getEncoder().getVelocity();
   }
 
@@ -37,7 +43,6 @@ public class ShooterIOReal implements ShooterIO  {
   public void setVoltage(double volts) {
     closedLoop = false;
     voltage = volts;
-
   }
 
   /** Run closed loop at the specified velocity. */
