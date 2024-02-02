@@ -7,8 +7,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
 
 public class ShooterIOReal implements ShooterIO {
-  private boolean closedLoop = false;
-  private double voltage = 0.0;
+  private boolean openLoop = false;
   private final CANSparkMax topMotorLeader = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax topMotorFollower = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax bottomMotorLeader =
@@ -16,8 +15,8 @@ public class ShooterIOReal implements ShooterIO {
   private final CANSparkMax bottomMotorFollower =
       new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
 
-  private SparkPIDController topMotorPID;
-  private SparkPIDController bottomMotorPID;
+  private final SparkPIDController topMotorPID;
+  private final SparkPIDController bottomMotorPID;
 
   public ShooterIOReal() {
     // Tune acceptable current limit, don't want to use all power if shoot while moving
@@ -55,24 +54,25 @@ public class ShooterIOReal implements ShooterIO {
           bottomMotorLeader.getOutputCurrent(),
           bottomMotorFollower.getOutputCurrent()
         };
-    inputs.shooterVelocityRadPerSec =
+    inputs.shooterVelocityRPM =
         new double[] {
           topMotorLeader.getEncoder().getVelocity(), bottomMotorLeader.getEncoder().getVelocity()
         };
+    inputs.openLoopStatus = openLoop;
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
   public void setVoltage(double volts) {
-    closedLoop = false;
+    openLoop = true;
     topMotorLeader.setVoltage(volts);
     bottomMotorLeader.setVoltage(volts);
   }
 
   /** Run closed loop at the specified velocity. */
-  public void setVelocity(double velocityRadPerSec, double ffVolts) {
-    closedLoop = true;
-    topMotorPID.setReference(velocityRadPerSec, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
-    bottomMotorPID.setReference(velocityRadPerSec, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
+  public void setVelocity(double velocityRPM, double ffVolts) {
+    openLoop = false;
+    topMotorPID.setReference(velocityRPM, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(velocityRPM, kVelocity, 0, ffVolts, ArbFFUnits.kVoltage);
   }
 
   /** Stop in open loop. */

@@ -8,36 +8,37 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ShooterIOSim implements ShooterIO {
 
   private final DCMotorSim motorSim = new DCMotorSim(DCMotor.getNEO(4), 1, 0.01);
-  private PIDController shooterPID = new PIDController(1.0, 0.0, 0.0);
+  private final PIDController shooterPID = new PIDController(1.0, 0.0, 0.0);
 
   private double shooterAppliedVolts;
-  private boolean closedLoop = false;
+  private boolean openLoop = false;
   private double ffVolts = 0.0;
 
   public void updateInputs(ShooterIOInputs inputs) {
 
-    if (closedLoop) {
+    if (openLoop) {
       shooterAppliedVolts =
           MathUtil.clamp(
-              shooterPID.calculate(motorSim.getAngularVelocityRadPerSec()) + ffVolts, -12.0, 12.0);
+              shooterPID.calculate(motorSim.getAngularVelocityRPM()) + ffVolts, -12.0, 12.0);
       motorSim.setInputVoltage(shooterAppliedVolts);
     }
 
     motorSim.update(0.02);
 
-    inputs.shooterVelocityRadPerSec = new double[] {motorSim.getAngularVelocityRadPerSec()};
+    inputs.shooterVelocityRPM = new double[] {motorSim.getAngularVelocityRPM()};
     inputs.shooterAppliedVolts = new double[] {shooterAppliedVolts};
     inputs.shooterCurrentAmps = new double[] {motorSim.getCurrentDrawAmps()};
+    inputs.openLoopStatus = openLoop;
   }
 
   public void setVoltage(double volts) {
-    closedLoop = false;
+    openLoop = true;
     shooterAppliedVolts = volts;
     motorSim.setInputVoltage(volts);
   }
 
   public void setVelocity(double velocityRadPerSec, double ffVolts) {
-    closedLoop = true;
+    openLoop = false;
     shooterPID.setSetpoint(velocityRadPerSec);
     this.ffVolts = ffVolts;
   }

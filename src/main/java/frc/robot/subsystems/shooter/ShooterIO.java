@@ -6,9 +6,10 @@ public interface ShooterIO {
   @AutoLog
   public static class ShooterIOInputs {
     public double[] shooterAppliedVolts = new double[] {};
-    public double[] shooterVelocityRadPerSec = new double[] {};
+    public double[] shooterVelocityRPM = new double[] {};
     public double[] shooterCurrentAmps =
         new double[] {}; // Log motors individually, useful for failure analysis
+    public boolean openLoopStatus = true;
   }
 
   /** Updates the set of loggable inputs. */
@@ -18,7 +19,7 @@ public interface ShooterIO {
   public default void setVoltage(double volts) {}
 
   /** Run closed loop at the specified velocity. */
-  public default void setVelocity(double velocityRadPerSec, double ffVolts) {}
+  public default void setVelocity(double velocityRPM, double ffVolts) {}
 
   /** Stop in open loop. */
   public default void stop() {}
