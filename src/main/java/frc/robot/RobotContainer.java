@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -33,6 +34,10 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.pivot.Pivot;
+import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOSim;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -46,6 +51,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Flywheel flywheel;
+  private final Pivot pivot;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -69,6 +75,7 @@ public class RobotContainer {
                 new ModuleIOAlpha(3),
                 new AprilTagVisionIOReal());
         flywheel = new Flywheel(new FlywheelIO() {});
+        pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -89,6 +96,7 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new AprilTagVisionIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
+        pivot = new Pivot(new PivotIOSim());
         break;
 
       default:
@@ -102,6 +110,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new AprilTagVisionIO() {});
         flywheel = new Flywheel(new FlywheelIO() {});
+        pivot = new Pivot(new PivotIO() {});
         break;
     }
 
@@ -126,25 +135,25 @@ public class RobotContainer {
     autoChooser.addOption("Nine Piece Auto", NamedCommands.getCommand("Nine Piece Auto"));
     // Set up SysId routines
     autoChooser.addOption(
-            "Drive SysId (Quasistatic Forward)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        "Drive SysId (Quasistatic Forward)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-            "Drive SysId (Quasistatic Reverse)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        "Drive SysId (Quasistatic Reverse)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-            "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-            "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-            "Flywheel SysId (Quasistatic Forward)",
-            flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        "Flywheel SysId (Quasistatic Forward)",
+        flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-            "Flywheel SysId (Quasistatic Reverse)",
-            flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        "Flywheel SysId (Quasistatic Reverse)",
+        flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-            "Flywheel SysId (Dynamic Forward)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Flywheel SysId (Dynamic Forward)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-            "Flywheel SysId (Dynamic Reverse)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        "Flywheel SysId (Dynamic Reverse)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -187,5 +196,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  @AutoLogOutput
+  public Pose3d[] log3DPoses() {
+    Pose3d[] mechanismPoses = new Pose3d[1];
+    mechanismPoses[0] = pivot.getPose3D();
+    return mechanismPoses;
   }
 }
