@@ -19,7 +19,7 @@ public class ShooterIOSim implements ShooterIO {
 
   public void updateInputs(ShooterIOInputs inputs) {
 
-    if (openLoop) {
+    if (!openLoop) {
       shooterAppliedVolts =
           MathUtil.clamp(
               shooterPID.calculate(motorSim.getAngularVelocityRPM())
