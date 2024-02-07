@@ -86,6 +86,10 @@ public class Indexer extends SubsystemBase {
     io.setIntakeIndexer(OFF);
   }
 
+  public void setShootReady(boolean value) {
+    shootReady = value;
+  }
+
   // Commands
 
   public Command intakeInCommand() {
