@@ -38,13 +38,12 @@ public final class Constants {
     REPLAY
   }
 
- public static final double UPDATE_PERIOD = 0.2;
+  public static final double UPDATE_PERIOD = 0.02;
 
   public final class PivotConstants {
-
-
+    public static final double PIVOT_MAX_VOLTAGE = 0;
+    public static final double PIVOT_MIN_VOLTAGE = 0;
   }
-
 
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);

@@ -52,8 +52,12 @@ public class PivotIOReal implements PivotIO {
           feedForward
               + pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
     }
-
-    motorLeader.setVoltage(appliedVolts);
+    if (Constants.PivotConstants.PIVOT_MIN_VOLTAGE < getAbsoluteEncoderPosition()
+        && Constants.PivotConstants.PIVOT_MAX_VOLTAGE > getAbsoluteEncoderPosition()) {
+      motorLeader.setVoltage(appliedVolts);
+    } else if (Math.signum(getAbsoluteEncoderPosition()) != Math.signum(appliedVolts)) {
+      motorLeader.setVoltage(appliedVolts);
+    }
 
     inputs.pivotAbsolutePositionRad = getAbsoluteEncoderPosition();
     inputs.pivotAppliedVolts = appliedVolts;
