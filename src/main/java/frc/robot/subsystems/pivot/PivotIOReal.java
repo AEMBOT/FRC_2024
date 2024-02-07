@@ -8,6 +8,7 @@ import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
+import frc.robot.Constants;
 
 public class PivotIOReal implements PivotIO {
 
@@ -40,12 +41,12 @@ public class PivotIOReal implements PivotIO {
   public void updateInputs(PivotIOInputs inputs) {
     if (!openLoop) {
       double currentVelocity = pivotSetpoint.velocity;
-      pivotSetpoint = pivotProfile.calculate(0.02, pivotSetpoint, pivotGoal);
+      pivotSetpoint = pivotProfile.calculate(Constants.UPDATE_PERIOD, pivotSetpoint, pivotGoal);
       double feedForward =
           pivotFFModel.calculate(
               pivotSetpoint.position,
               pivotSetpoint.velocity,
-              (pivotSetpoint.velocity - currentVelocity) / 0.02);
+              (pivotSetpoint.velocity - currentVelocity) / Constants.UPDATE_PERIOD);
 
       appliedVolts =
           feedForward

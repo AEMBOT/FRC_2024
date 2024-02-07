@@ -38,6 +38,14 @@ public final class Constants {
     REPLAY
   }
 
+ public static final double UPDATE_PERIOD = 0.2;
+
+  public final class PivotConstants {
+
+
+  }
+
+
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
     public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
