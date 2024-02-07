@@ -1,5 +1,9 @@
 package frc.robot.subsystems.pivot;
 
+import static edu.wpi.first.math.MathUtil.clamp;
+import static frc.robot.Constants.PivotConstants.PIVOT_MAX_POS_RAD;
+import static frc.robot.Constants.PivotConstants.PIVOT_MIN_POS_RAD;
+
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -28,8 +32,8 @@ public class PivotIOReal implements PivotIO {
   private ExponentialProfile.State pivotSetpoint;
 
   public PivotIOReal() {
-    pivotGoal = new ExponentialProfile.State(1.05, 0);
-    pivotSetpoint = new ExponentialProfile.State(1.05, 0);
+    pivotGoal = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
+    pivotSetpoint = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
 
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
@@ -52,12 +56,15 @@ public class PivotIOReal implements PivotIO {
           feedForward
               + pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
     }
-    if (Constants.PivotConstants.PIVOT_MIN_VOLTAGE < getAbsoluteEncoderPosition()
-        && Constants.PivotConstants.PIVOT_MAX_VOLTAGE > getAbsoluteEncoderPosition()) {
-      motorLeader.setVoltage(appliedVolts);
-    } else if (Math.signum(getAbsoluteEncoderPosition()) != Math.signum(appliedVolts)) {
-      motorLeader.setVoltage(appliedVolts);
+
+    if (getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
+      appliedVolts = clamp(appliedVolts, 0, Double.MAX_VALUE);
     }
+    if (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD) {
+      appliedVolts = clamp(appliedVolts, Double.MIN_VALUE, 0);
+    }
+
+    motorLeader.setVoltage(appliedVolts);
 
     inputs.pivotAbsolutePositionRad = getAbsoluteEncoderPosition();
     inputs.pivotAppliedVolts = appliedVolts;

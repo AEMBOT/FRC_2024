@@ -41,8 +41,8 @@ public final class Constants {
   public static final double UPDATE_PERIOD = 0.02;
 
   public final class PivotConstants {
-    public static final double PIVOT_MAX_VOLTAGE = 0;
-    public static final double PIVOT_MIN_VOLTAGE = 0;
+    public static final double PIVOT_MAX_POS_RAD = 0;
+    public static final double PIVOT_MIN_POS_RAD = 0;
   }
 
   public final class FieldConstants {
