@@ -41,6 +41,11 @@ public final class Constants {
     REPLAY
   }
 
+  public static final class ShooterConstants {
+    public static final double shooterSpeedRPM = 7840;
+    public static final double shooterIdleRPM = 1960;
+  }
+  
   public static final AprilTagFieldLayout aprilTagFieldLayout =
       AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
