@@ -15,7 +15,6 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -58,12 +57,13 @@ public final class Constants {
 
     /*VOLTAGES*/
     public static final double intakeMotorVoltage = 1; // PLACEHOLDER VALUE
+  }
 
-    public static final class ShooterConstants {
+  public static final class ShooterConstants {
     public static final double shooterSpeedRPM = 7840;
     public static final double shooterIdleRPM = 1960;
   }
-  
+
   public static final AprilTagFieldLayout aprilTagFieldLayout =
       AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
