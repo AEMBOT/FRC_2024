@@ -59,7 +59,6 @@ public class IndexerIOSparkMax implements IndexerIO {
         indexerMotorTop.setVoltage(indexerMotorVoltage);
       case OUT:
         indexerMotorTop.setVoltage(-indexerMotorVoltage);
-        indexerMotorBottom.setVoltage(-indexerMotorVoltage);
     }
   }
 
@@ -67,15 +66,12 @@ public class IndexerIOSparkMax implements IndexerIO {
   public void setIntakeIndexer(MotorState state) {
     switch (state) {
       case OFF:
-        intakeMotorBottom.setVoltage(0);
         intakeMotorTop.setVoltage(0);
         break;
       case IN:
-        intakeMotorBottom.setVoltage(intakeMotorVoltage);
         intakeMotorTop.setVoltage(intakeMotorVoltage);
         break;
       case OUT:
-        intakeMotorBottom.setVoltage(-intakeMotorVoltage);
         intakeMotorTop.setVoltage(-intakeMotorVoltage);
     }
   }

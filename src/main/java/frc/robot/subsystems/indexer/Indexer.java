@@ -39,7 +39,8 @@ public class Indexer extends SubsystemBase {
                 () -> {
                   shootReady = true;
                   indexOffIntakeBack();
-                }));
+                }))
+        .finallyDo(this::indexOffIntakeOff);
   }
 
   public void indexOffIntakeOn() {
@@ -60,6 +61,11 @@ public class Indexer extends SubsystemBase {
   public void indexOffIntakeBack() {
     io.setIntakeIndexer(OUT);
     io.setShooterIndexer(OFF);
+  }
+
+  public void indexOnIntakeOff() {
+    io.setIntakeIndexer(OFF);
+    io.setShooterIndexer(OUT);
   }
 
   public void indexerIn() {
@@ -91,6 +97,9 @@ public class Indexer extends SubsystemBase {
   }
 
   // Commands
+  public Command shootCommand() {
+    return run(this::indexOnIntakeOff);
+  }
 
   public Command intakeInCommand() {
     return runOnce(this::intakeIn);
