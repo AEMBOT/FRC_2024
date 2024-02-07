@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class PivotIOReal implements PivotIO {
 
@@ -51,10 +52,13 @@ public class PivotIOReal implements PivotIO {
               pivotSetpoint.position,
               pivotSetpoint.velocity,
               (pivotSetpoint.velocity - currentVelocity) / Constants.UPDATE_PERIOD);
+      double pidOutput =
+          pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
 
-      appliedVolts =
-          feedForward
-              + pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
+      Logger.recordOutput("Pivot/CalculatedFFVolts", feedForward);
+      Logger.recordOutput("Pivot/PIDCommandVolts", pidOutput);
+
+      appliedVolts = feedForward + pidOutput;
     }
 
     if (getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
