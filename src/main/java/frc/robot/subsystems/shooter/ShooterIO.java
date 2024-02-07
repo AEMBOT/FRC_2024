@@ -5,10 +5,11 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   public static class ShooterIOInputs {
-    public double shooterVelocityRadPerSec = 0.0;
-    public double shooterAppliedVolts = 0.0;
+    public double[] shooterAppliedVolts = new double[] {};
+    public double[] shooterVelocityRPM = new double[] {};
     public double[] shooterCurrentAmps =
         new double[] {}; // Log motors individually, useful for failure analysis
+    public boolean openLoopStatus = true;
   }
 
   /** Updates the set of loggable inputs. */
@@ -18,11 +19,8 @@ public interface ShooterIO {
   public default void setVoltage(double volts) {}
 
   /** Run closed loop at the specified velocity. */
-  public default void setVelocity(double velocityRadPerSec, double ffVolts) {}
+  public default void setVelocity(double velocityRPM) {}
 
   /** Stop in open loop. */
   public default void stop() {}
-
-  /** Set velocity PID constants. */
-  public default void configurePID(double kP, double kI, double kD) {}
 }

@@ -13,6 +13,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -24,7 +30,7 @@ package frc.robot;
 public final class Constants {
   public static final Mode currentMode = Mode.REAL;
 
-  public static enum Mode {
+  public enum Mode {
     /** Running on a real robot. */
     REAL,
 
@@ -52,5 +58,27 @@ public final class Constants {
 
     /*VOLTAGES*/
     public static final double intakeMotorVoltage = 1; // PLACEHOLDER VALUE
+
+    public static final class ShooterConstants {
+    public static final double shooterSpeedRPM = 7840;
+    public static final double shooterIdleRPM = 1960;
+  }
+  
+  public static final AprilTagFieldLayout aprilTagFieldLayout =
+      AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+
+  public final class FieldConstants {
+    public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
+    public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
+
+    public static Translation2d getSpeaker() {
+      if (DriverStation.getAlliance().isPresent()) {
+        return DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+            ? RED_SPEAKER_POSE
+            : BLUE_SPEAKER_POSE;
+      } else {
+        return BLUE_SPEAKER_POSE; // default to blue
+      }
+    }
   }
 }

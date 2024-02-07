@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -26,6 +27,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
@@ -34,6 +38,10 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSparkMax;
+import frc.robot.subsystems.pivot.Pivot;
+import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOSim;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
@@ -48,6 +56,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Flywheel flywheel;
   private final Indexer indexer;
+  private final Pivot pivot;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -68,9 +77,11 @@ public class RobotContainer {
                 new ModuleIOAlpha(0),
                 new ModuleIOAlpha(1),
                 new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3));
+                new ModuleIOAlpha(3),
+                new AprilTagVisionIOReal());
         flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIOSparkMax());
+        pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -88,9 +99,11 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new ModuleIOSim());
+                new ModuleIOSim(),
+                new AprilTagVisionIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
         indexer = new Indexer(new IndexerIOSim());
+        pivot = new Pivot(new PivotIOSim());
         break;
 
       default:
@@ -101,9 +114,11 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                new AprilTagVisionIO() {});
         flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        pivot = new Pivot(new PivotIO() {});
         break;
     }
 
@@ -191,5 +206,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  @AutoLogOutput
+  public Pose3d[] log3DPoses() {
+    Pose3d[] mechanismPoses = new Pose3d[1];
+    mechanismPoses[0] = pivot.getPose3D();
+    return mechanismPoses;
   }
 }
