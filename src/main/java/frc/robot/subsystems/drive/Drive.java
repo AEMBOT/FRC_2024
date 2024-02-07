@@ -14,17 +14,16 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static java.lang.Math.abs;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -35,6 +34,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
@@ -68,17 +69,23 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private final AprilTagVisionIO aprilTagVisionIO;
+  private final AprilTagVisionIOInputsAutoLogged aprilTagVisionInputs =
+      new AprilTagVisionIOInputsAutoLogged();
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      AprilTagVisionIO aprilTagVisionIO) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0);
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
+    this.aprilTagVisionIO = aprilTagVisionIO;
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -185,6 +192,35 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+    }
+
+    // Update vision
+    aprilTagVisionIO.updatePose(getPose());
+    aprilTagVisionIO.updateInputs(aprilTagVisionInputs);
+    Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
+
+    for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
+      if (aprilTagVisionInputs.timestamps[i] != 0.0) {
+        // Bounds check the pose is actually on the field
+        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 2.0
+            || aprilTagVisionInputs.visionPoses[i].getX() < 0
+            || aprilTagVisionInputs.visionPoses[i].getX() > 20
+            || aprilTagVisionInputs.visionPoses[i].getY() < 0
+            || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
+
+        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
+        Logger.recordOutput(
+            "Drive/AprilTagStdDevs" + i,
+            Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
+
+        poseEstimator.addVisionMeasurement(
+            aprilTagVisionInputs.visionPoses[i].toPose2d(),
+            aprilTagVisionInputs.timestamps[i],
+            VecBuilder.fill(
+                aprilTagVisionInputs.visionStdDevs[3 * i],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 1],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+      }
     }
   }
 
