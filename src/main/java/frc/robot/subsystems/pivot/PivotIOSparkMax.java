@@ -36,18 +36,18 @@ public class PivotIOSparkMax implements PivotIO {
   public void updateInputs(PivotIOInputs inputs) {
     if (!openLoop) {
       double currentVelocity = pivotSetpoint.velocity;
-      pivotSetpoint = pivotProfile.calculate(0.02, pivotSetpoint, pivotGoal);
+      pivotSetpoint = pivotProfile.calculate(UPDATE_PERIOD, pivotSetpoint, pivotGoal);
       double feedForward =
           pivotFFModel.calculate(
               pivotSetpoint.position,
               pivotSetpoint.velocity,
-              (pivotSetpoint.velocity - currentVelocity) / 0.02);
+              (pivotSetpoint.velocity - currentVelocity) / UPDATE_PERIOD);
       appliedVolts =
           MathUtil.clamp(
               controller.calculate(absoluteEncoder.getAbsolutePosition(), pivotSetpoint.position)
                   + feedForward,
-              -12.0,
-              12.0);
+              -VOLT_CLAMP,
+              VOLT_CLAMP);
     }
     leftMotor.setVoltage(appliedVolts);
     leftMotor.setVoltage(appliedVolts);
@@ -69,6 +69,7 @@ public class PivotIOSparkMax implements PivotIO {
   public void setPosition(double positionRad) {
     openLoop = false;
     pivotGoal = new ExponentialProfile.State(positionRad, 0);
+
   }
 
   /** Run open loop at the specified voltage. */
