@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
+import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
@@ -32,6 +33,11 @@ public class ShooterIOReal implements ShooterIO {
     topMotorFollower.getEncoder().setVelocityConversionFactor(2);
     bottomMotorLeader.getEncoder().setVelocityConversionFactor(2);
     bottomMotorFollower.getEncoder().setVelocityConversionFactor(2);
+
+    topMotorLeader.setIdleMode(kCoast);
+    topMotorFollower.setIdleMode(kCoast);
+    bottomMotorLeader.setIdleMode(kCoast);
+    bottomMotorFollower.setIdleMode(kCoast);
 
     topMotorPID = topMotorLeader.getPIDController();
     bottomMotorPID = bottomMotorLeader.getPIDController();

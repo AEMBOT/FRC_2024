@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,7 +22,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command getDefaultCommand() {
-    return run(() -> setVelocityRPM(shooterIdleRPM));
+    // If the shooter was running fast and is now coasting down,
+    // we don't want to force the speed down-- preserve momentum
+    return Commands.waitUntil(() -> findMin(inputs.shooterVelocityRPM) < shooterIdleRPM)
+        .andThen(run(() -> setVelocityRPM(shooterIdleRPM)));
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
@@ -30,5 +34,12 @@ public class Shooter extends SubsystemBase {
 
   private void setVelocityRPM(double velRPM) {
     io.setVelocity(velRPM);
+  }
+
+  // We're using this because the overhead of the Java Stream API sucks
+  private double findMin(double[] array) {
+    if (array == null || array.length == 0) return 0;
+    if (array.length == 1) return array[0];
+    else return Math.min(array[0], array[1]);
   }
 }
