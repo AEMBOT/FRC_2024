@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -44,6 +46,33 @@ public final class Constants {
     public static final double PIVOT_MAX_POS_RAD = 0;
     public static final double PIVOT_MIN_POS_RAD = 0;
   }
+
+  public static final class IndexerConstants {
+    /* PORTS */
+    public static final int indexerMotorPortBottom = 0; // PLACEHOLDER VALUE
+    public static final int indexerMotorPortTop = 1; // PLACEHOLDER VALUE
+    public static final int indexerBeamBrake = 1; // PLACEHOLDER VALUE
+
+    /* VOLTAGES */
+    public static final double indexerMotorVoltage = 1; // PLACEHOLDER VALUE
+  }
+
+  public static final class IntakeConstants {
+    public static final int intakeMotorPortBottom = 2; // PLACEHOLDER VALUE
+    public static final int intakeMotorPortTop = 3; // PLACEHOLDER VALUE
+    public static final int intakeBeamBrake = 2; // PLACEHOLDER VALUE
+
+    /*VOLTAGES*/
+    public static final double intakeMotorVoltage = 1; // PLACEHOLDER VALUE
+  }
+
+  public static final class ShooterConstants {
+    public static final double shooterSpeedRPM = 7840;
+    public static final double shooterIdleRPM = 1960;
+  }
+
+  public static final AprilTagFieldLayout aprilTagFieldLayout =
+      AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);

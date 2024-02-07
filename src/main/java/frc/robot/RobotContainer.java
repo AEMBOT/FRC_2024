@@ -27,10 +27,17 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelIOSim;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOSim;
@@ -48,6 +55,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Flywheel flywheel;
+  private final Indexer indexer;
   private final Pivot pivot;
 
   // Controller
@@ -69,8 +77,10 @@ public class RobotContainer {
                 new ModuleIOAlpha(0),
                 new ModuleIOAlpha(1),
                 new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3));
+                new ModuleIOAlpha(3),
+                new AprilTagVisionIOReal());
         flywheel = new Flywheel(new FlywheelIO() {});
+        indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         // drive = new Drive(
         // new GyroIOPigeon2(true),
@@ -89,8 +99,10 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new ModuleIOSim());
+                new ModuleIOSim(),
+                new AprilTagVisionIOSim());
         flywheel = new Flywheel(new FlywheelIOSim());
+        indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         break;
 
@@ -102,8 +114,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                new AprilTagVisionIO() {});
         flywheel = new Flywheel(new FlywheelIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         break;
     }
@@ -166,6 +180,8 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+    indexer.setDefaultCommand(indexer.getDefaultCommand());
+
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     controller
         .b()
