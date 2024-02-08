@@ -19,8 +19,8 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
   @AutoLog
   public static class ModuleIOInputs {
-    public double drivePositionRad = 0.0;
-    public double driveVelocityRadPerSec = 0.0;
+    public double drivePositionMeters = 0.0;
+    public double driveVelocityMetersPerSec = 0.0;
     public double driveAppliedVolts = 0.0;
     public double[] driveCurrentAmps = new double[] {};
 
@@ -31,7 +31,7 @@ public interface ModuleIO {
     public double[] turnCurrentAmps = new double[] {};
 
     public double[] odometryTimestamps = new double[] {};
-    public double[] odometryDrivePositionsRad = new double[] {};
+    public double[] odometryDrivePositionsMeters = new double[] {};
     public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
   }
 
@@ -41,8 +41,14 @@ public interface ModuleIO {
   /** Run the drive motor at the specified voltage. */
   public default void setDriveVoltage(double volts) {}
 
+  /** Use onboard PIDF to run the drive motor at the specified speed */
+  public default void setDriveSetpoint(final double metersPerSecond) {}
+
   /** Run the turn motor at the specified voltage. */
   public default void setTurnVoltage(double volts) {}
+
+  /** Use onboard PIDF to run the turn motor to the specified rotation */
+  public default void setTurnSetpoint(final Rotation2d rotation) {}
 
   /** Enable or disable brake mode on the drive motor. */
   public default void setDriveBrakeMode(boolean enable) {}
