@@ -1,6 +1,7 @@
 package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Volts;
+import static java.lang.Math.abs;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -41,6 +42,12 @@ public class Pivot extends SubsystemBase {
   public void runPosition(double positionRad) {
     Logger.recordOutput("Pivot/GoalRad", positionRad);
     io.setPosition(positionRad);
+  }
+
+  public Command goToAngle(double positionRad) {
+    // TODO make sure 0.02 radian tolerance is achievable
+    return run(() -> runPosition(positionRad))
+        .until(() -> abs(inputs.pivotAbsolutePositionRad - inputs.pivotGoalPosition) < 0.02);
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
