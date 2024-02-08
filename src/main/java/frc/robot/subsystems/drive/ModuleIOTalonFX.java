@@ -29,7 +29,7 @@ import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
- * CANcoder
+ * CANcoder. Implementation applicable for 2024 Lightcycle and 2024 Clef.
  *
  * <p>NOTE: This implementation should be used as a starting point and adapted to different hardware
  * configurations (e.g. If using an analog encoder, copy from "ModuleIOSparkMax")
@@ -59,11 +59,12 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnAppliedVolts;
   private final StatusSignal<Double> turnCurrent;
 
-  // Gear ratios for SDS MK4i L2, adjust as necessary
-  private final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
+  // Gear ratios for SDS MK4i L2+, adjust as necessary
+  private final double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0);
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
-  private final boolean isTurnMotorInverted = true;
+  private final boolean isDriveMotorInverted;
+  private final boolean isTurnMotorInverted;
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOTalonFX(int index) {
@@ -73,38 +74,46 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnTalon = new TalonFX(1);
         cancoder = new CANcoder(2);
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        isDriveMotorInverted = false;
+        isTurnMotorInverted = true;
         break;
       case 1:
         driveTalon = new TalonFX(3);
         turnTalon = new TalonFX(4);
         cancoder = new CANcoder(5);
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        isDriveMotorInverted = false;
+        isTurnMotorInverted = true;
         break;
       case 2:
         driveTalon = new TalonFX(6);
         turnTalon = new TalonFX(7);
         cancoder = new CANcoder(8);
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        isDriveMotorInverted = false;
+        isTurnMotorInverted = true;
         break;
       case 3:
         driveTalon = new TalonFX(9);
         turnTalon = new TalonFX(10);
         cancoder = new CANcoder(11);
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        isDriveMotorInverted = false;
+        isTurnMotorInverted = true;
         break;
       default:
         throw new RuntimeException("Invalid module index");
     }
 
     var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.StatorCurrentLimit = 40.0;
-    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    driveConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
+    driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
     var turnConfig = new TalonFXConfiguration();
-    turnConfig.CurrentLimits.StatorCurrentLimit = 30.0;
-    turnConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    turnConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
 
@@ -200,7 +209,10 @@ public class ModuleIOTalonFX implements ModuleIO {
   @Override
   public void setDriveBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
-    config.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.Inverted =
+        isDriveMotorInverted
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     driveTalon.getConfigurator().apply(config);
   }

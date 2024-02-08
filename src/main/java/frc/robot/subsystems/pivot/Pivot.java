@@ -1,9 +1,10 @@
 package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Volts;
+import static java.lang.Math.abs;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -12,26 +13,10 @@ import org.littletonrobotics.junction.Logger;
 public class Pivot extends SubsystemBase {
   private final PivotIO io;
   private final PivotIOInputsAutoLogged inputs = new PivotIOInputsAutoLogged();
-
-  private final double pivotkS = 0.1;
-  private final double pivotkG = 0.24;
-  private final double pivotkV = 5.85;
-  private final double pivotkA = 0.02;
-
-  private final ArmFeedforward pivotFFModel;
-  private final ExponentialProfile pivotProfile =
-      new ExponentialProfile(
-          ExponentialProfile.Constraints.fromCharacteristics(10, pivotkV, pivotkA));
-  private ExponentialProfile.State pivotGoal = new ExponentialProfile.State();
-  private ExponentialProfile.State pivotSetpoint = new ExponentialProfile.State();
-
   private final SysIdRoutine sysId;
 
   public Pivot(PivotIO io) {
     this.io = io;
-
-    pivotFFModel = new ArmFeedforward(0.1, 0.24, 5.85, 0.02); // Recalc estimate, TODO characterize
-    io.configurePID(0.1, 0.0, 0.02); // TODO characterize
 
     // Configure SysId
     sysId =
@@ -46,14 +31,8 @@ public class Pivot extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double currentVel = pivotSetpoint.velocity;
-    pivotSetpoint = pivotProfile.calculate(0.02, pivotSetpoint, pivotGoal);
-    io.setPosition(
-        pivotSetpoint.position,
-        pivotFFModel.calculate(
-            pivotSetpoint.position,
-            pivotSetpoint.velocity,
-            (pivotSetpoint.velocity - currentVel) / 0.02));
+    io.updateInputs(inputs);
+    Logger.processInputs("Pivot", inputs);
   }
 
   public void runVolts(double volts) {
@@ -61,7 +40,14 @@ public class Pivot extends SubsystemBase {
   }
 
   public void runPosition(double positionRad) {
-    pivotGoal = new ExponentialProfile.State(positionRad, 0);
+    Logger.recordOutput("Pivot/GoalRad", positionRad);
+    io.setPosition(positionRad);
+  }
+
+  public Command goToAngle(double positionRad) {
+    // TODO make sure 0.02 radian tolerance is achievable
+    return run(() -> runPosition(positionRad))
+        .until(() -> abs(inputs.pivotAbsolutePositionRad - inputs.pivotGoalPosition) < 0.02);
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -72,5 +58,9 @@ public class Pivot extends SubsystemBase {
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
+  }
+
+  public Pose3d getPose3D() {
+    return new Pose3d(-0.2, 0, 0.255, new Rotation3d(0, -inputs.pivotAbsolutePositionRad, 0));
   }
 }
