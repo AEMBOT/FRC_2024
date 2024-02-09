@@ -37,6 +37,10 @@ import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOSim;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
@@ -52,6 +56,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Indexer indexer;
   private final Pivot pivot;
+  private final Shooter shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -76,6 +81,7 @@ public class RobotContainer {
                 new AprilTagVisionIOReal());
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
+        shooter = new Shooter(new ShooterIOReal());
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -97,6 +103,7 @@ public class RobotContainer {
                 new AprilTagVisionIOSim());
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
+        shooter = new Shooter(new ShooterIOSim());
         break;
 
       default:
@@ -111,6 +118,7 @@ public class RobotContainer {
                 new AprilTagVisionIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
+        shooter = new Shooter(new ShooterIO() {});
         break;
     }
 
