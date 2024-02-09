@@ -25,15 +25,11 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.flywheel.Flywheel;
-import frc.robot.subsystems.flywheel.FlywheelIO;
-import frc.robot.subsystems.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
@@ -54,7 +50,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Flywheel flywheel;
   private final Indexer indexer;
   private final Pivot pivot;
 
@@ -79,7 +74,6 @@ public class RobotContainer {
                 new ModuleIOAlpha(2),
                 new ModuleIOAlpha(3),
                 new AprilTagVisionIOReal());
-        flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         // drive = new Drive(
@@ -101,7 +95,6 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new AprilTagVisionIOSim());
-        flywheel = new Flywheel(new FlywheelIOSim());
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         break;
@@ -116,18 +109,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new AprilTagVisionIO() {});
-        flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         break;
     }
 
     // Set up auto routines
-    NamedCommands.registerCommand(
-        "Run Flywheel",
-        Commands.startEnd(
-                () -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel)
-            .withTimeout(5.0));
     NamedCommands.registerCommand(
         "Nine Piece Auto",
         Commands.runOnce(
@@ -144,16 +131,6 @@ public class RobotContainer {
     // Set up SysId routines
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
-    autoChooser.addOption(
-        "Flywheel SysId (Quasistatic Forward)",
-        flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Flywheel SysId (Quasistatic Reverse)",
-        flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Flywheel SysId (Dynamic Forward)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Flywheel SysId (Dynamic Reverse)", flywheel.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -184,11 +161,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    controller
-        .a()
-        .whileTrue(
-            Commands.startEnd(
-                () -> flywheel.runVelocity(flywheelSpeedInput.get()), flywheel::stop, flywheel));
   }
 
   /**
