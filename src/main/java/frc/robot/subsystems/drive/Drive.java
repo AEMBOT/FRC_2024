@@ -14,11 +14,15 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
+import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static java.lang.Math.abs;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.VecBuilder;
@@ -29,9 +33,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
@@ -40,6 +47,7 @@ import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -55,7 +63,8 @@ public class Drive extends SubsystemBase {
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-  private final SysIdRoutine sysId;
+  private final SysIdRoutine moduleSteerRoutine;
+  private final SysIdRoutine driveRoutine;
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = new Rotation2d();
@@ -98,7 +107,11 @@ public class Drive extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
-            MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
+            new PIDConstants(5.0),
+            new PIDConstants(5.0),
+            MAX_LINEAR_SPEED,
+            DRIVE_BASE_RADIUS,
+            new ReplanningConfig(true, true)), // PP can't replan choreo paths
         () ->
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
@@ -121,19 +134,29 @@ public class Drive extends SubsystemBase {
     Logger.recordOutput("PathPlanner/AbsoluteTranslationError", 0.0);
 
     // Configure SysId
-    sysId =
+    moduleSteerRoutine = // I know SignalLogger is CTRE specific but I think this works regardless
+        // of IO layer, check
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null,
-                null,
-                null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                null, // Default ramp rate is acceptable
+                Volts.of(8),
+                null, // Default timeout is acceptable
+                // Log state with Phoenix SignalLogger class
+                (state) -> SignalLogger.writeString("state", state.toString())),
             new SysIdRoutine.Mechanism(
-                (voltage) -> {
-                  for (int i = 0; i < 4; i++) {
-                    modules[i].runCharacterization(voltage.in(Volts));
-                  }
-                },
+                (Measure<Voltage> volts) -> modules[0].runSteerCharacterization(volts.in(Volts)),
+                null,
+                this));
+    driveRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null, // Default ramp rate is acceptable
+                Volts.of(4), // Reduce dynamic voltage to 4 to prevent motor brownout
+                Seconds.of(5),
+                // Log state with Phoenix SignalLogger class
+                (state) -> SignalLogger.writeString("state", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (Measure<Voltage> volts) -> runDriveCharacterizationVolts(volts.in(Volts)),
                 null,
                 this));
   }
@@ -163,6 +186,10 @@ public class Drive extends SubsystemBase {
     }
 
     // Update odometry
+    // TODO this entire section is completely broken because navx signal timing doesn't match
+    // canivore fused timestamps
+    // TODO either write custom handler for gyro angle or beg for pigeon 2
+    // vision also corrects for async odo so maybe just cope
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
     int sampleCount = sampleTimestamps.length;
@@ -256,6 +283,25 @@ public class Drive extends SubsystemBase {
   }
 
   /**
+   * Runs the drive at the desired velocity.
+   *
+   * @param speeds Speeds in meters/sec
+   */
+  public Command runVelocityCommand(Supplier<ChassisSpeeds> speeds) {
+    return this.run(() -> runVelocity(speeds.get()));
+  }
+
+  /** Stops the drive. */
+  public Command stopCommand() {
+    return runVelocityCommand(ChassisSpeeds::new);
+  }
+
+  public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
+    return this.runVelocityCommand(
+        () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
+  }
+
+  /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
    * return to their normal orientations the next time a nonzero velocity is requested.
    */
@@ -268,14 +314,19 @@ public class Drive extends SubsystemBase {
     stop();
   }
 
-  /** Returns a command to run a quasistatic test in the specified direction. */
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return sysId.quasistatic(direction);
+  private void runDriveCharacterizationVolts(double volts) {
+    for (Module module : modules) {
+      module.runDriveCharacterization(volts);
+    }
   }
 
-  /** Returns a command to run a dynamic test in the specified direction. */
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return sysId.dynamic(direction);
+  /** Returns the average drive velocity in meters/sec. */
+  public double getCharacterizationVelocity() {
+    double driveVelocityAverage = 0.0;
+    for (Module module : modules) {
+      driveVelocityAverage += module.getVelocityMetersPerSec();
+    }
+    return driveVelocityAverage / 4.0;
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
@@ -328,6 +379,11 @@ public class Drive extends SubsystemBase {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
+  public void setYaw(Rotation2d yaw) {
+    gyroIO.setYaw(yaw);
+    setPose(new Pose2d(getPose().getTranslation(), yaw));
+  }
+
   /**
    * Adds a vision measurement to the pose estimator.
    *
@@ -356,5 +412,37 @@ public class Drive extends SubsystemBase {
       new Translation2d(-TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
       new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
     };
+  }
+
+  public Command runModuleSteerCharacterizationCmd() {
+    return Commands.sequence(
+        this.runOnce(SignalLogger::start),
+        moduleSteerRoutine.quasistatic(kForward),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        moduleSteerRoutine.quasistatic(kReverse),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        moduleSteerRoutine.dynamic(kForward),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        moduleSteerRoutine.dynamic(kReverse),
+        this.runOnce(SignalLogger::stop));
+  }
+
+  public Command runDriveCharacterizationCmd() { // TODO Timing on this seems sus
+    return Commands.sequence(
+        this.runOnce(SignalLogger::start),
+        driveRoutine.quasistatic(kForward),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        driveRoutine.quasistatic(kReverse),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        driveRoutine.dynamic(kForward),
+        this.stopCommand(),
+        Commands.waitSeconds(1.0),
+        driveRoutine.dynamic(kReverse),
+        this.runOnce(SignalLogger::stop));
   }
 }

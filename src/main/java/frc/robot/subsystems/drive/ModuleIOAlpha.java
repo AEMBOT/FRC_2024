@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
+
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -93,6 +95,9 @@ public class ModuleIOAlpha implements ModuleIO {
     turnSparkMax.setCANTimeout(250);
 
     driveEncoder = driveSparkMax.getEncoder();
+    driveEncoder.setPositionConversionFactor(2 * Math.PI * WHEEL_RADIUS / DRIVE_GEAR_RATIO);
+    driveEncoder.setVelocityConversionFactor(
+        ((Math.PI / (60.0 / 2)) * WHEEL_RADIUS) / DRIVE_GEAR_RATIO); // RPM to rad/sec
     turnRelativeEncoder = turnSparkMax.getEncoder();
 
     driveSparkMax.setInverted(isDriveMotorInverted);
@@ -131,10 +136,8 @@ public class ModuleIOAlpha implements ModuleIO {
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(driveEncoder.getPosition()) / DRIVE_GEAR_RATIO;
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO;
+    inputs.drivePositionMeters = driveEncoder.getPosition();
+    inputs.driveVelocityMetersPerSec = driveEncoder.getVelocity();
     inputs.driveAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
     inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
 
@@ -149,10 +152,8 @@ public class ModuleIOAlpha implements ModuleIO {
     inputs.turnAppliedVolts = turnSparkMax.getAppliedOutput() * turnSparkMax.getBusVoltage();
     inputs.turnCurrentAmps = new double[] {turnSparkMax.getOutputCurrent()};
 
-    inputs.odometryDrivePositionsRad =
-        drivePositionQueue.stream()
-            .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
-            .toArray();
+    inputs.odometryDrivePositionsMeters =
+        drivePositionQueue.stream().mapToDouble(Double::doubleValue).toArray();
     inputs.odometryTurnPositions =
         turnPositionQueue.stream()
             .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))

@@ -142,16 +142,8 @@ public class RobotContainer {
 
     autoChooser.addOption("Nine Piece Auto", NamedCommands.getCommand("Nine Piece Auto"));
     // Set up SysId routines
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Forward)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Quasistatic Reverse)",
-        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
+    autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
     autoChooser.addOption(
         "Flywheel SysId (Quasistatic Forward)",
         flywheel.sysIdQuasistatic(SysIdRoutine.Direction.kForward));

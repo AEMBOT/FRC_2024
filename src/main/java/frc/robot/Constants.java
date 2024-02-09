@@ -40,6 +40,13 @@ public final class Constants {
     REPLAY
   }
 
+  public static final double UPDATE_PERIOD = 0.02;
+
+  public final class PivotConstants {
+    public static final double PIVOT_MAX_POS_RAD = 0;
+    public static final double PIVOT_MIN_POS_RAD = 0;
+  }
+
   public static final class IndexerConstants {
     /* PORTS */
     public static final int indexerMotorPortBottom = 0; // PLACEHOLDER VALUE

@@ -13,9 +13,12 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
@@ -41,8 +44,9 @@ public class ModuleIOSim implements ModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionRad = driveSim.getAngularPositionRad();
-    inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
+    inputs.drivePositionMeters =
+        Units.rotationsToRadians(driveSim.getAngularPositionRad()) * WHEEL_RADIUS;
+    inputs.driveVelocityMetersPerSec = driveSim.getAngularVelocityRadPerSec() * WHEEL_RADIUS;
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
 
@@ -54,7 +58,7 @@ public class ModuleIOSim implements ModuleIO {
     inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
 
     inputs.odometryTimestamps = new double[] {Timer.getFPGATimestamp()};
-    inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionRad};
+    inputs.odometryDrivePositionsMeters = new double[] {inputs.drivePositionMeters};
     inputs.odometryTurnPositions = new Rotation2d[] {inputs.turnPosition};
   }
 
