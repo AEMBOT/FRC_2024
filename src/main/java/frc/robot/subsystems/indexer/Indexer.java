@@ -124,4 +124,12 @@ public class Indexer extends SubsystemBase {
   public Command indexerStopCommand() {
     return runOnce(this::indexerStop);
   }
+
+  public Command indexerOnIntakeOnCommand() {
+    return runOnce(this::indexOnIntakeOn);
+  }
+
+  public Command indexerOffIntakeOffCommand() {
+    return runOnce(this::indexOffIntakeOff);
+  }
 }
