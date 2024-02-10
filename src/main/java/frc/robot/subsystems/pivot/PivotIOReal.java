@@ -36,6 +36,9 @@ public class PivotIOReal implements PivotIO {
     pivotGoal = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
     pivotSetpoint = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
 
+    motorLeader.restoreFactoryDefaults();
+    motorFollower.restoreFactoryDefaults();
+
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
 

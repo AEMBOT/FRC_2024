@@ -23,6 +23,11 @@ public class ShooterIOReal implements ShooterIO {
   private final SparkPIDController bottomMotorPID;
 
   public ShooterIOReal() {
+    topMotorLeader.restoreFactoryDefaults();
+    topMotorFollower.restoreFactoryDefaults();
+    bottomMotorLeader.restoreFactoryDefaults();
+    bottomMotorFollower.restoreFactoryDefaults();
+
     // Tune acceptable current limit, don't want to use all power if shoot while moving
     topMotorLeader.setSmartCurrentLimit(60);
     topMotorFollower.setSmartCurrentLimit(60);
