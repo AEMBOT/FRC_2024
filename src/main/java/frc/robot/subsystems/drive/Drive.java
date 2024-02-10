@@ -14,17 +14,16 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static java.lang.Math.abs;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -35,16 +34,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
-  private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
-  private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
+  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.14); // MK4i L2+
+  private static final double TRACK_WIDTH_X = Units.inchesToMeters(22.75); // 28 in square chassis
+  private static final double TRACK_WIDTH_Y = Units.inchesToMeters(22.75);
   private static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
@@ -67,17 +69,23 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private final AprilTagVisionIO aprilTagVisionIO;
+  private final AprilTagVisionIOInputsAutoLogged aprilTagVisionInputs =
+      new AprilTagVisionIOInputsAutoLogged();
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      AprilTagVisionIO aprilTagVisionIO) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0);
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
+    this.aprilTagVisionIO = aprilTagVisionIO;
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -99,12 +107,18 @@ public class Drive extends SubsystemBase {
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
           Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
+              "PathPlanner/ActivePath", activePath.toArray(new Pose2d[activePath.size()]));
         });
     PathPlannerLogging.setLogTargetPoseCallback(
         (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          Logger.recordOutput("PathPlanner/Target", targetPose);
+          Logger.recordOutput(
+              "PathPlanner/AbsoluteTranslationError",
+              targetPose.minus(getPose()).getTranslation().getNorm());
         });
+
+    Logger.recordOutput("PathPlanner/Target", new Pose2d());
+    Logger.recordOutput("PathPlanner/AbsoluteTranslationError", 0.0);
 
     // Configure SysId
     sysId =
@@ -179,6 +193,35 @@ public class Drive extends SubsystemBase {
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
+
+    // Update vision
+    aprilTagVisionIO.updatePose(getPose());
+    aprilTagVisionIO.updateInputs(aprilTagVisionInputs);
+    Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
+
+    for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
+      if (aprilTagVisionInputs.timestamps[i] != 0.0) {
+        // Bounds check the pose is actually on the field
+        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 2.0
+            || aprilTagVisionInputs.visionPoses[i].getX() < 0
+            || aprilTagVisionInputs.visionPoses[i].getX() > 20
+            || aprilTagVisionInputs.visionPoses[i].getY() < 0
+            || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
+
+        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
+        Logger.recordOutput(
+            "Drive/AprilTagStdDevs" + i,
+            Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
+
+        poseEstimator.addVisionMeasurement(
+            aprilTagVisionInputs.visionPoses[i].toPose2d(),
+            aprilTagVisionInputs.timestamps[i],
+            VecBuilder.fill(
+                aprilTagVisionInputs.visionStdDevs[3 * i],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 1],
+                aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+      }
+    }
   }
 
   /**
@@ -191,6 +234,9 @@ public class Drive extends SubsystemBase {
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+
+    Logger.recordOutput("Swerve/TargetSpeeds", discreteSpeeds);
+    Logger.recordOutput("Swerve/SpeedError", discreteSpeeds.minus(getVelocity()));
 
     // Send setpoints to modules
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
@@ -243,13 +289,27 @@ public class Drive extends SubsystemBase {
   }
 
   /** Returns the module positions (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
       states[i] = modules[i].getPosition();
     }
     return states;
+  }
+
+  @AutoLogOutput(key = "Odometry/Velocity")
+  public ChassisSpeeds getVelocity() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        kinematics.toChassisSpeeds(
+            Arrays.stream(modules).map(Module::getState).toArray(SwerveModuleState[]::new)),
+        getRotation());
+  }
+
+  @AutoLogOutput(key = "Odometry/RobotRelativeVelocity")
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return kinematics.toChassisSpeeds(
+        (SwerveModuleState[])
+            Arrays.stream(modules).map((m) -> m.getState()).toArray(SwerveModuleState[]::new));
   }
 
   /** Returns the current odometry pose. */

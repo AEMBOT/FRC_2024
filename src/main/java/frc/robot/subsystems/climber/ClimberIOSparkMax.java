@@ -1,5 +1,7 @@
 package frc.robot.subsystems.climber;
 
+import static frc.robot.Constants.ClimberConstants.*;
+
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.ctre.phoenix6.StatusSignal;
@@ -68,13 +70,15 @@ public class ClimberIOSparkMax implements ClimberIO {
 
   public ClimberIOSparkMax() {
     m_winchMotorRight.restoreFactoryDefaults();
+    m_winchMotorRight.restoreFactoryDefaults();
     m_winchMotorLeft.restoreFactoryDefaults();
-    
+
     m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
     m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit); //make sure to have logic for homing current limit
+    m_winchMotorLeft.setSmartCurrentLimit(
+        extendCurrentLimit); // make sure to have logic for homing current limit
 
     m_winchMotorRight.setInverted(false);
     m_winchMotorLeft.setInverted(false);

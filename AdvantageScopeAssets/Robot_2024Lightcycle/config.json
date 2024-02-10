@@ -1,0 +1,129 @@
+{
+  "name": "2024 Lightcycle",
+  "sourceUrl": "",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "y",
+      "degrees": 0
+    },
+    {
+      "axis": "z",
+      "degrees": 180
+    }
+  ],
+  "position": [
+    0.2794,
+    0.3556,
+    0.285
+  ],
+  "components": [
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "y",
+          "degrees": 0
+        },
+        {
+          "axis": "z",
+          "degrees": 0
+        }
+      ],
+      "zeroedPosition": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "cameras": [
+    {
+      "name": "Front Camera",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "y",
+          "degrees": -15
+        },
+        {
+          "axis": "z",
+          "degrees": 0
+        }
+      ],
+      "position": [
+        0.2032,
+        0.2032,
+        0.1778
+      ],
+      "resolution": [
+        1600,
+        1200
+      ],
+      "fov": 75
+    },
+    {
+      "name": "Left Camera",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "y",
+          "degrees": 0
+        },
+        {
+          "axis": "z",
+          "degrees": -45
+        }
+      ],
+      "position": [
+        -0.254,
+        -0.254,
+        0.2032
+      ],
+      "resolution": [
+        1280,
+        800
+      ],
+      "fov": 70
+    },
+    {
+      "name": "Right Camera",
+      "rotations": [
+        {
+          "axis": "x",
+          "degrees": 0
+        },
+        {
+          "axis": "y",
+          "degrees": 0
+        },
+        {
+          "axis": "z",
+          "degrees": 45
+        }
+      ],
+      "position": [
+        -0.254,
+        0.254,
+        0.2032
+      ],
+      "resolution": [
+        1280,
+        800
+      ],
+      "fov": 70
+    }
+  ]
+}
