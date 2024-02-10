@@ -20,11 +20,12 @@ public class PivotIOReal implements PivotIO {
   private boolean openLoop = false;
   private double appliedVolts = 0.0;
 
-  private final CANSparkMax motorLeader = new CANSparkMax(69, MotorType.kBrushless);
-  private final CANSparkMax motorFollower = new CANSparkMax(420, MotorType.kBrushless);
-  private final DutyCycleEncoder encoder = new DutyCycleEncoder(1);
-  private final Encoder velEncoder = new Encoder(2, 3);
-  private final ArmFeedforward pivotFFModel = new ArmFeedforward(0.0, 0.0379, 5.85, 0.04);
+  private final CANSparkMax motorLeader = new CANSparkMax(11, MotorType.kBrushless);
+  private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
+  private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
+  private final Encoder velEncoder = new Encoder(2, 1);
+  private final ArmFeedforward pivotFFModel =
+      new ArmFeedforward(0.0, 0.0379, 5.85, 0.04); // TODO tune
   private final PIDController pidController = new PIDController(1, 0, 0); // TODO tune
   private final ExponentialProfile pivotProfile =
       new ExponentialProfile(

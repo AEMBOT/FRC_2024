@@ -81,33 +81,33 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(int index) {
     switch (index) {
       case 0:
-        driveTalon = new TalonFX(0);
-        turnTalon = new TalonFX(1);
-        cancoder = new CANcoder(2);
+        driveTalon = new TalonFX(3, "*");
+        turnTalon = new TalonFX(4, "*");
+        cancoder = new CANcoder(25, "*");
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       case 1:
-        driveTalon = new TalonFX(3);
-        turnTalon = new TalonFX(4);
-        cancoder = new CANcoder(5);
+        driveTalon = new TalonFX(9, "*");
+        turnTalon = new TalonFX(2, "*");
+        cancoder = new CANcoder(23, "*");
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       case 2:
-        driveTalon = new TalonFX(6);
-        turnTalon = new TalonFX(7);
-        cancoder = new CANcoder(8);
+        driveTalon = new TalonFX(7, "*");
+        turnTalon = new TalonFX(8, "*");
+        cancoder = new CANcoder(26, "*");
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       case 3:
-        driveTalon = new TalonFX(9);
-        turnTalon = new TalonFX(10);
-        cancoder = new CANcoder(11);
+        driveTalon = new TalonFX(5, "*");
+        turnTalon = new TalonFX(6, "*");
+        cancoder = new CANcoder(24, "*");
         absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;

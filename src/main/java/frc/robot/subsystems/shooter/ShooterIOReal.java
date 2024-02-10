@@ -12,12 +12,13 @@ public class ShooterIOReal implements ShooterIO {
   private boolean openLoop = false;
   // Recalc estimate, TODO characterize
   private final SimpleMotorFeedforward shooterFFModel = new SimpleMotorFeedforward(0.1, 0.26, 0.18);
-  private final CANSparkMax topMotorLeader = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
-  private final CANSparkMax topMotorFollower = new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax topMotorLeader = new CANSparkMax(20, CANSparkMax.MotorType.kBrushless);
+  private final CANSparkMax topMotorFollower =
+      new CANSparkMax(17, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax bottomMotorLeader =
-      new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+      new CANSparkMax(22, CANSparkMax.MotorType.kBrushless);
   private final CANSparkMax bottomMotorFollower =
-      new CANSparkMax(0, CANSparkMax.MotorType.kBrushless);
+      new CANSparkMax(21, CANSparkMax.MotorType.kBrushless);
 
   private final SparkPIDController topMotorPID;
   private final SparkPIDController bottomMotorPID;
