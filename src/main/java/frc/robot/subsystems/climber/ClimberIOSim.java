@@ -1,3 +1,6 @@
+//change between sim and sparkmax files
+
+
 package frc.robot.subsystems.climber;
 
 import com.revrobotics.CANSparkBase.ControlType;
@@ -32,7 +35,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-public class ClimberIOSparkMax implements ClimberIO {
+public class ClimberIOSim implements ClimberIO {
   private static final double GEAR_RATIO = 1.5;
   private double appliedVoltsUp = 0;
   private double appliedVoltsDown = 0;
@@ -66,7 +69,7 @@ public class ClimberIOSparkMax implements ClimberIO {
   private final double velocity = encoder.getVelocity();
 
 
-  public ClimberIOSparkMax() {
+  public ClimberIOSim() {
     m_winchMotorRight.restoreFactoryDefaults();
     m_winchMotorLeft.restoreFactoryDefaults();
     

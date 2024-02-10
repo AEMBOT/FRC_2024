@@ -5,18 +5,23 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ClimberIO {
   @AutoLog
   public static class ClimberIOInputs {
-    public double climberPositionRad = 0.0;
-    public double climberAbsoluteVelocityRadPerSec = 0.0;
-    public double climberAppliedVolts = 0.0;
-    public double[] climberCurrentAmps =
-        new double[] {}; // Log motors individually, useful for failure analysis
+    public double climberPositionMeters = 0.0;
+    public double climberAbsoluteVelocityMetersPerSec = 0.0;
+    public double climberAppliedVoltsUp = 0.0;
+    public double climberAppliedVoltsDown = 0.0;
+    public double[] climberCurrentAmps =new double[] {}; // Log motors individually, useful for failure analysis
+
+    public double climberGoalPosition =0.0;
+    public double climberSetpointPosition = 0.0;
+    public double climberSetpointVelocity = 0.0;  
+    public boolean upDirectionStatus = true;
   }
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(ClimberIOInputs inputs) {}
 
-  /** Sets the angle of the pivot, in radians. */
-  public default void setPosition(double climberPositionRad, double ffVolts) {}
+  /** Sets the target of the climber **/
+  public default void setPosition(double climberPositionRad) {}
 
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
@@ -24,7 +29,17 @@ public interface ClimberIO {
   public default void setVelocity(double velocityRadPerSec, double ffVolts) {}
 
   /** Stop in open loop. */
-  public default void stop() {}
+  public default void stop(){
+    setVoltage(0);
+  }
+
+  public void resetEncoder(final double position);
+
+  public default void resetEncoder(){
+    resetEncoder(0);
+  }
+
+
 
   /** Set position PID constants. */
   public default void configurePID(double kP, double kI, double kD) {}

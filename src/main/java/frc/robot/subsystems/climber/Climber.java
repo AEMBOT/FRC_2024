@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -29,21 +30,19 @@ import org.littletonrobotics.junction.Logger;
 import static edu.wpi.first.units.Units.Volts;
 
 public class Climber extends SubsystemBase{
+    public static final double GEAR_RATIO  = 15.0/1.0;
+    public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
+
     private final ClimberIO io; 
     private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
     private final SysIdRoutine sysId;
 
-    private final CANSparkMax m_winchMotorRight = new CANSparkMax(winchMotorRightCanID, MotorType.kBrushless);
-    private final CANSparkMax m_winchMotorLeft = new CANSparkMax(winchMotorLeftCanID, MotorType.kBrushless);
-
-    public RelativeEncoder rightEncoder = m_winchMotorRight.getEncoder();
-    public RelativeEncoder leftEncoder = m_winchMotorLeft.getEncoder();
     private boolean activateExtendPID = false;
     private boolean extendZeroed = false;
 
+    ElevatorFeedforward ffUp = new ElevatorFeedforward(1,1,1);
+    ElevatorFeedforward ffDown = new ElevatorFeedforward(1,1,1);    
     PIDController pidExtend = new PIDController(120, 0, 2); //tune needed
-
-    
 
     public Climber(ClimberIO io){
         this.io = io;
@@ -78,21 +77,12 @@ public class Climber extends SubsystemBase{
     /** Returns the current velocity in RPM. */
     @AutoLogOutput
     public double getVelocityRPM() {
-        return Units.radiansPerSecondToRotationsPerMinute(inputs.climberAbsoluteVelocityRadPerSec);
+        return Units.radiansPerSecondToRotationsPerMinute(inputs.climberAbsoluteVelocityMetersPerSec);
     }
 
     /** Returns the current velocity in radians per second. */
     public double getCharacterizationVelocity() {
-        return inputs.climberAbsoluteVelocityRadPerSec;
-    }
-
-
-    public void resetRightEncoder(){
-        rightEncoder.setPosition(0);
-    }
-
-    public void resetLeftEncoder(){
-        leftEncoder.setPosition(0);
+        return inputs.climberAbsoluteVelocityMetersPerSec;
     }
 
     public void setExtendMeter(double positionMeters){
