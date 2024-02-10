@@ -49,6 +49,8 @@ public class ClimberIOSparkMax implements ClimberIO {
   private final ElevatorFeedforward climberFFModelUp = new ElevatorFeedforward(0.0, 0.0379, 5.85, 0.04); //TODO: tune
   private final ElevatorFeedforward climberFFModelDown = new ElevatorFeedforward(0,0,0); //TODO: tune
   private final PIDController pidController = new PIDController(1,0,0); //TODO: tune
+  
+  private int currentLimitNow = homingCurrentLimit; //value used initially, updated from function
 
   private final ExponentialProfile climberProfile =
     new ExponentialProfile(
@@ -76,15 +78,11 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
-    m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(
-        extendCurrentLimit); // make sure to have logic for homing current limit
+    m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
+    m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow); // logic for homing vs extended is built in now
 
     m_winchMotorRight.setInverted(false);
     m_winchMotorLeft.setInverted(false);
-
-    m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit);
 
     m_winchMotorRight.burnFlash();
     m_winchMotorLeft.burnFlash();
@@ -136,6 +134,16 @@ public class ClimberIOSparkMax implements ClimberIO {
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberSetpointVelocity = climberSetpoint.velocity;
     inputs.upDirectionStatus = UpDirection;
+  }
+
+  @Override 
+  public void setHoming(boolean homingBool){
+    if (homingBool){
+      currentLimitNow = homingCurrentLimit;
+    }
+    else{
+      currentLimitNow = extendCurrentLimit;
+    }
   }
 
   @Override

@@ -26,7 +26,9 @@ public interface ClimberIO {
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
 
-  public default void setVelocity(double velocityRadPerSec, double ffVolts) {}
+  public default void setVelocity(double velocityMetersPerSec, double ffVolts) {}
+
+  public default void setHoming(boolean homingBool){}
 
   /** Stop in open loop. */
   public default void stop(){
@@ -38,8 +40,6 @@ public interface ClimberIO {
   public default void resetEncoder(){
     resetEncoder(0);
   }
-
-
 
   /** Set position PID constants. */
   public default void configurePID(double kP, double kI, double kD) {}

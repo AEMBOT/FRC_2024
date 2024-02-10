@@ -65,18 +65,26 @@ public class Climber extends SubsystemBase{
     io.stop();
   }
 
-    /** Returns the current velocity in RPM. */
-    @AutoLogOutput
-    public double getVelocityRPM() {
+  @AutoLogOutput
+  public double getVelocityRPM() {
         return Units.radiansPerSecondToRotationsPerMinute(inputs.climberAbsoluteVelocityMetersPerSec);
     }
 
-    /** Returns the current velocity in radians per second. */
-    public double getCharacterizationVelocity() {
+  public double getCharacterizationVelocity() {
         return inputs.climberAbsoluteVelocityMetersPerSec;
     }
 
   public void setExtendMeter(double positionMeters) {
     pidExtend.setSetpoint(positionMeters);
+  }
+
+  public double getCurrentLimit(boolean homingBool){
+    //homingBool true if we are in homing mode
+    if (homingBool){
+      return homingCurrentLimit;
+    }
+    else {
+      return extendCurrentLimit;
+    }
   }
 }
