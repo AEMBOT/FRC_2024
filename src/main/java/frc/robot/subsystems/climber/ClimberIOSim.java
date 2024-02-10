@@ -5,27 +5,21 @@ package frc.robot.subsystems.climber;
 
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
-
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import frc.robot.subsystems.climber.ClimberIO.ClimberIOInputs;
-import frc.robot.subsystems.pivot.PivotIO.PivotIOInputs;
-import frc.robot.Constants;
 import static frc.robot.Constants.ClimberConstants.*;
-
-import java.rmi.server.ExportException;
 
 import static edu.wpi.first.math.MathUtil.clamp;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
@@ -34,6 +28,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 public class ClimberIOSim implements ClimberIO {
   private static final double GEAR_RATIO = 1.5;
@@ -42,59 +37,28 @@ public class ClimberIOSim implements ClimberIO {
   private boolean UpDirection = true; //boolean for climber going up or down
 
   //choosing right as the main motor and left as the follower motor
-
-  private final CANSparkMax m_winchMotorRight = new CANSparkMax(10, MotorType.kBrushless);
-  private final CANSparkMax m_winchMotorLeft = new CANSparkMax(11, MotorType.kBrushless);
-  private final RelativeEncoder encoder = m_winchMotorRight.getEncoder();
-  private final SparkPIDController pid = m_winchMotorRight.getPIDController(); 
+  private final DCMotor m_elevatorGearbox = DCMotor.getNEO(2);
+  
+  private final ElevatorSim sim = new ElevatorSim(m_elevatorGearbox, 15, 5, Units.inchesToMeters(0.5), Units.inchesToMeters(8), Units.inchesToMeters(24), true, 0, VecBuilder.fill(0.01));
+  private final PIDController pidController = new PIDController(1, 0,0);
   private final ElevatorFeedforward climberFFModelUp = new ElevatorFeedforward(0.0, 0.0379, 5.85, 0.04); //TODO: tune
   private final ElevatorFeedforward climberFFModelDown = new ElevatorFeedforward(0,0,0); //TODO: tune
-  private final PIDController pidController = new PIDController(1,0,0); //TODO: tune
 
   private final ExponentialProfile climberProfile =
     new ExponentialProfile(
       ExponentialProfile.Constraints.fromCharacteristics(10, climberFFModelUp.kv, climberFFModelUp.ka));
 
-  private final ExponentialProfile climberPorProfileDown = 
+  private final ExponentialProfile climberProfileDown = 
     new ExponentialProfile(
       ExponentialProfile.Constraints.fromCharacteristics(10,climberFFModelDown.kv, climberFFModelDown.ka));
 
   private ExponentialProfile.State climberGoal;
   private ExponentialProfile.State climberSetpoint;
-  
-  //probably unnecessary
-  //private ExponentialProfile.State climberSetpointDown;
-
-  private final double position = encoder.getPosition();
-  private final double velocity = encoder.getVelocity();
-
 
   public ClimberIOSim() {
-    m_winchMotorRight.restoreFactoryDefaults();
-    m_winchMotorLeft.restoreFactoryDefaults();
-    
-    m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
-    m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit); //make sure to have logic for homing current limit
-
-    m_winchMotorRight.setInverted(false);
-    m_winchMotorLeft.setInverted(false);
-
-    m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit);
-
-    m_winchMotorRight.burnFlash();
-    m_winchMotorLeft.burnFlash();
-
-    m_winchMotorRight.setCANTimeout(250);
-    m_winchMotorLeft.setCANTimeout(250);
-
-    m_winchMotorLeft.follow(m_winchMotorRight, true);
-
-    climberGoal = new ExponentialProfile.State(encoder.getPosition(),0);
-    climberSetpoint = new ExponentialProfile.State(encoder.getPosition(),0);
+    climberGoal = new ExponentialProfile.State(1.05,0);
+    climberSetpoint = new ExponentialProfile.State(1.05,0);
 
   }
 
@@ -111,26 +75,26 @@ public class ClimberIOSim implements ClimberIO {
     climberFFModelDown.calculate(climberSetpoint.position, 
     climberSetpoint.velocity, 
     (climberSetpoint.velocity - currentVelocity) / 0.02);
-    double pidOutput = pidController.calculate(encoder.getPosition(), climberSetpoint.position);
+    double pidOutput = pidController.calculate(sim.getPositionMeters(), climberSetpoint.position);
 
-    Logger.recordOutput("Climber/CalculatedFFVoltsUp", feedForwardUp);
-    Logger.recordOutput("Climber/CalculatedFFVoltsDown", feedForwardDown);
-    Logger.recordOutput("Climber/PIDCommandVolts", pidOutput);
+    sim.setInputVoltage(appliedVoltsUp);
+    sim.update(0.02);
+
     appliedVoltsUp = feedForwardUp + pidOutput;
     appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
     
     if (UpDirection){
-      m_winchMotorRight.setVoltage(appliedVoltsUp);
+      sim.setInputVoltage(appliedVoltsUp);
     }
     else{
-      m_winchMotorRight.setVoltage(appliedVoltsDown);
+      sim.setInputVoltage(appliedVoltsDown);
     }
 
-    inputs.climberAbsoluteVelocityMetersPerSec = encoder.getVelocity();
+    inputs.climberAbsoluteVelocityMetersPerSec = sim.getVelocityMetersPerSecond();
     inputs.climberAppliedVoltsUp = appliedVoltsUp;
     inputs.climberAppliedVoltsDown = appliedVoltsDown;
     inputs.climberCurrentAmps = 
-      new double[] {m_winchMotorRight.getOutputCurrent(), m_winchMotorLeft.getOutputCurrent()};
+      new double[] {sim.getCurrentDrawAmps()};
     inputs.climberGoalPosition = climberGoal.position;
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberSetpointVelocity = climberSetpoint.velocity;
@@ -146,34 +110,17 @@ public class ClimberIOSim implements ClimberIO {
   public void setVoltage(double volts) {
     appliedVoltsDown = volts;
     appliedVoltsUp = volts;
-    m_winchMotorRight.setVoltage(appliedVoltsUp);
+    sim.setInputVoltage(appliedVoltsUp);
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec, double ffVolts) {
-    pid.setReference(
-        Units.radiansPerSecondToRotationsPerMinute(velocityRadPerSec) * GEAR_RATIO,
-        ControlType.kVelocity,
-        0,
-        ffVolts,
-        ArbFFUnits.kVoltage);
+  public void resetEncoder(double position){
+    //this does not actually reset the encoder, but I need to do it for the file to inherit climberio
+    sim.setInput(0);
   }
-
+  
   @Override
   public void stop() {
     setVoltage(0);
-  }
-
-  @Override
-  public void configurePID(double kP, double kI, double kD) {
-    pid.setP(kP, 0);
-    pid.setI(kI, 0);
-    pid.setD(kD, 0);
-    pid.setFF(0, 0);
-  }
-
-  @Override
-  public void resetEncoder(final double position){
-    encoder.setPosition(position);
   }
 }

@@ -3,22 +3,14 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ClimberConstants.*;
 
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import static edu.wpi.first.units.Units.Volts;
 
 public class Climber extends SubsystemBase{
     public static final double GEAR_RATIO  = 15.0/1.0;
@@ -73,6 +65,14 @@ public class Climber extends SubsystemBase{
   public double getCharacterizationVelocity() {
         return inputs.climberAbsoluteVelocityMetersPerSec;
     }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysId.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysId.dynamic(direction);
+  }
 
   public void setExtendMeter(double positionMeters) {
     pidExtend.setSetpoint(positionMeters);

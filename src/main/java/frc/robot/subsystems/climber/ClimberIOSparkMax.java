@@ -78,8 +78,8 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
-    m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
-    m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow); // logic for homing vs extended is built in now
+    m_winchMotorRight.setSmartCurrentLimit(homingCurrentLimit);
+    m_winchMotorLeft.setSmartCurrentLimit(homingCurrentLimit); // logic for homing vs extended is built in now
 
     m_winchMotorRight.setInverted(false);
     m_winchMotorLeft.setInverted(false);
@@ -89,8 +89,6 @@ public class ClimberIOSparkMax implements ClimberIO {
 
     m_winchMotorRight.setCANTimeout(250);
     m_winchMotorLeft.setCANTimeout(250);
-
-    m_winchMotorLeft.follow(m_winchMotorRight, true);
 
     climberGoal = new ExponentialProfile.State(encoder.getPosition(),0);
     climberSetpoint = new ExponentialProfile.State(encoder.getPosition(),0);
@@ -120,9 +118,11 @@ public class ClimberIOSparkMax implements ClimberIO {
     
     if (UpDirection){
       m_winchMotorRight.setVoltage(appliedVoltsUp);
+      m_winchMotorLeft.setVoltage(appliedVoltsUp);
     }
     else{
       m_winchMotorRight.setVoltage(appliedVoltsDown);
+      m_winchMotorLeft.setVoltage(appliedVoltsDown);
     }
 
     inputs.climberAbsoluteVelocityMetersPerSec = encoder.getVelocity();
@@ -140,9 +140,14 @@ public class ClimberIOSparkMax implements ClimberIO {
   public void setHoming(boolean homingBool){
     if (homingBool){
       currentLimitNow = homingCurrentLimit;
+      m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
+      m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow);
+
     }
     else{
       currentLimitNow = extendCurrentLimit;
+      m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
+      m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow);
     }
   }
 
@@ -156,6 +161,7 @@ public class ClimberIOSparkMax implements ClimberIO {
     appliedVoltsDown = volts;
     appliedVoltsUp = volts;
     m_winchMotorRight.setVoltage(appliedVoltsUp);
+    m_winchMotorLeft.setVoltage(appliedVoltsUp);
   }
 
   @Override
