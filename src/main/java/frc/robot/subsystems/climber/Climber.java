@@ -9,29 +9,28 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Climber extends SubsystemBase{
-    public static final double GEAR_RATIO  = 15.0/1.0;
-    public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
+public class Climber extends SubsystemBase {
+  public static final double GEAR_RATIO = 15.0 / 1.0;
+  public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
 
-    private final ClimberIO io; 
-    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
-    private final SysIdRoutine sysId;
+  private final ClimberIO io;
+  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
+  private final SysIdRoutine sysId;
 
-    private boolean activateExtendPID = false;
-    private boolean extendZeroed = false;
+  private boolean activateExtendPID = false;
+  private boolean extendZeroed = false;
 
-    ElevatorFeedforward ffUp = new ElevatorFeedforward(1,1,1);
-    ElevatorFeedforward ffDown = new ElevatorFeedforward(1,1,1);    
-    PIDController pidExtend = new PIDController(120, 0, 2); //tune needed
+  ElevatorFeedforward ffUp = new ElevatorFeedforward(1, 1, 1);
+  ElevatorFeedforward ffDown = new ElevatorFeedforward(1, 1, 1);
+  PIDController pidExtend = new PIDController(120, 0, 2); // tune needed
 
-    public Climber(ClimberIO io){
-        this.io = io;
-    
-        pidExtend.setSetpoint(0);
-        pidExtend.setTolerance(0.01);
+  public Climber(ClimberIO io) {
+    this.io = io;
+
+    pidExtend.setSetpoint(0);
+    pidExtend.setTolerance(0.01);
 
     sysId =
         new SysIdRoutine(
@@ -58,8 +57,8 @@ public class Climber extends SubsystemBase{
   }
 
   public double getCharacterizationVelocity() {
-        return inputs.climberAbsoluteVelocityMetersPerSec;
-    }
+    return inputs.climberAbsoluteVelocityMetersPerSec;
+  }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return sysId.quasistatic(direction);
@@ -73,12 +72,11 @@ public class Climber extends SubsystemBase{
     pidExtend.setSetpoint(positionMeters);
   }
 
-  public double getCurrentLimit(boolean homingBool){
-    //homingBool true if we are in homing mode
-    if (homingBool){
+  public double getCurrentLimit(boolean homingBool) {
+    // homingBool true if we are in homing mode
+    if (homingBool) {
       return homingCurrentLimit;
-    }
-    else {
+    } else {
       return extendCurrentLimit;
     }
   }

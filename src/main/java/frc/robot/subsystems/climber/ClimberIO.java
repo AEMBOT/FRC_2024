@@ -9,18 +9,19 @@ public interface ClimberIO {
     public double climberAbsoluteVelocityMetersPerSec = 0.0;
     public double climberAppliedVoltsUp = 0.0;
     public double climberAppliedVoltsDown = 0.0;
-    public double[] climberCurrentAmps =new double[] {}; // Log motors individually, useful for failure analysis
+    public double[] climberCurrentAmps =
+        new double[] {}; // Log motors individually, useful for failure analysis
 
-    public double climberGoalPosition =0.0;
+    public double climberGoalPosition = 0.0;
     public double climberSetpointPosition = 0.0;
-    public double climberSetpointVelocity = 0.0;  
+    public double climberSetpointVelocity = 0.0;
     public boolean upDirectionStatus = true;
   }
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(ClimberIOInputs inputs) {}
 
-  /** Sets the target of the climber **/
+  /** Sets the target of the climber * */
   public default void setPosition(double climberPositionRad) {}
 
   /** Run open loop at the specified voltage. */
@@ -28,16 +29,16 @@ public interface ClimberIO {
 
   public default void setVelocity(double velocityMetersPerSec, double ffVolts) {}
 
-  public default void setHoming(boolean homingBool){}
+  public default void setHoming(boolean homingBool) {}
 
   /** Stop in open loop. */
-  public default void stop(){
+  public default void stop() {
     setVoltage(0);
   }
 
   public void resetEncoder(final double position);
 
-  public default void resetEncoder(){
+  public default void resetEncoder() {
     resetEncoder(0);
   }
 
