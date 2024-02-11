@@ -57,11 +57,6 @@ public class Climber extends SubsystemBase{
     io.stop();
   }
 
-  @AutoLogOutput
-  public double getVelocityRPM() {
-        return Units.radiansPerSecondToRotationsPerMinute(inputs.climberAbsoluteVelocityMetersPerSec);
-    }
-
   public double getCharacterizationVelocity() {
         return inputs.climberAbsoluteVelocityMetersPerSec;
     }

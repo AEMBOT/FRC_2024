@@ -71,10 +71,6 @@ public class ClimberIOSparkMax implements ClimberIO {
 
 
   public ClimberIOSparkMax() {
-    m_winchMotorRight.restoreFactoryDefaults();
-    m_winchMotorRight.restoreFactoryDefaults();
-    m_winchMotorLeft.restoreFactoryDefaults();
-
     m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
