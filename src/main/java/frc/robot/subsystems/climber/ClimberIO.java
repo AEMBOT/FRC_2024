@@ -7,14 +7,12 @@ public interface ClimberIO {
   public static class ClimberIOInputs {
     public double climberPositionMeters = 0.0;
     public double climberAbsoluteVelocityMetersPerSec = 0.0;
-    public double climberAppliedVoltsUp = 0.0;
-    public double climberAppliedVoltsDown = 0.0;
+    public double climberAppliedVolts = 0.0;
     public double[] climberCurrentAmps =new double[] {}; // Log motors individually, useful for failure analysis
 
     public double climberGoalPosition =0.0;
     public double climberSetpointPosition = 0.0;
     public double climberSetpointVelocity = 0.0;  
-    public boolean upDirectionStatus = true;
   }
 
   /** Updates the set of loggable inputs. */
@@ -26,7 +24,7 @@ public interface ClimberIO {
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
 
-  public default void setVelocity(double velocityMetersPerSec, double ffVolts) {}
+  public default void setVelocity(double velocityMetersPerSec) {}
 
   public default void setHoming(boolean homingBool){}
 
@@ -40,7 +38,4 @@ public interface ClimberIO {
   public default void resetEncoder(){
     resetEncoder(0);
   }
-
-  /** Set position PID constants. */
-  public default void configurePID(double kP, double kI, double kD) {}
 }

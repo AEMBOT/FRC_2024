@@ -32,8 +32,7 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 public class ClimberIOSim implements ClimberIO {
   private static final double GEAR_RATIO = 1.5;
-  private double appliedVoltsUp = 0;
-  private double appliedVoltsDown = 0;
+  private double appliedVolts = 0;
   private boolean UpDirection = true; //boolean for climber going up or down
 
   //choosing right as the main motor and left as the follower motor
@@ -77,28 +76,26 @@ public class ClimberIOSim implements ClimberIO {
     (climberSetpoint.velocity - currentVelocity) / 0.02);
     double pidOutput = pidController.calculate(sim.getPositionMeters(), climberSetpoint.position);
 
-    sim.setInputVoltage(appliedVoltsUp);
+    sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    appliedVoltsUp = feedForwardUp + pidOutput;
-    appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
-    
+    appliedVolts = feedForwardUp + pidOutput;
+    //appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
+    /* 
     if (UpDirection){
       sim.setInputVoltage(appliedVoltsUp);
     }
     else{
       sim.setInputVoltage(appliedVoltsDown);
-    }
+    }*/
 
     inputs.climberAbsoluteVelocityMetersPerSec = sim.getVelocityMetersPerSecond();
-    inputs.climberAppliedVoltsUp = appliedVoltsUp;
-    inputs.climberAppliedVoltsDown = appliedVoltsDown;
+    inputs.climberAppliedVolts = appliedVolts;
     inputs.climberCurrentAmps = 
       new double[] {sim.getCurrentDrawAmps()};
     inputs.climberGoalPosition = climberGoal.position;
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberSetpointVelocity = climberSetpoint.velocity;
-    inputs.upDirectionStatus = UpDirection;
   }
 
   @Override
@@ -108,9 +105,8 @@ public class ClimberIOSim implements ClimberIO {
 
   @Override
   public void setVoltage(double volts) {
-    appliedVoltsDown = volts;
-    appliedVoltsUp = volts;
-    sim.setInputVoltage(appliedVoltsUp);
+    appliedVolts = volts;
+    sim.setInputVoltage(appliedVolts);
   }
 
   @Override

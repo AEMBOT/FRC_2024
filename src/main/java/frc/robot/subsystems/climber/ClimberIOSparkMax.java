@@ -36,21 +36,20 @@ import org.littletonrobotics.junction.Logger;
 
 public class ClimberIOSparkMax implements ClimberIO {
   private static final double GEAR_RATIO = 1.5;
-  private double appliedVoltsUp = 0;
-  private double appliedVoltsDown = 0;
+  private double appliedVolts = 0;
   private boolean UpDirection = true; //boolean for climber going up or down
 
   //choosing right as the main motor and left as the follower motor
 
   private final CANSparkMax m_winchMotorRight = new CANSparkMax(10, MotorType.kBrushless);
   private final CANSparkMax m_winchMotorLeft = new CANSparkMax(11, MotorType.kBrushless);
-  private final RelativeEncoder encoder = m_winchMotorRight.getEncoder();
-  private final SparkPIDController pid = m_winchMotorRight.getPIDController(); 
+  private final RelativeEncoder encoderRight = m_winchMotorRight.getEncoder();
+  private final RelativeEncoder encoderLeft = m_winchMotorLeft.getEncoder();
+
   private final ElevatorFeedforward climberFFModelUp = new ElevatorFeedforward(0.0, 0.0379, 5.85, 0.04); //TODO: tune
   private final ElevatorFeedforward climberFFModelDown = new ElevatorFeedforward(0,0,0); //TODO: tune
-  private final PIDController pidController = new PIDController(1,0,0); //TODO: tune
-  
-  private int currentLimitNow = homingCurrentLimit; //value used initially, updated from function
+  private final PIDController pidControllerUp = new PIDController(1,0,0); //TODO: tune
+  private final PIDController pidControllerDown = new PIDController(1,0,0); //TODO: tune
 
   private final ExponentialProfile climberProfile =
     new ExponentialProfile(
@@ -66,8 +65,8 @@ public class ClimberIOSparkMax implements ClimberIO {
   //probably unnecessary
   //private ExponentialProfile.State climberSetpointDown;
 
-  private final double position = encoder.getPosition();
-  private final double velocity = encoder.getVelocity();
+  private final double positionRight = encoderRight.getPosition();
+  private final double velocityRight = encoderRight.getVelocity();
 
 
   public ClimberIOSparkMax() {
@@ -86,8 +85,8 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorRight.setCANTimeout(250);
     m_winchMotorLeft.setCANTimeout(250);
 
-    climberGoal = new ExponentialProfile.State(encoder.getPosition(),0);
-    climberSetpoint = new ExponentialProfile.State(encoder.getPosition(),0);
+    climberGoal = new ExponentialProfile.State(encoderRight.getPosition(),0);
+    climberSetpoint = new ExponentialProfile.State(encoderRight.getPosition(),0);
 
   }
 
@@ -97,77 +96,66 @@ public class ClimberIOSparkMax implements ClimberIO {
     //change 0.02 for constants.update period when merged properly in climbersetpoint definitionand feedforwardup definition
     climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
     double feedForwardUp = 
-        climberFFModelUp.calculate(climberSetpoint.position, 
+        climberFFModelUp.calculate(currentVelocity, 
         climberSetpoint.velocity, 
-        (climberSetpoint.velocity - currentVelocity) /0.02);
+        0.02);
     double feedForwardDown = 
-    climberFFModelDown.calculate(climberSetpoint.position, 
+    climberFFModelDown.calculate(currentVelocity, 
     climberSetpoint.velocity, 
-    (climberSetpoint.velocity - currentVelocity) / 0.02);
-    double pidOutput = pidController.calculate(encoder.getPosition(), climberSetpoint.position);
+    0.02);
+    double pidOutputUp = pidControllerUp.calculate(encoderRight.getPosition(), climberSetpoint.position);
+    double pidOutputDown = pidControllerDown.calculate(encoderRight.getPosition(), climberSetpoint.position);
 
     Logger.recordOutput("Climber/CalculatedFFVoltsUp", feedForwardUp);
     Logger.recordOutput("Climber/CalculatedFFVoltsDown", feedForwardDown);
-    Logger.recordOutput("Climber/PIDCommandVolts", pidOutput);
-    appliedVoltsUp = feedForwardUp + pidOutput;
-    appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
-    
-    if (UpDirection){
-      m_winchMotorRight.setVoltage(appliedVoltsUp);
-      m_winchMotorLeft.setVoltage(appliedVoltsUp);
+    Logger.recordOutput("Climber/PIDCommandVoltsUp", pidOutputUp);
+    Logger.recordOutput("Climber/PIDCommandVoltsDown", pidOutputDown);
+
+    if(encoderRight.getPosition() > climberSetpoint.position){
+      appliedVolts= feedForwardDown + pidOutputDown; 
     }
     else{
-      m_winchMotorRight.setVoltage(appliedVoltsDown);
-      m_winchMotorLeft.setVoltage(appliedVoltsDown);
+      appliedVolts = feedForwardUp + pidOutputUp;
     }
 
-    inputs.climberAbsoluteVelocityMetersPerSec = encoder.getVelocity();
-    inputs.climberAppliedVoltsUp = appliedVoltsUp;
-    inputs.climberAppliedVoltsDown = appliedVoltsDown;
+    inputs.climberAbsoluteVelocityMetersPerSec = encoderRight.getVelocity();
+    inputs.climberAppliedVolts = appliedVolts;
     inputs.climberCurrentAmps = 
       new double[] {m_winchMotorRight.getOutputCurrent(), m_winchMotorLeft.getOutputCurrent()};
     inputs.climberGoalPosition = climberGoal.position;
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberSetpointVelocity = climberSetpoint.velocity;
-    inputs.upDirectionStatus = UpDirection;
   }
 
   @Override 
   public void setHoming(boolean homingBool){
     if (homingBool){
-      currentLimitNow = homingCurrentLimit;
-      m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
-      m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow);
-
+      m_winchMotorRight.setSmartCurrentLimit(homingCurrentLimit);
+      m_winchMotorLeft.setSmartCurrentLimit(homingCurrentLimit);
+      setVoltage(-2);
     }
     else{
-      currentLimitNow = extendCurrentLimit;
-      m_winchMotorRight.setSmartCurrentLimit(currentLimitNow);
-      m_winchMotorLeft.setSmartCurrentLimit(currentLimitNow);
+      m_winchMotorRight.setSmartCurrentLimit(extendCurrentLimit);
+      m_winchMotorLeft.setSmartCurrentLimit(extendCurrentLimit);
     }
   }
 
   @Override
-  public void setPosition(double position) {
+  public void setPosition(double position) { 
     climberGoal = new ExponentialProfile.State(position, 0);
   }
 
   @Override
   public void setVoltage(double volts) {
-    appliedVoltsDown = volts;
-    appliedVoltsUp = volts;
-    m_winchMotorRight.setVoltage(appliedVoltsUp);
-    m_winchMotorLeft.setVoltage(appliedVoltsUp);
+    appliedVolts= volts;
+    m_winchMotorRight.setVoltage(appliedVolts);
+    m_winchMotorLeft.setVoltage(appliedVolts);
   }
 
   @Override
-  public void setVelocity(double velocityRadPerSec, double ffVolts) {
-    pid.setReference(
-        Units.radiansPerSecondToRotationsPerMinute(velocityRadPerSec) * GEAR_RATIO,
-        ControlType.kVelocity,
-        0,
-        ffVolts,
-        ArbFFUnits.kVoltage);
+  public void setVelocity(double velocityMetersPerSec) {
+    m_winchMotorLeft.set(velocityMetersPerSec);
+    m_winchMotorRight.set(velocityMetersPerSec);
   }
 
   @Override
@@ -176,15 +164,8 @@ public class ClimberIOSparkMax implements ClimberIO {
   }
 
   @Override
-  public void configurePID(double kP, double kI, double kD) {
-    pid.setP(kP, 0);
-    pid.setI(kI, 0);
-    pid.setD(kD, 0);
-    pid.setFF(0, 0);
-  }
-
-  @Override
-  public void resetEncoder(final double position){
-    encoder.setPosition(position);
+  public void resetEncoder(double position){
+    encoderRight.setPosition(0);
+    encoderLeft.setPosition(0);
   }
 }

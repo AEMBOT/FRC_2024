@@ -23,15 +23,8 @@ public class Climber extends SubsystemBase{
     private boolean activateExtendPID = false;
     private boolean extendZeroed = false;
 
-    ElevatorFeedforward ffUp = new ElevatorFeedforward(1,1,1);
-    ElevatorFeedforward ffDown = new ElevatorFeedforward(1,1,1);    
-    PIDController pidExtend = new PIDController(120, 0, 2); //tune needed
-
     public Climber(ClimberIO io){
         this.io = io;
-    
-        pidExtend.setSetpoint(0);
-        pidExtend.setTolerance(0.01);
 
     sysId =
         new SysIdRoutine(
@@ -68,11 +61,7 @@ public class Climber extends SubsystemBase{
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
   }
-
-  public void setExtendMeter(double positionMeters) {
-    pidExtend.setSetpoint(positionMeters);
-  }
-
+  
   public double getCurrentLimit(boolean homingBool){
     //homingBool true if we are in homing mode
     if (homingBool){
