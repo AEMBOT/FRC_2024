@@ -17,6 +17,7 @@ import frc.robot.subsystems.pivot.Pivot;
 import static frc.robot.Constants.shootingSpeakerConstants.*;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 
 public class SpeakerCommands {
@@ -31,12 +32,13 @@ public class SpeakerCommands {
     public static Command shootSpeaker(
             Drive drive,
             Pivot pivot,
+            Supplier<Pose2d> robotPosition,
             Translation2d speakerPosition,
             DoubleSupplier xSupplier,
             DoubleSupplier ySupplier
             ){
-        double distance = drive.getPose().getTranslation().getDistance(speakerPosition);
-        Rotation2d targetAngle = speakerPosition.minus(drive.getPose().getTranslation()).getAngle();
+        double distance = robotPosition.get().getTranslation().getDistance(speakerPosition);
+        Rotation2d targetAngle = speakerPosition.minus(robotPosition.get().getTranslation()).getAngle();
         ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
         Command driveTrainCommand = Commands.run(
                 () -> {
