@@ -1,9 +1,11 @@
 package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.math.MathUtil.clamp;
+import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.PivotConstants.PIVOT_MAX_POS_RAD;
 import static frc.robot.Constants.PivotConstants.PIVOT_MIN_POS_RAD;
 
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -17,13 +19,13 @@ import org.littletonrobotics.junction.Logger;
 
 public class PivotIOReal implements PivotIO {
 
-  private boolean openLoop = false;
+  private boolean openLoop = true;
   private double appliedVolts = 0.0;
 
   private final CANSparkMax motorLeader = new CANSparkMax(11, MotorType.kBrushless);
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
-  private final Encoder velEncoder = new Encoder(2, 1);
+  private final Encoder velEncoder = new Encoder(2, 1, true);
   private final ArmFeedforward pivotFFModel =
       new ArmFeedforward(0.0, 0.0379, 5.85, 0.04); // TODO tune
   private final PIDController pidController = new PIDController(1, 0, 0); // TODO tune
@@ -40,10 +42,25 @@ public class PivotIOReal implements PivotIO {
     motorLeader.restoreFactoryDefaults();
     motorFollower.restoreFactoryDefaults();
 
+    delay(0.25);
+
+    motorLeader.setIdleMode(CANSparkBase.IdleMode.kBrake);
+    motorFollower.setIdleMode(CANSparkBase.IdleMode.kBrake);
+
+    // I have no clue what's going on with invert settings, but both inverted and invert follow
+    // works
+    motorLeader.setInverted(true);
+    motorFollower.setInverted(true);
+
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
 
+    delay(0.25);
+
     motorFollower.follow(motorLeader, true);
+
+    encoder.setPositionOffset(
+        2.85765 / (2 * Math.PI)); // Convert from offset rads to offset rotations
   }
 
   @Override
