@@ -4,6 +4,7 @@ import static edu.wpi.first.math.MathUtil.clamp;
 import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.PivotConstants.PIVOT_MAX_POS_RAD;
 import static frc.robot.Constants.PivotConstants.PIVOT_MIN_POS_RAD;
+import static frc.robot.Constants.UPDATE_PERIOD;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -14,13 +15,11 @@ import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class PivotIOReal implements PivotIO {
 
   private boolean openLoop = true;
-  private double appliedVolts = 0.0;
 
   private final CANSparkMax motorLeader = new CANSparkMax(11, MotorType.kBrushless);
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
@@ -65,34 +64,8 @@ public class PivotIOReal implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    if (!openLoop) {
-      double currentVelocity = pivotSetpoint.velocity;
-      pivotSetpoint = pivotProfile.calculate(Constants.UPDATE_PERIOD, pivotSetpoint, pivotGoal);
-      double feedForward =
-          pivotFFModel.calculate(
-              pivotSetpoint.position,
-              pivotSetpoint.velocity,
-              (pivotSetpoint.velocity - currentVelocity) / Constants.UPDATE_PERIOD);
-      double pidOutput =
-          pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
-
-      Logger.recordOutput("Pivot/CalculatedFFVolts", feedForward);
-      Logger.recordOutput("Pivot/PIDCommandVolts", pidOutput);
-
-      appliedVolts = feedForward + pidOutput;
-    }
-
-    if (getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
-      appliedVolts = clamp(appliedVolts, 0, Double.MAX_VALUE);
-    }
-    if (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD) {
-      appliedVolts = clamp(appliedVolts, Double.MIN_VALUE, 0);
-    }
-
-    motorLeader.setVoltage(appliedVolts);
-
     inputs.pivotAbsolutePositionRad = getAbsoluteEncoderPosition();
-    inputs.pivotAppliedVolts = appliedVolts;
+    inputs.pivotAppliedVolts = motorLeader.getAppliedOutput() * motorLeader.getBusVoltage();
     inputs.pivotCurrentAmps =
         new double[] {motorLeader.getOutputCurrent(), motorFollower.getOutputCurrent()};
     inputs.pivotAbsoluteVelocityRadPerSec = velEncoder.getRate();
@@ -107,13 +80,27 @@ public class PivotIOReal implements PivotIO {
   public void setPosition(double positionRad) {
     openLoop = false;
     pivotGoal = new ExponentialProfile.State(positionRad, 0);
+    double currentVelocity = pivotSetpoint.velocity;
+    pivotSetpoint = pivotProfile.calculate(UPDATE_PERIOD, pivotSetpoint, pivotGoal);
+    double feedForward =
+        pivotFFModel.calculate(
+            pivotSetpoint.position,
+            pivotSetpoint.velocity,
+            (pivotSetpoint.velocity - currentVelocity) / UPDATE_PERIOD);
+    double pidOutput =
+        pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
+
+    Logger.recordOutput("Pivot/CalculatedFFVolts", feedForward);
+    Logger.recordOutput("Pivot/PIDCommandVolts", pidOutput);
+
+    setMotorVoltage(feedForward + pidOutput);
   }
 
   /** Run open loop at the specified voltage. */
   @Override
   public void setVoltage(double volts) {
     openLoop = true;
-    appliedVolts = volts;
+    setMotorVoltage(volts);
   }
 
   /** Stop in open loop. */
@@ -125,5 +112,16 @@ public class PivotIOReal implements PivotIO {
 
   private double getAbsoluteEncoderPosition() {
     return Units.rotationsToRadians(encoder.getAbsolutePosition() - encoder.getPositionOffset());
+  }
+
+  private void setMotorVoltage(double volts) {
+    if (getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
+      volts = clamp(volts, 0, Double.MAX_VALUE);
+    }
+    if (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD) {
+      volts = clamp(volts, Double.MIN_VALUE, 0);
+    }
+
+    motorLeader.setVoltage(volts);
   }
 }

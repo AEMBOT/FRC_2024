@@ -27,23 +27,20 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
-import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -63,8 +60,6 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardNumber flywheelSpeedInput =
-      new LoggedDashboardNumber("Flywheel Speed", 1500.0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -157,7 +152,9 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    indexer.setDefaultCommand(indexer.getDefaultCommand());
+    indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
+    pivot.setDefaultCommand(pivot.getDefault());
+    shooter.setDefaultCommand(shooter.getDefault());
 
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     controller

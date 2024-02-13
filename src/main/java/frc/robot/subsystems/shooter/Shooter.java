@@ -36,7 +36,7 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
   }
 
-  public Command getDefaultCommand() {
+  public Command getDefault() {
     // If the shooter was running fast and is now coasting down,
     // we don't want to force the speed down-- preserve momentum
     return Commands.waitUntil(() -> findMin(inputs.shooterVelocityRPM) < shooterIdleRPM)
