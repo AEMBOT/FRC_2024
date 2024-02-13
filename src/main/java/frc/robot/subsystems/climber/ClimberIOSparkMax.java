@@ -4,34 +4,15 @@ import static frc.robot.Constants.ClimberConstants.*;
 
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.ctre.phoenix6.StatusSignal;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
-
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import frc.robot.subsystems.climber.ClimberIO.ClimberIOInputs;
-import frc.robot.subsystems.pivot.PivotIO.PivotIOInputs;
-import frc.robot.Constants;
-import static frc.robot.Constants.ClimberConstants.*;
-
-import java.rmi.server.ExportException;
-
-import static edu.wpi.first.math.MathUtil.clamp;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Encoder;
-import frc.robot.Constants;
+import frc.robot.subsystems.climber.ClimberIO.ClimberIOInputs;
 import org.littletonrobotics.junction.Logger;
 
 public class ClimberIOSparkMax implements ClimberIO {
@@ -39,7 +20,7 @@ public class ClimberIOSparkMax implements ClimberIO {
   private double appliedVolts = 0;
   private boolean UpDirection = true; //boolean for climber going up or down
 
-  //choosing right as the main motor and left as the follower motor
+  // choosing right as the main motor and left as the follower motor
 
   private final CANSparkMax m_winchMotorRight = new CANSparkMax(10, MotorType.kBrushless);
   private final CANSparkMax m_winchMotorLeft = new CANSparkMax(11, MotorType.kBrushless);
@@ -52,18 +33,20 @@ public class ClimberIOSparkMax implements ClimberIO {
   private final PIDController pidControllerDown = new PIDController(1,0,0); //TODO: tune
 
   private final ExponentialProfile climberProfile =
-    new ExponentialProfile(
-      ExponentialProfile.Constraints.fromCharacteristics(10, climberFFModelUp.kv, climberFFModelUp.ka));
+      new ExponentialProfile(
+          ExponentialProfile.Constraints.fromCharacteristics(
+              10, climberFFModelUp.kv, climberFFModelUp.ka));
 
-  private final ExponentialProfile climberPorProfileDown = 
-    new ExponentialProfile(
-      ExponentialProfile.Constraints.fromCharacteristics(10,climberFFModelDown.kv, climberFFModelDown.ka));
+  private final ExponentialProfile climberPorProfileDown =
+      new ExponentialProfile(
+          ExponentialProfile.Constraints.fromCharacteristics(
+              10, climberFFModelDown.kv, climberFFModelDown.ka));
 
   private ExponentialProfile.State climberGoal;
   private ExponentialProfile.State climberSetpoint;
-  
-  //probably unnecessary
-  //private ExponentialProfile.State climberSetpointDown;
+
+  // probably unnecessary
+  // private ExponentialProfile.State climberSetpointDown;
 
   private final double positionRight = encoderRight.getPosition();
   private final double velocityRight = encoderRight.getVelocity();
@@ -74,7 +57,8 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
     m_winchMotorRight.setSmartCurrentLimit(homingCurrentLimit);
-    m_winchMotorLeft.setSmartCurrentLimit(homingCurrentLimit); // logic for homing vs extended is built in now
+    m_winchMotorLeft.setSmartCurrentLimit(
+        homingCurrentLimit); // logic for homing vs extended is built in now
 
     m_winchMotorRight.setInverted(false);
     m_winchMotorLeft.setInverted(false);
@@ -93,7 +77,8 @@ public class ClimberIOSparkMax implements ClimberIO {
   @Override
   public void updateInputs(ClimberIOInputs inputs) {
     double currentVelocity = climberSetpoint.velocity;
-    //change 0.02 for constants.update period when merged properly in climbersetpoint definitionand feedforwardup definition
+    // change 0.02 for constants.update period when merged properly in climbersetpoint definitionand
+    // feedforwardup definition
     climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
     double feedForwardUp = 
         climberFFModelUp.calculate(currentVelocity, 
