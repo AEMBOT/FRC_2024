@@ -28,6 +28,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
@@ -54,6 +57,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Pivot pivot;
   private final Shooter shooter;
+  private final Climber climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -77,6 +81,8 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         shooter = new Shooter(new ShooterIOReal());
+        climber = new Climber(new ClimberIOSparkMax());
+
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -99,6 +105,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         shooter = new Shooter(new ShooterIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
 
       default:
@@ -114,6 +121,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
+        climber = new Climber(new ClimberIOSim() {});
         break;
     }
 

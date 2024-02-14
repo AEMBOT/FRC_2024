@@ -3,43 +3,25 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ClimberConstants.*;
 
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.Volts;
+public class Climber extends SubsystemBase {
+  public static final double GEAR_RATIO = 15.0 / 1.0;
+  public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
 
-public class Climber extends SubsystemBase{
-    public static final double GEAR_RATIO  = 15.0/1.0;
-    public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
+  private final ClimberIO io;
+  private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
+  private final SysIdRoutine sysId;
 
-    private final ClimberIO io; 
-    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
-    private final SysIdRoutine sysId;
+  private boolean activateExtendPID = false;
+  private boolean extendZeroed = false;
 
-    private boolean activateExtendPID = false;
-    private boolean extendZeroed = false;
-
-    ElevatorFeedforward ffUp = new ElevatorFeedforward(1,1,1);
-    ElevatorFeedforward ffDown = new ElevatorFeedforward(1,1,1);    
-    PIDController pidExtend = new PIDController(120, 0, 2); //tune needed
-
-    public Climber(ClimberIO io){
-        this.io = io;
-    
-        pidExtend.setSetpoint(0);
-        pidExtend.setTolerance(0.01);
+  public Climber(ClimberIO io) {
+    this.io = io;
 
     sysId =
         new SysIdRoutine(
@@ -61,29 +43,39 @@ public class Climber extends SubsystemBase{
     io.setVoltage(volts);
   }
 
+  public void setPosition(double position){
+    io.setPosition(position);
+  }
+
   public void stopExtend() {
     io.stop();
   }
 
-  @AutoLogOutput
-  public double getVelocityRPM() {
-        return Units.radiansPerSecondToRotationsPerMinute(inputs.climberAbsoluteVelocityMetersPerSec);
-    }
-
-  public double getCharacterizationVelocity() {
-        return inputs.climberAbsoluteVelocityMetersPerSec;
-    }
-
-  public void setExtendMeter(double positionMeters) {
-    pidExtend.setSetpoint(positionMeters);
+  public Command runVoltageCommand(double voltage){
+    return run(() -> runVolts(voltage));
   }
 
-  public double getCurrentLimit(boolean homingBool){
-    //homingBool true if we are in homing mode
-    if (homingBool){
+  public Command setPositionCommand(double targetPosition){
+    return run(() -> setPosition(targetPosition));
+  }
+
+  public double getCharacterizationVelocity() {
+    return inputs.climberAbsoluteVelocityMetersPerSec;
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysId.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysId.dynamic(direction);
+  }
+
+  public double getCurrentLimit(boolean homingBool) {
+    // homingBool true if we are in homing mode
+    if (homingBool) {
       return homingCurrentLimit;
-    }
-    else {
+    } else {
       return extendCurrentLimit;
     }
   }
