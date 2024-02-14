@@ -1,5 +1,6 @@
 package frc.robot.subsystems.pivot;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.geometry.Pose3d;
@@ -23,9 +24,9 @@ public class Pivot extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null,
-                null,
-                null,
+                Volts.of(0.2).per(Seconds.of(1)),
+                Volts.of(8),
+                Seconds.of(30),
                 (state) -> Logger.recordOutput("Flywheel/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> runVolts(voltage.in(Volts)), null, this));
   }

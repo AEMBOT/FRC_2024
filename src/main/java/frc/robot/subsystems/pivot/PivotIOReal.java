@@ -25,9 +25,8 @@ public class PivotIOReal implements PivotIO {
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
   private final Encoder velEncoder = new Encoder(2, 1, true);
-  private final ArmFeedforward pivotFFModel =
-      new ArmFeedforward(0.0, 0.0379, 5.85, 0.04); // TODO tune
-  private final PIDController pidController = new PIDController(1, 0, 0); // TODO tune
+  private final ArmFeedforward pivotFFModel = new ArmFeedforward(0.29, 0.28, 6.32, 0.21);
+  private final PIDController pidController = new PIDController(8, 0, 0);
   private final ExponentialProfile pivotProfile =
       new ExponentialProfile(
           ExponentialProfile.Constraints.fromCharacteristics(10, pivotFFModel.kv, pivotFFModel.ka));
@@ -60,6 +59,8 @@ public class PivotIOReal implements PivotIO {
 
     encoder.setPositionOffset(
         2.85765 / (2 * Math.PI)); // Convert from offset rads to offset rotations
+
+    velEncoder.setDistancePerPulse((2 * Math.PI) / 8192.0);
   }
 
   @Override
@@ -119,7 +120,7 @@ public class PivotIOReal implements PivotIO {
       volts = clamp(volts, 0, Double.MAX_VALUE);
     }
     if (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD) {
-      volts = clamp(volts, Double.MIN_VALUE, 0);
+      volts = clamp(volts, -Double.MAX_VALUE, 0);
     }
 
     motorLeader.setVoltage(volts);

@@ -43,8 +43,8 @@ public final class Constants {
   public static final double UPDATE_PERIOD = 0.02;
 
   public static final class PivotConstants {
-    public static final double PIVOT_MAX_POS_RAD = 2.30;
-    public static final double PIVOT_MIN_POS_RAD = 0.30;
+    public static final double PIVOT_MAX_POS_RAD = 2.20;
+    public static final double PIVOT_MIN_POS_RAD = 0.40;
   }
 
   public static final class IndexerConstants {
