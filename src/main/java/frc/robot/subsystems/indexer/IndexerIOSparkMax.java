@@ -20,13 +20,18 @@ public class IndexerIOSparkMax implements IndexerIO {
   public DigitalInput shooterBeamBreak = new DigitalInput(indexerBeamBrake);
 
   public IndexerIOSparkMax() {
-    intakeMotorTop.setSmartCurrentLimit(20);
-    intakeMotorBottom.setSmartCurrentLimit(20);
-    indexerMotorTop.setSmartCurrentLimit(20);
-    indexerMotorBottom.setSmartCurrentLimit(20);
+    intakeMotorTop.restoreFactoryDefaults();
+    intakeMotorBottom.restoreFactoryDefaults();
+    indexerMotorTop.restoreFactoryDefaults();
+    indexerMotorBottom.restoreFactoryDefaults();
 
-    intakeMotorTop.setInverted(false);
-    intakeMotorBottom.setInverted(false);
+    intakeMotorTop.setSmartCurrentLimit(40);
+    intakeMotorBottom.setSmartCurrentLimit(40);
+    indexerMotorTop.setSmartCurrentLimit(40);
+    indexerMotorBottom.setSmartCurrentLimit(40);
+
+    intakeMotorTop.setInverted(true);
+    intakeMotorBottom.setInverted(true);
     indexerMotorTop.setInverted(false);
     indexerMotorBottom.setInverted(false);
 

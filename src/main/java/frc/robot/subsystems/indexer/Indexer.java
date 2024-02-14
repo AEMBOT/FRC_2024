@@ -24,7 +24,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
   }
 
-  public Command getDefaultCommand(BooleanSupplier pivotHandoff) {
+  public Command getDefault(BooleanSupplier pivotHandoff) {
     return runOnce(() -> shootReady = false)
         .andThen(
             Commands.waitUntil(() -> inputs.shooterBeamBreakState)

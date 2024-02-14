@@ -10,13 +10,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import java.util.List;
 import org.littletonrobotics.junction.AutoLog;
 import org.photonvision.EstimatedRobotPose;
 
 public interface AprilTagVisionIO {
   @AutoLog
   public static class AprilTagVisionIOInputs {
-    public Pose3d[] visionPoses = new Pose3d[3];
+    public Pose3d[] visionPoses =
+        List.of(new Pose3d(), new Pose3d(), new Pose3d()).toArray(new Pose3d[0]);
     public double[] timestamps = new double[3];
     public double[] visionStdDevs = new double[9];
   }
