@@ -30,6 +30,9 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelIO;
@@ -57,6 +60,7 @@ public class RobotContainer {
   private final Flywheel flywheel;
   private final Indexer indexer;
   private final Pivot pivot;
+  private final Climber climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -82,6 +86,8 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
+        climber = new Climber(new ClimberIOSparkMax());
+
         // drive = new Drive(
         // new GyroIOPigeon2(true),
         // new ModuleIOTalonFX(0),
@@ -104,6 +110,7 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIOSim());
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
 
       default:
@@ -119,6 +126,7 @@ public class RobotContainer {
         flywheel = new Flywheel(new FlywheelIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
+        climber = new Climber(new ClimberIOSim() {});
         break;
     }
 
