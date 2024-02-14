@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIOSim;
@@ -37,7 +38,6 @@ import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
-import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
@@ -73,14 +73,25 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIONavX(),
-                new ModuleIOAlpha(0),
-                new ModuleIOAlpha(1),
-                new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3),
+                new ModuleIOTalonFX(0),
+                new ModuleIOTalonFX(1),
+                new ModuleIOTalonFX(2),
+                new ModuleIOTalonFX(3),
                 new AprilTagVisionIOReal());
-        indexer = new Indexer(new IndexerIOSparkMax());
-        pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
-        shooter = new Shooter(new ShooterIOReal());
+        //        drive =
+        //            new Drive(
+        //                new GyroIO() {},
+        //                new ModuleIO() {},
+        //                new ModuleIO() {},
+        //                new ModuleIO() {},
+        //                new ModuleIO() {},
+        //                new AprilTagVisionIO() {});
+        //        indexer = new Indexer(new IndexerIOSparkMax());
+        //        pivot = new Pivot(new PivotIOReal());
+        //                shooter = new Shooter(new ShooterIOReal());
+        indexer = new Indexer(new IndexerIO() {});
+        pivot = new Pivot(new PivotIO() {});
+        shooter = new Shooter(new ShooterIO() {});
         climber = new Climber(new ClimberIOSparkMax());
 
         // drive = new Drive(
@@ -174,6 +185,9 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    controller.rightTrigger().whileTrue(climber.runVoltsCommand(10.0));
+    controller.leftTrigger().whileTrue(climber.runVoltsCommand(-10.0));
   }
 
   /**

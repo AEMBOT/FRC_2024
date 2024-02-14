@@ -1,5 +1,6 @@
 package frc.robot.subsystems.climber;
 
+import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.ClimberConstants.*;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -18,15 +19,17 @@ public class ClimberIOSparkMax implements ClimberIO {
 
   // choosing right as the main motor and left as the follower motor
 
-  private final CANSparkMax m_winchMotorRight = new CANSparkMax(winchMotorRightCanID, MotorType.kBrushless);
-  private final CANSparkMax m_winchMotorLeft = new CANSparkMax(winchMotorLeftCanID, MotorType.kBrushless);
+  private final CANSparkMax m_winchMotorRight =
+      new CANSparkMax(winchMotorRightCanID, MotorType.kBrushless);
+  private final CANSparkMax m_winchMotorLeft =
+      new CANSparkMax(winchMotorLeftCanID, MotorType.kBrushless);
   private final RelativeEncoder encoderRight = m_winchMotorRight.getEncoder();
   private final RelativeEncoder encoderLeft = m_winchMotorLeft.getEncoder();
 
   private final ElevatorFeedforward climberFFModelUp =
       new ElevatorFeedforward(0.0, 0.0379, 5.85, 0.04); // TODO: tune
   private final ElevatorFeedforward climberFFModelDown =
-      new ElevatorFeedforward(0, 0, 0); // TODO: tune
+      new ElevatorFeedforward(0, 0, 1, 0.0001); // TODO: tune
   private final PIDController pidControllerUp = new PIDController(1, 0, 0); // TODO: tune
   private final PIDController pidControllerDown = new PIDController(1, 0, 0); // TODO: tune
 
@@ -37,8 +40,12 @@ public class ClimberIOSparkMax implements ClimberIO {
   private ExponentialProfile.State climberGoal;
   private ExponentialProfile.State climberSetpoint;
 
-
   public ClimberIOSparkMax() {
+    m_winchMotorLeft.restoreFactoryDefaults();
+    m_winchMotorRight.restoreFactoryDefaults();
+
+    delay(0.25);
+
     m_winchMotorRight.setIdleMode(CANSparkMax.IdleMode.kBrake);
     m_winchMotorLeft.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
@@ -46,8 +53,10 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorLeft.setSmartCurrentLimit(
         homingCurrentLimit); // logic for homing vs extended is built in now
 
-    m_winchMotorRight.setInverted(false);
+    m_winchMotorRight.setInverted(true);
     m_winchMotorLeft.setInverted(false);
+
+    m_winchMotorRight.follow(m_winchMotorLeft, true);
 
     m_winchMotorRight.setCANTimeout(250);
     m_winchMotorLeft.setCANTimeout(250);
@@ -75,7 +84,7 @@ public class ClimberIOSparkMax implements ClimberIO {
     Logger.recordOutput("Climber/CalculatedFFVoltsDown", feedForwardDown);
     Logger.recordOutput("Climber/PIDCommandVoltsUp", pidOutputUp);
     Logger.recordOutput("Climber/PIDCommandVoltsDown", pidOutputDown);
-    if(!openLoop) {
+    if (!openLoop) {
       if (encoderRight.getPosition() > climberSetpoint.position) {
         appliedVolts = feedForwardDown + pidOutputDown;
       } else {
@@ -113,7 +122,7 @@ public class ClimberIOSparkMax implements ClimberIO {
   public void setVoltage(double volts) {
     appliedVolts = volts;
     openLoop = true;
-    m_winchMotorRight.setVoltage(appliedVolts);
+    // m_winchMotorRight.setVoltage(appliedVolts);
     m_winchMotorLeft.setVoltage(appliedVolts);
   }
 
