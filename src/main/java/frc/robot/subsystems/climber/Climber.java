@@ -43,8 +43,20 @@ public class Climber extends SubsystemBase {
     io.setVoltage(volts);
   }
 
+  public void setPosition(double position){
+    io.setPosition(position);
+  }
+
   public void stopExtend() {
     io.stop();
+  }
+
+  public Command runVoltageCommand(double voltage){
+    return run(() -> runVolts(voltage));
+  }
+
+  public Command setPositionCommand(double targetPosition){
+    return run(() -> setPosition(targetPosition));
   }
 
   public double getCharacterizationVelocity() {
