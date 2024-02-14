@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 public class ClimberIOSim implements ClimberIO {
   private static final double GEAR_RATIO = 1.5;
   private double appliedVolts = 0;
-  private boolean UpDirection = true; //boolean for climber going up or down
+  private boolean UpDirection = true; // boolean for climber going up or down
 
   // choosing right as the main motor and left as the follower motor
   private final DCMotor m_elevatorGearbox = DCMotor.getNEO(2);
@@ -78,8 +78,8 @@ public class ClimberIOSim implements ClimberIO {
     sim.update(0.02);
 
     appliedVolts = feedForwardUp + pidOutput;
-    //appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
-    /* 
+    // appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
+    /*
     if (UpDirection){
       sim.setInputVoltage(appliedVoltsUp);
     } else {
@@ -88,8 +88,7 @@ public class ClimberIOSim implements ClimberIO {
 
     inputs.climberAbsoluteVelocityMetersPerSec = sim.getVelocityMetersPerSecond();
     inputs.climberAppliedVolts = appliedVolts;
-    inputs.climberCurrentAmps = 
-      new double[] {sim.getCurrentDrawAmps()};
+    inputs.climberCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
     inputs.climberGoalPosition = climberGoal.position;
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberSetpointVelocity = climberSetpoint.velocity;

@@ -41,8 +41,8 @@ public final class Constants {
   }
 
   public static final class ClimberConstants {
-    public static final int winchMotorRightCanID = 1; // change this
-    public static final int winchMotorLeftCanID = 2; // change this
+    public static final int winchMotorRightCanID = 10; // change this
+    public static final int winchMotorLeftCanID = 11; // change this
     public static final int homingCurrentLimit = 20;
     public static final int extendCurrentLimit = 60;
     public static final double extendToGrab = 10; // change this

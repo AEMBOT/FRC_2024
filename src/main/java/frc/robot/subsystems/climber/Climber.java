@@ -3,8 +3,6 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ClimberConstants.*;
 
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,11 +17,11 @@ public class Climber extends SubsystemBase {
   private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
   private final SysIdRoutine sysId;
 
-    private boolean activateExtendPID = false;
-    private boolean extendZeroed = false;
+  private boolean activateExtendPID = false;
+  private boolean extendZeroed = false;
 
-    public Climber(ClimberIO io){
-        this.io = io;
+  public Climber(ClimberIO io) {
+    this.io = io;
 
     sysId =
         new SysIdRoutine(
@@ -60,10 +58,10 @@ public class Climber extends SubsystemBase {
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     return sysId.dynamic(direction);
   }
-  
-  public double getCurrentLimit(boolean homingBool){
-    //homingBool true if we are in homing mode
-    if (homingBool){
+
+  public double getCurrentLimit(boolean homingBool) {
+    // homingBool true if we are in homing mode
+    if (homingBool) {
       return homingCurrentLimit;
     } else {
       return extendCurrentLimit;

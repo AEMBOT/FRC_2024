@@ -8,11 +8,12 @@ public interface ClimberIO {
     public double climberPositionMeters = 0.0;
     public double climberAbsoluteVelocityMetersPerSec = 0.0;
     public double climberAppliedVolts = 0.0;
-    public double[] climberCurrentAmps =new double[] {}; // Log motors individually, useful for failure analysis
+    public double[] climberCurrentAmps =
+        new double[] {}; // Log motors individually, useful for failure analysis
 
     public double climberGoalPosition = 0.0;
     public double climberSetpointPosition = 0.0;
-    public double climberSetpointVelocity = 0.0;  
+    public double climberSetpointVelocity = 0.0;
   }
 
   /** Updates the set of loggable inputs. */
