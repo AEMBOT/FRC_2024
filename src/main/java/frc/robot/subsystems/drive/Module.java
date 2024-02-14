@@ -66,6 +66,9 @@ public class Module {
     io.setTurnSetpoint(optimizedState.angle);
     io.setDriveSetpoint(optimizedState.speedMetersPerSecond);
 
+    Logger.recordOutput("Module" + index + "/AngleSetpoint", optimizedState.angle);
+    Logger.recordOutput("Module" + index + "/DriveSetpoint", optimizedState.speedMetersPerSecond);
+
     return optimizedState;
   }
 
