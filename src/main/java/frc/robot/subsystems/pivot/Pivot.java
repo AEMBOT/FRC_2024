@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Pivot extends SubsystemBase {
@@ -37,6 +38,7 @@ public class Pivot extends SubsystemBase {
     Logger.processInputs("Pivot", inputs);
   }
 
+  @AutoLogOutput
   public boolean inHandoffZone() {
     return Units.degreesToRadians(30) < inputs.pivotAbsolutePositionRad
         && inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
@@ -65,7 +67,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public Command getDefault() {
-    return setPositionCommand(() -> Units.degreesToRadians(30));
+    return setPositionCommand(() -> Units.degreesToRadians(40));
   }
 
   // These functions should only be accessed through command mutexing, hence private

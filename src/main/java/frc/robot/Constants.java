@@ -54,7 +54,7 @@ public final class Constants {
     public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 4; // PLACEHOLDER VALUE
+    public static final double indexerMotorVoltage = 2;
   }
 
   public static final class IntakeConstants {
@@ -63,7 +63,7 @@ public final class Constants {
     public static final int intakeBeamBrake = 7;
 
     /*VOLTAGES*/
-    public static final double intakeMotorVoltage = 4; // PLACEHOLDER VALUE
+    public static final double intakeMotorVoltage = 10;
   }
 
   public static final class ShooterConstants {
