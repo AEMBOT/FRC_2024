@@ -56,8 +56,6 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorRight.setInverted(true);
     m_winchMotorLeft.setInverted(false);
 
-    m_winchMotorRight.follow(m_winchMotorLeft, true);
-
     m_winchMotorRight.setCANTimeout(250);
     m_winchMotorLeft.setCANTimeout(250);
 
@@ -122,7 +120,7 @@ public class ClimberIOSparkMax implements ClimberIO {
   public void setVoltage(double volts) {
     appliedVolts = volts;
     openLoop = true;
-    // m_winchMotorRight.setVoltage(appliedVolts);
+    m_winchMotorRight.setVoltage(appliedVolts);
     m_winchMotorLeft.setVoltage(appliedVolts);
   }
 
