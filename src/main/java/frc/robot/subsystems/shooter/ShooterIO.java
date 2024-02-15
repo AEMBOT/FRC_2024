@@ -10,6 +10,7 @@ public interface ShooterIO {
     public double[] shooterCurrentAmps =
         new double[] {}; // Log motors individually, useful for failure analysis
     public boolean openLoopStatus = true;
+    public int sysIDState = 0;
   }
 
   /** Updates the set of loggable inputs. */

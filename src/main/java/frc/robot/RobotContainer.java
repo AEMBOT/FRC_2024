@@ -27,17 +27,19 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
-import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -69,10 +71,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIONavX(),
-                new ModuleIOAlpha(0),
-                new ModuleIOAlpha(1),
-                new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3),
+                new ModuleIOTalonFX(0),
+                new ModuleIOTalonFX(1),
+                new ModuleIOTalonFX(2),
+                new ModuleIOTalonFX(3),
                 new AprilTagVisionIOReal());
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
@@ -132,7 +134,7 @@ public class RobotContainer {
 
     autoChooser.addOption("Nine Piece Auto", NamedCommands.getCommand("Nine Piece Auto"));
     // Set up SysId routines
-    autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
+    autoChooser.addOption("Shooter Drive SysId Routine", shooter.runShooterCharacterization());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
 
     // Configure the button bindings
@@ -152,7 +154,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
+    // indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
@@ -166,6 +168,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    controller.y().onTrue(shooter.setVoltageCommand(10));
+    controller.y().onFalse(shooter.stopCommand());
   }
 
   /**

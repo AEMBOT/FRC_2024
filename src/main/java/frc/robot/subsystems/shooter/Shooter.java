@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
@@ -23,9 +24,9 @@ public class Shooter extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null,
-                null,
-                null,
+                Volts.of(0.2).per(Seconds.of(1)),
+                Volts.of(8),
+                Seconds.of(30),
                 (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> io.setVoltage(voltage.in(Volts)), null, this));
   }
@@ -44,11 +45,15 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
-    return run(() -> setVelocityRPM(velRPM));
+    return runOnce(() -> setVelocityRPM(velRPM));
   }
 
   public Command stopCommand() {
-    return run(() -> io.setVoltage(0.0));
+    return runOnce(() -> io.setVoltage(0.0));
+  }
+
+  public Command setVoltageCommand(double volts) {
+    return runOnce(() -> io.setVoltage(volts));
   }
 
   private void setVelocityRPM(double velRPM) {
@@ -62,17 +67,31 @@ public class Shooter extends SubsystemBase {
     else return Math.min(array[0], array[1]);
   }
 
+  private Command sysIDStateSet(int val) {
+    return runOnce(() -> inputs.sysIDState = val);
+  }
+
   public Command runShooterCharacterization() {
     return Commands.sequence(
+        sysIDStateSet(0),
         sysId.quasistatic(kForward),
+        sysIDStateSet(1),
         stopCommand(),
+        sysIDStateSet(2),
         Commands.waitSeconds(2.0),
+        sysIDStateSet(3),
         sysId.quasistatic(kReverse),
+        sysIDStateSet(4),
         stopCommand(),
+        sysIDStateSet(5),
         Commands.waitSeconds(2.0),
+        sysIDStateSet(6),
         sysId.dynamic(kForward),
+        sysIDStateSet(7),
         stopCommand(),
+        sysIDStateSet(8),
         Commands.waitSeconds(2.0),
+        sysIDStateSet(9),
         sysId.dynamic(kReverse));
   }
 }
