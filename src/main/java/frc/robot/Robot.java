@@ -83,6 +83,7 @@ public class Robot extends LoggedRobot {
     // Logger.disableDeterministicTimestamps()
 
     // Start AdvantageKit logger
+    // Logger.registerURCL(URCL.startExternal());
     Logger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
