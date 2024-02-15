@@ -86,12 +86,10 @@ public class ClimberIOSim implements ClimberIO {
       sim.setInputVoltage(appliedVoltsDown);
     }*/
 
-    inputs.climberAbsoluteVelocityMetersPerSec = sim.getVelocityMetersPerSecond();
-    inputs.climberAppliedVolts = appliedVolts;
+    // TODO FIX ALL OF SIM
+
     inputs.climberCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
-    inputs.climberGoalPosition = climberGoal.position;
     inputs.climberSetpointPosition = climberSetpoint.position;
-    inputs.climberSetpointVelocity = climberSetpoint.velocity;
   }
 
   @Override
@@ -110,10 +108,5 @@ public class ClimberIOSim implements ClimberIO {
     // this does not actually reset the encoder, but I need to do it for the file to inherit
     // climberio
     sim.setInput(0);
-  }
-
-  @Override
-  public void stop() {
-    setVoltage(0);
   }
 }

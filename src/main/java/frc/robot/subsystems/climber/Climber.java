@@ -3,22 +3,16 @@ package frc.robot.subsystems.climber;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ClimberConstants.*;
 
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
-  public static final double GEAR_RATIO = 15.0 / 1.0;
-  public static final double PULLEY_RADIUS = Units.inchesToMeters(1.0);
-
   private final ClimberIO io;
   private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
   private final SysIdRoutine sysId;
-
-  private boolean activateExtendPID = false;
-  private boolean extendZeroed = false;
 
   public Climber(ClimberIO io) {
     this.io = io;
@@ -39,16 +33,12 @@ public class Climber extends SubsystemBase {
     Logger.processInputs("Climber", inputs);
   }
 
-  public void runVolts(double volts) {
+  private void runVolts(double volts) {
     io.setVoltage(volts);
   }
 
-  public void setPosition(double position) {
+  private void setPosition(double position) {
     io.setPosition(position);
-  }
-
-  public void stopExtend() {
-    io.stop();
   }
 
   public Command runVoltsCommand(double voltage) {
@@ -59,8 +49,12 @@ public class Climber extends SubsystemBase {
     return run(() -> setPosition(targetPosition));
   }
 
-  public double getCharacterizationVelocity() {
-    return inputs.climberAbsoluteVelocityMetersPerSec;
+  public Command getHomingCommand() {
+    return Commands.sequence(
+        runOnce(() -> io.setHoming(true)),
+        runVoltsCommand(-2.0).until(io::isCurrentLimited),
+        runOnce(io::resetEncoder),
+        runOnce(() -> io.setHoming(false)));
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
