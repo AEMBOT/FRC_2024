@@ -29,7 +29,7 @@ public interface ClimberIO {
 
   public default void setHoming(boolean homingBool) {}
 
-  public void resetEncoder(final double position);
+  public default void resetEncoder(final double position) {}
 
   public default void resetEncoder() {
     resetEncoder(0);
