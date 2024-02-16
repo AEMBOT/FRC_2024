@@ -40,6 +40,16 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.getEncoder().setVelocityConversionFactor(2);
     bottomMotorFollower.getEncoder().setVelocityConversionFactor(2);
 
+    topMotorLeader.getEncoder().setMeasurementPeriod(8);
+    topMotorFollower.getEncoder().setMeasurementPeriod(8);
+    bottomMotorLeader.getEncoder().setMeasurementPeriod(8);
+    bottomMotorFollower.getEncoder().setMeasurementPeriod(8);
+
+    topMotorLeader.getEncoder().setAverageDepth(1);
+    topMotorFollower.getEncoder().setAverageDepth(1);
+    bottomMotorLeader.getEncoder().setAverageDepth(1);
+    bottomMotorFollower.getEncoder().setAverageDepth(1);
+
     topMotorLeader.setIdleMode(kCoast);
     topMotorFollower.setIdleMode(kCoast);
     bottomMotorLeader.setIdleMode(kCoast);
