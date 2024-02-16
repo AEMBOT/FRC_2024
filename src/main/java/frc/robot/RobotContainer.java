@@ -30,6 +30,7 @@ import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
@@ -93,14 +94,6 @@ public class RobotContainer {
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
         climber = new Climber(new ClimberIOSparkMax());
-
-        // drive = new Drive(
-        // new GyroIOPigeon2(true),
-        // new ModuleIOTalonFX(0),
-        // new ModuleIOTalonFX(1),
-        // new ModuleIOTalonFX(2),
-        // new ModuleIOTalonFX(3));
-        // flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       case SIM:
@@ -132,7 +125,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
-        climber = new Climber(new ClimberIOSim() {});
+        climber = new Climber(new ClimberIO() {});
         break;
     }
 

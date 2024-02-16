@@ -18,18 +18,22 @@ public final class AprilTagConstants {
   public static final Transform3d frontCamToRobot =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(8), Units.inchesToMeters(8), Units.inchesToMeters(7)),
+              Units.inchesToMeters(11.32), Units.inchesToMeters(7.08), Units.inchesToMeters(7.8)),
           new Rotation3d(0.0, Units.degreesToRadians(-30), 0.0));
   public static final Transform3d leftCamToRobot =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-10), Units.inchesToMeters(-10), Units.inchesToMeters(8)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(-45)));
+              Units.inchesToMeters(-12.01),
+              Units.inchesToMeters(11.65),
+              Units.inchesToMeters(10.58)),
+          new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(147)));
   public static final Transform3d rightCamToRobot =
       new Transform3d(
           new Translation3d(
-              Units.inchesToMeters(-10), Units.inchesToMeters(10), Units.inchesToMeters(8)),
-          new Rotation3d(0.0, 0.0, Units.degreesToRadians(45)));
+              Units.inchesToMeters(-12.01),
+              Units.inchesToMeters(-11.65),
+              Units.inchesToMeters(10.58)),
+          new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(-147)));
   public static final Matrix<N3, N1> highResSingleTagStdDev =
       VecBuilder.fill(0.25, 0.25, Double.MAX_VALUE);
   public static final Matrix<N3, N1> normalSingleTagStdDev =
