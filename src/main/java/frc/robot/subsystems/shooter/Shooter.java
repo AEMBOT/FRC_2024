@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
+import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -24,9 +25,9 @@ public class Shooter extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                Volts.of(0.2).per(Seconds.of(1)),
+                Volts.of(0.5).per(Seconds.of(1)),
                 Volts.of(8),
-                Seconds.of(30),
+                Seconds.of(20),
                 (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> io.setVoltage(voltage.in(Volts)), null, this));
   }
@@ -53,7 +54,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVoltageCommand(double volts) {
-    return runOnce(() -> io.setVoltage(volts));
+    return run(() -> io.setVoltage(volts)).finallyDo(() -> io.setVoltage(0.0));
   }
 
   private void setVelocityRPM(double velRPM) {
@@ -63,8 +64,8 @@ public class Shooter extends SubsystemBase {
   // We're using this because the overhead of the Java Stream API sucks
   private double findMin(double[] array) {
     if (array == null || array.length == 0) return 0;
-    if (array.length == 1) return array[0];
-    else return Math.min(array[0], array[1]);
+    if (array.length == 1) return abs(array[0]);
+    else return Math.min(abs(array[0]), abs(array[1]));
   }
 
   private Command sysIDStateSet(int val) {
@@ -78,20 +79,20 @@ public class Shooter extends SubsystemBase {
         sysIDStateSet(1),
         stopCommand(),
         sysIDStateSet(2),
-        Commands.waitSeconds(2.0),
+        Commands.waitSeconds(5.0),
         sysIDStateSet(3),
         sysId.quasistatic(kReverse),
         sysIDStateSet(4),
         stopCommand(),
         sysIDStateSet(5),
-        Commands.waitSeconds(2.0),
+        Commands.waitSeconds(5.0),
         sysIDStateSet(6),
-        sysId.dynamic(kForward),
+        sysId.dynamic(kForward).withTimeout(5.0),
         sysIDStateSet(7),
         stopCommand(),
         sysIDStateSet(8),
-        Commands.waitSeconds(2.0),
+        Commands.waitSeconds(5.0),
         sysIDStateSet(9),
-        sysId.dynamic(kReverse));
+        sysId.dynamic(kReverse).withTimeout(5.0));
   }
 }

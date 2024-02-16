@@ -1,7 +1,8 @@
 package frc.robot.subsystems.shooter;
 
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
-import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
+import static com.revrobotics.CANSparkBase.IdleMode.kBrake;
+import static edu.wpi.first.wpilibj.Timer.delay;
 
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
@@ -30,6 +31,13 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.restoreFactoryDefaults();
     bottomMotorFollower.restoreFactoryDefaults();
 
+    delay(0.25);
+
+    topMotorLeader.setInverted(true);
+    topMotorFollower.setInverted(true);
+    bottomMotorLeader.setInverted(false);
+    topMotorFollower.setInverted(false);
+
     // Tune acceptable current limit, don't want to use all power if shoot while moving
     topMotorLeader.setSmartCurrentLimit(80);
     topMotorFollower.setSmartCurrentLimit(80);
@@ -41,29 +49,21 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.getEncoder().setVelocityConversionFactor(2);
     bottomMotorFollower.getEncoder().setVelocityConversionFactor(2);
 
-    topMotorLeader.setIdleMode(kCoast);
-    topMotorFollower.setIdleMode(kCoast);
-    bottomMotorLeader.setIdleMode(kCoast);
-    bottomMotorFollower.setIdleMode(kCoast);
+    topMotorLeader.setIdleMode(kBrake);
+    topMotorFollower.setIdleMode(kBrake);
+    bottomMotorLeader.setIdleMode(kBrake);
+    bottomMotorFollower.setIdleMode(kBrake);
 
     topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
     topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
-    topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 5);
-    topMotorFollower.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
-    topMotorFollower.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
-    topMotorFollower.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 5);
     bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
     bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 5);
 
     topMotorPID = topMotorLeader.getPIDController();
     bottomMotorPID = bottomMotorLeader.getPIDController();
 
-    topMotorPID.setP(1); // TODO tune
-    bottomMotorPID.setP(1);
+    topMotorPID.setP(0); // TODO tune
+    bottomMotorPID.setP(0);
 
     topMotorFollower.follow(topMotorLeader, true);
     bottomMotorFollower.follow(bottomMotorLeader, true);

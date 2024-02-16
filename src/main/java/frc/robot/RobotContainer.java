@@ -27,13 +27,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
-import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOSim;
@@ -68,15 +66,23 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
+        //        drive =
+        //            new Drive(
+        //                new GyroIONavX(),
+        //                new ModuleIOTalonFX(0),
+        //                new ModuleIOTalonFX(1),
+        //                new ModuleIOTalonFX(2),
+        //                new ModuleIOTalonFX(3),
+        //                new AprilTagVisionIOReal());
         drive =
             new Drive(
-                new GyroIONavX(),
-                new ModuleIOTalonFX(0),
-                new ModuleIOTalonFX(1),
-                new ModuleIOTalonFX(2),
-                new ModuleIOTalonFX(3),
-                new AprilTagVisionIOReal());
-        indexer = new Indexer(new IndexerIOSparkMax());
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new AprilTagVisionIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         shooter = new Shooter(new ShooterIOReal());
         // drive = new Drive(
@@ -154,9 +160,9 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    // indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
+    indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
     pivot.setDefaultCommand(pivot.getDefault());
-    shooter.setDefaultCommand(shooter.getDefault());
+    // shooter.setDefaultCommand(shooter.getDefault());
 
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     controller
@@ -170,6 +176,9 @@ public class RobotContainer {
                 .ignoringDisable(true));
     controller.y().onTrue(shooter.setVoltageCommand(10));
     controller.y().onFalse(shooter.stopCommand());
+
+    controller.leftTrigger().whileTrue(shooter.setVoltageCommand(-0.5));
+    controller.rightTrigger().whileTrue(shooter.setVoltageCommand(0.5));
   }
 
   /**
