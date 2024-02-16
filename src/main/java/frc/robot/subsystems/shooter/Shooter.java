@@ -46,7 +46,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
-    return runOnce(() -> setVelocityRPM(velRPM));
+    return run(() -> setVelocityRPM(velRPM));
   }
 
   public Command stopCommand() {
@@ -72,13 +72,13 @@ public class Shooter extends SubsystemBase {
     return Commands.sequence(
         sysId.quasistatic(kForward),
         stopCommand(),
-        Commands.waitSeconds(5.0),
+        Commands.waitSeconds(2.0),
         sysId.quasistatic(kReverse),
         stopCommand(),
-        Commands.waitSeconds(5.0),
-        sysId.dynamic(kForward).withTimeout(5.0),
+        Commands.waitSeconds(2.0),
+        sysId.dynamic(kForward),
         stopCommand(),
-        Commands.waitSeconds(5.0),
-        sysId.dynamic(kReverse).withTimeout(5.0));
+        Commands.waitSeconds(2.0),
+        sysId.dynamic(kReverse));
   }
 }
