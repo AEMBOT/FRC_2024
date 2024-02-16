@@ -59,6 +59,16 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
     bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
 
+    topMotorLeader.getEncoder().setMeasurementPeriod(8);
+    topMotorFollower.getEncoder().setMeasurementPeriod(8);
+    bottomMotorLeader.getEncoder().setMeasurementPeriod(8);
+    bottomMotorFollower.getEncoder().setMeasurementPeriod(8);
+
+    topMotorLeader.getEncoder().setAverageDepth(1);
+    topMotorFollower.getEncoder().setAverageDepth(1);
+    bottomMotorLeader.getEncoder().setAverageDepth(1);
+    bottomMotorFollower.getEncoder().setAverageDepth(1);
+
     topMotorPID = topMotorLeader.getPIDController();
     bottomMotorPID = bottomMotorLeader.getPIDController();
 

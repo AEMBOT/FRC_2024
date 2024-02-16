@@ -85,13 +85,6 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
         shooter = new Shooter(new ShooterIOReal());
-        // drive = new Drive(
-        // new GyroIOPigeon2(true),
-        // new ModuleIOTalonFX(0),
-        // new ModuleIOTalonFX(1),
-        // new ModuleIOTalonFX(2),
-        // new ModuleIOTalonFX(3));
-        // flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       case SIM:
