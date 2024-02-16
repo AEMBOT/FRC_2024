@@ -68,31 +68,17 @@ public class Shooter extends SubsystemBase {
     else return Math.min(abs(array[0]), abs(array[1]));
   }
 
-  private Command sysIDStateSet(int val) {
-    return runOnce(() -> inputs.sysIDState = val);
-  }
-
   public Command runShooterCharacterization() {
     return Commands.sequence(
-        sysIDStateSet(0),
         sysId.quasistatic(kForward),
-        sysIDStateSet(1),
         stopCommand(),
-        sysIDStateSet(2),
         Commands.waitSeconds(5.0),
-        sysIDStateSet(3),
         sysId.quasistatic(kReverse),
-        sysIDStateSet(4),
         stopCommand(),
-        sysIDStateSet(5),
         Commands.waitSeconds(5.0),
-        sysIDStateSet(6),
         sysId.dynamic(kForward).withTimeout(5.0),
-        sysIDStateSet(7),
         stopCommand(),
-        sysIDStateSet(8),
         Commands.waitSeconds(5.0),
-        sysIDStateSet(9),
         sysId.dynamic(kReverse).withTimeout(5.0));
   }
 }

@@ -167,11 +167,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    controller.y().onTrue(shooter.setVoltageCommand(10));
-    controller.y().onFalse(shooter.stopCommand());
-
-    controller.leftTrigger().whileTrue(shooter.setVoltageCommand(-3.0));
-    controller.rightTrigger().whileTrue(shooter.setVoltageCommand(3.0));
   }
 
   /**

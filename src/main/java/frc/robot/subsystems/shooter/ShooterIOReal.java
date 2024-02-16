@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
-import static com.revrobotics.CANSparkBase.IdleMode.kBrake;
+import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 import static edu.wpi.first.wpilibj.Timer.delay;
 
 import com.revrobotics.CANSparkLowLevel;
@@ -49,10 +49,10 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.getEncoder().setVelocityConversionFactor(2);
     bottomMotorFollower.getEncoder().setVelocityConversionFactor(2);
 
-    topMotorLeader.setIdleMode(kBrake);
-    topMotorFollower.setIdleMode(kBrake);
-    bottomMotorLeader.setIdleMode(kBrake);
-    bottomMotorFollower.setIdleMode(kBrake);
+    topMotorLeader.setIdleMode(kCoast);
+    topMotorFollower.setIdleMode(kCoast);
+    bottomMotorLeader.setIdleMode(kCoast);
+    bottomMotorFollower.setIdleMode(kCoast);
 
     topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
     topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
