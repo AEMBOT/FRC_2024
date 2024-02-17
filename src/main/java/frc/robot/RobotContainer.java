@@ -75,8 +75,10 @@ public class RobotContainer {
   StringSubscriber notePosChar = table.getStringTopic("note position").subscribe("center");
   DoubleSubscriber notePosX = table.getDoubleTopic("note x pixel").subscribe(0.0);
   DoubleSubscriber notePosY = table.getDoubleTopic("note y pixel").subscribe(0.0);
-  DoubleArraySubscriber notePosYArray = table.getDoubleArrayTopic("note y pixel array").subscribe(new double[] {});
-  DoubleArraySubscriber notePosXArray= table.getDoubleArrayTopic("note x pixel array").subscribe(new double[] {});
+  DoubleArraySubscriber notePosYArray =
+      table.getDoubleArrayTopic("note y pixel array").subscribe(new double[] {});
+  DoubleArraySubscriber notePosXArray =
+      table.getDoubleArrayTopic("note x pixel array").subscribe(new double[] {});
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -184,11 +186,12 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    controller.y().onTrue(
-      RotateDriveToNote.DriveToNote(drive, notePosChar.get())
-    );
-    controller.a().onTrue(
-                RotateDriveToNote.RotatToNoteWithArray(drive, notePosXArray.get(), notePosYArray.get()));
+    controller.y().onTrue(RotateDriveToNote.DriveToNote(drive, notePosChar.get()));
+    controller
+        .a()
+        .onTrue(
+            RotateDriveToNote.RotatToNoteWithArray(
+                drive, notePosXArray.get(), notePosYArray.get()));
   }
 
   /**
