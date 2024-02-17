@@ -1,10 +1,10 @@
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState.*;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IndexerConstants;
+import frc.robot.Constants.IntakeConstants;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -44,52 +44,52 @@ public class Indexer extends SubsystemBase {
   }
 
   public void indexOffIntakeOn() {
-    io.setShooterIndexer(OFF);
-    io.setIntakeIndexer(IN);
+    io.setShooterVoltage(0);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOnIntakeOn() {
-    io.setShooterIndexer(IN);
-    io.setIntakeIndexer(IN);
+    io.setShooterVoltage(IndexerConstants.indexerMotorVoltage);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOffIntakeOff() {
-    io.setIntakeIndexer(OFF);
-    io.setShooterIndexer(OFF);
+    io.setIntakeVoltage(0);
+    io.setShooterVoltage(0);
   }
 
   public void indexOffIntakeBack() {
-    io.setIntakeIndexer(OUT);
-    io.setShooterIndexer(OFF);
+    io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
+    io.setShooterVoltage(0);
   }
 
   public void indexOnIntakeOff() {
-    io.setIntakeIndexer(OFF);
-    io.setShooterIndexer(OUT);
+    io.setIntakeVoltage(0);
+    io.setShooterVoltage(-IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerIn() {
-    io.setShooterIndexer(IN);
+    io.setShooterVoltage(IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerOut() {
-    io.setShooterIndexer(OUT);
+    io.setShooterVoltage(-IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerStop() {
-    io.setShooterIndexer(OFF);
+    io.setShooterVoltage(0);
   }
 
   public void intakeIn() {
-    io.setIntakeIndexer(IN);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void intakeOut() {
-    io.setIntakeIndexer(OUT);
+    io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
   }
 
   public void intakeStop() {
-    io.setIntakeIndexer(OFF);
+    io.setIntakeVoltage(0);
   }
 
   public boolean getShootReady() {

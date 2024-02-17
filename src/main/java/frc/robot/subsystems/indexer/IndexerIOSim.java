@@ -1,12 +1,8 @@
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.Constants.IndexerConstants.indexerMotorVoltage;
-import static frc.robot.Constants.IntakeConstants.intakeMotorVoltage;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState;
 
 public class IndexerIOSim implements IndexerIO {
   private final DIOSim intakeBeamBreak = new DIOSim(0);
@@ -30,37 +26,13 @@ public class IndexerIOSim implements IndexerIO {
     inputs.shooterIndexerCurrentAmps = new double[] {indexerSim.getCurrentDrawAmps()};
   }
 
-  @Override
-  public void setShooterIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        indexerSim.setInputVoltage(0);
-        indexerAppliedVolts = 0;
-        break;
-      case IN:
-        indexerSim.setInputVoltage(indexerMotorVoltage);
-        indexerAppliedVolts = indexerMotorVoltage;
-        break;
-      case OUT:
-        indexerSim.setInputVoltage(-indexerMotorVoltage);
-        indexerAppliedVolts = -indexerMotorVoltage;
-    }
+  public void setShooterVoltage(double voltage) {
+    indexerSim.setInputVoltage(voltage);
+    indexerAppliedVolts = voltage;
   }
 
-  @Override
-  public void setIntakeIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        intakeSim.setInputVoltage(0);
-        intakeAppliedVolts = 0;
-        break;
-      case IN:
-        intakeSim.setInputVoltage(intakeMotorVoltage);
-        intakeAppliedVolts = intakeMotorVoltage;
-        break;
-      case OUT:
-        intakeSim.setInputVoltage(-intakeMotorVoltage);
-        intakeAppliedVolts = -intakeMotorVoltage;
-    }
+  public void setIntakeVoltage(double voltage) {
+    intakeSim.setInputVoltage(voltage);
+    intakeAppliedVolts = voltage;
   }
 }
