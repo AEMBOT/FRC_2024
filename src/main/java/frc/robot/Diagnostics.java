@@ -11,6 +11,11 @@ public class Diagnostics {
 
   private Diagnostics() {}
 
+  //display camera outputs
+  public static Command testCamerasCommand() {
+return 
+  };
+
   // run drivebase
   public static Command testDrivetrainCommand(Drive drive) {
     return drive.runVelocityCommand(() -> new ChassisSpeeds(1, 1, 1));
@@ -25,15 +30,31 @@ public class Diagnostics {
   public static Command testPivotCommand(Pivot pivot) {
     return pivot
         .goToAngle(Constants.PivotConstants.PIVOT_MAX_POS_RAD)
-        .andThen(pivot.goToAngle(Constants.PivotConstants.PIVOT_MIN_POS_RAD));
+        .andThen(
+            pivot
+                .goToAngle(Constants.PivotConstants.PIVOT_MIN_POS_RAD)
+                .andThen(pivot.goToAngle(1))
+                .andThen(pivot.goToAngle(-1))
+                .andThen(pivot.goToAngle(1))
+                .andThen(pivot.goToAngle(-1))
+                .andThen(pivot.goToAngle(1))
+                .andThen(pivot.goToAngle(-1))
+                .andThen(pivot.goToAngle(1))
+                .andThen(pivot.goToAngle(-1))
+                .andThen(pivot.goToAngle(1))
+                .andThen(pivot.goToAngle(-1)));
+    // PLEASE optimize my poopy ahh code this is horrible
   }
 
   // run indexer
   public static Command testIndexerCommand(Indexer indexer) {
-    return indexer.indexerOnIntakeOnCommand()
-    .andThen(indexer.indexerOffIntakeOffCommand());
+    return indexer.indexerOnIntakeOnCommand().andThen(indexer.indexerOffIntakeOffCommand());
   }
 
   // run climber
-  //    schlawg there aint no climber
+  /* climber code for when it gets pushed to main
+public static Command testClimberCommand(Climber climber) {
+  return climber.setPosition(-1).andThen(climber.setPosition(1));
+}
+*/
 }

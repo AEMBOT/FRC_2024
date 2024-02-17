@@ -139,7 +139,6 @@ public class RobotContainer {
     // Set up SysId routines
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
-
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -178,6 +177,17 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public Command getTestingCommand() {
+    return       Diagnostics.testDrivetrainCommand(drive)
+        .andThen(Diagnostics.testShooterCommand(shooter))
+        .andThen(Diagnostics.testPivotCommand(pivot))
+        .andThen(Diagnostics.testIndexerCommand(indexer))
+        /* climber code for when it gets pushed to main
+        .andThen(Diagnostics.testClimberCommand(climber))
+        */
+        ;
   }
 
   @AutoLogOutput
