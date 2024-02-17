@@ -13,9 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
 public class ClimberIOSim implements ClimberIO {
-  private static final double GEAR_RATIO = 1.5;
   private double appliedVolts = 0;
-  private boolean UpDirection = true; // boolean for climber going up or down
 
   // choosing right as the main motor and left as the follower motor
   private final DCMotor m_elevatorGearbox = DCMotor.getNEO(2);
@@ -57,40 +55,32 @@ public class ClimberIOSim implements ClimberIO {
   }
 
   @Override
-  public void updateInputs(ClimberIOInputs inputs) {
-    double currentVelocity = climberSetpoint.velocity;
-    // change 0.02 for constants.update period when merged properly in climbersetpoint definitionand
-    // feedforwardup definition
-    climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
-    double feedForwardUp =
-        climberFFModelUp.calculate(
-            climberSetpoint.position,
-            climberSetpoint.velocity,
-            (climberSetpoint.velocity - currentVelocity) / 0.02);
-    double feedForwardDown =
-        climberFFModelDown.calculate(
-            climberSetpoint.position,
-            climberSetpoint.velocity,
-            (climberSetpoint.velocity - currentVelocity) / 0.02);
+public void updateInputs(ClimberIOInputs inputs) {
+    double currentVelocity = sim.getVelocityMetersPerSecond();
+    double positionError = climberSetpoint.position - sim.getPositionMeters();
+
+    if (positionError > 0) {
+        climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
+        appliedVolts = climberFFModelUp.calculate(climberSetpoint.position, climberSetpoint.velocity,
+                (climberSetpoint.velocity - currentVelocity) / 0.02);
+    } else {
+        climberSetpoint = climberProfileDown.calculate(0.02, climberSetpoint, climberGoal);
+        appliedVolts = climberFFModelDown.calculate(climberSetpoint.position, climberSetpoint.velocity,
+                (climberSetpoint.velocity - currentVelocity) / 0.02);
+    }
+
     double pidOutput = pidController.calculate(sim.getPositionMeters(), climberSetpoint.position);
 
+    appliedVolts += pidOutput;
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    appliedVolts = feedForwardUp + pidOutput;
-    // appliedVoltsDown = feedForwardDown; //TODO: figure out if need pid for down or not
-    /*
-    if (UpDirection){
-      sim.setInputVoltage(appliedVoltsUp);
-    } else {
-      sim.setInputVoltage(appliedVoltsDown);
-    }*/
-
-    // TODO FIX ALL OF SIM
-
-    inputs.climberCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
+    inputs.climberCurrentAmps = new double[] { sim.getCurrentDrawAmps() };
     inputs.climberSetpointPosition = climberSetpoint.position;
-  }
+    inputs.climberLeftVelocityMetersPerSec = climberSetpoint.velocity;
+    inputs.climberRightVelocityMetersPerSec = climberSetpoint.velocity;
+}
+
 
   @Override
   public void setPosition(double position) {
@@ -105,8 +95,6 @@ public class ClimberIOSim implements ClimberIO {
 
   @Override
   public void resetEncoder(double position) {
-    // this does not actually reset the encoder, but I need to do it for the file to inherit
-    // climberio
     sim.setInput(0);
   }
 }
