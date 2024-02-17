@@ -19,7 +19,7 @@ public class RotateDriveToNoteCommands {
 
   }
 
-  public static Command RotatToNoteWithArray(
+  public static Command RotateToNoteWithArray(
       Drive drive, double[] notePosXArray, double[] notePosYArray) {
     return Commands.run(
         () -> {

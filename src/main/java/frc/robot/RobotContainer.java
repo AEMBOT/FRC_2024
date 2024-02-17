@@ -190,7 +190,7 @@ public class RobotContainer {
     controller
         .a()
         .onTrue(
-            RotateDriveToNoteCommands.RotatToNoteWithArray(
+            RotateDriveToNoteCommands.RotateToNoteWithArray(
                 drive, notePosXArray.get(), notePosYArray.get()));
   }
 
