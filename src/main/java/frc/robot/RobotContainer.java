@@ -20,6 +20,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -64,6 +69,14 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  NetworkTableInstance inst = NetworkTableInstance.getDefault();
+  NetworkTable table = inst.getTable("NotesDetection");
+  StringSubscriber notePosChar = table.getStringTopic("note position").subscribe("center");
+  DoubleSubscriber notePosX = table.getDoubleTopic("note x pixel").subscribe(0.0);
+  DoubleSubscriber notePosY = table.getDoubleTopic("note y pixel").subscribe(0.0);
+  DoubleArraySubscriber notePosYArray = table.getDoubleArrayTopic("note y pixel array").subscribe(new double[] {});
+  DoubleArraySubscriber notePosXArray= table.getDoubleArrayTopic("note x pixel array").subscribe(new double[] {});
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -172,10 +185,10 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     controller.y().onTrue(
-      RotateDriveToNote.DriveToNote(drive, null)
+      RotateDriveToNote.DriveToNote(drive, notePosChar.get())
     );
     controller.a().onTrue(
-                RotateDriveToNote.RotatToNoteWithArray(drive, null, null));
+                RotateDriveToNote.RotatToNoteWithArray(drive, notePosXArray.get(), notePosYArray.get()));
   }
 
   /**
