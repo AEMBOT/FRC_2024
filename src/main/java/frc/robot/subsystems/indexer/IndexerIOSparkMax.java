@@ -25,7 +25,7 @@ public class IndexerIOSparkMax implements IndexerIO {
     indexerMotorTop.restoreFactoryDefaults();
     indexerMotorBottom.restoreFactoryDefaults();
 
-    intakeMotorTop.setSmartCurrentLimit(40);
+    intakeMotorTop.setSmartCurrentLimit(60);
     intakeMotorBottom.setSmartCurrentLimit(40);
     indexerMotorTop.setSmartCurrentLimit(40);
     indexerMotorBottom.setSmartCurrentLimit(40);
