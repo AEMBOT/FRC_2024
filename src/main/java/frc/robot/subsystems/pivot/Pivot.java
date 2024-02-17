@@ -2,6 +2,7 @@ package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.Constants.UPDATE_PERIOD;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -62,6 +63,10 @@ public class Pivot extends SubsystemBase {
 
   public Command runVoltsCommand(double volts) {
     return run(() -> runVolts(volts)).finallyDo(() -> runVolts(0.0));
+  }
+
+  public Command changeGoalPosition(double velocityRadPerSec) {
+    return setPositionCommand(() -> inputs.pivotGoalPosition + (velocityRadPerSec * UPDATE_PERIOD));
   }
 
   public Command setPositionCommand(DoubleSupplier posRad) {
