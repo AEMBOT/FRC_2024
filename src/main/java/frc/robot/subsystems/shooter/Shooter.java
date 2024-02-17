@@ -1,9 +1,12 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
+import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -23,9 +26,9 @@ public class Shooter extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                null,
-                null,
-                null,
+                Volts.of(0.5).per(Seconds.of(1)),
+                Volts.of(8),
+                Seconds.of(16),
                 (state) -> Logger.recordOutput("Shooter/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> io.setVoltage(voltage.in(Volts)), null, this));
   }
@@ -36,19 +39,34 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
   }
 
-  public Command getDefaultCommand() {
+  public boolean isAtShootSpeed() {
+    return abs(shooterSpeedRPM - findMin(inputs.shooterVelocityRPM)) < 200;
+  }
+
+  public Command getDefault() {
     // If the shooter was running fast and is now coasting down,
     // we don't want to force the speed down-- preserve momentum
-    return Commands.waitUntil(() -> findMin(inputs.shooterVelocityRPM) < shooterIdleRPM)
+    return Commands.waitUntil(
+            () -> {
+              Logger.recordOutput("shooter min velocity", findMin(inputs.shooterVelocityRPM));
+              return findMin(inputs.shooterVelocityRPM) < shooterIdleRPM;
+            })
         .andThen(run(() -> setVelocityRPM(shooterIdleRPM)));
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
-    return run(() -> setVelocityRPM(velRPM));
+    // The finallyDo shooter stop sets voltage to 0, which lets the motor coast down
+    // without unintended latent power application from PID still running
+    // after the run is interrupted (ex by letting go of button)
+    return run(() -> setVelocityRPM(velRPM)).finallyDo(io::stop);
   }
 
   public Command stopCommand() {
-    return run(() -> io.setVoltage(0.0));
+    return runOnce(() -> io.setVoltage(0.0));
+  }
+
+  public Command setVoltageCommand(double volts) {
+    return run(() -> io.setVoltage(volts)).finallyDo(() -> io.setVoltage(0.0));
   }
 
   private void setVelocityRPM(double velRPM) {
@@ -58,8 +76,8 @@ public class Shooter extends SubsystemBase {
   // We're using this because the overhead of the Java Stream API sucks
   private double findMin(double[] array) {
     if (array == null || array.length == 0) return 0;
-    if (array.length == 1) return array[0];
-    else return Math.min(array[0], array[1]);
+    if (array.length == 1) return abs(array[0]);
+    else return Math.min(abs(array[0]), abs(array[1]));
   }
 
   public Command runShooterCharacterization() {

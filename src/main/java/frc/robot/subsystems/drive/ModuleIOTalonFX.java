@@ -81,40 +81,45 @@ public class ModuleIOTalonFX implements ModuleIO {
   public ModuleIOTalonFX(int index) {
     switch (index) {
       case 0:
-        driveTalon = new TalonFX(0);
-        turnTalon = new TalonFX(1);
-        cancoder = new CANcoder(2);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        driveTalon = new TalonFX(7, "*");
+        turnTalon = new TalonFX(8, "*");
+        cancoder = new CANcoder(26, "*");
+        absoluteEncoderOffset = Rotation2d.fromRadians(0.32827); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       case 1:
-        driveTalon = new TalonFX(3);
-        turnTalon = new TalonFX(4);
-        cancoder = new CANcoder(5);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        driveTalon = new TalonFX(5, "*");
+        turnTalon = new TalonFX(6, "*");
+        cancoder = new CANcoder(24, "*");
+        absoluteEncoderOffset = Rotation2d.fromRadians(-0.65654 + Math.PI); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       case 2:
-        driveTalon = new TalonFX(6);
-        turnTalon = new TalonFX(7);
-        cancoder = new CANcoder(8);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        driveTalon = new TalonFX(3, "*");
+        turnTalon = new TalonFX(4, "*");
+        cancoder = new CANcoder(25, "*");
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41586); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
-        isTurnMotorInverted = true;
+        isTurnMotorInverted = false;
         break;
       case 3:
-        driveTalon = new TalonFX(9);
-        turnTalon = new TalonFX(10);
-        cancoder = new CANcoder(11);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
-        isDriveMotorInverted = false;
+        driveTalon = new TalonFX(9, "*");
+        turnTalon = new TalonFX(2, "*");
+        cancoder = new CANcoder(23, "*");
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.29468 + Math.PI); // MUST BE CALIBRATED
+        isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
       default:
         throw new RuntimeException("Invalid module index");
     }
+
+    // Cancoder
+    var cancoderConfig = new CANcoderConfiguration();
+    cancoderConfig.MagnetSensor.MagnetOffset = absoluteEncoderOffset.getRotations();
+    cancoder.getConfigurator().apply(cancoderConfig);
 
     // Drive Configuration
     var driveConfig = new TalonFXConfiguration();
@@ -125,10 +130,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Feedback.SensorToMechanismRatio =
         (DRIVE_GEAR_RATIO) * (1.0 / (WHEEL_RADIUS * 2 * Math.PI));
 
-    driveConfig.Slot0.kV = 2.0; // TODO SysID
-    driveConfig.Slot0.kA = 0.0;
-    driveConfig.Slot0.kS = 0.0;
-    driveConfig.Slot0.kP = 0.25; // TODO SysID and hand tune
+    driveConfig.Slot0.kV = 2.28;
+    driveConfig.Slot0.kA = 0.08;
+    driveConfig.Slot0.kS = 0.25;
+    driveConfig.Slot0.kP = 2.5; // TODO hand tune
     driveConfig.Slot0.kD = 0.0;
 
     driveTalon.getConfigurator().apply(driveConfig);
@@ -143,23 +148,19 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     turnConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
     turnConfig.Feedback.RotorToSensorRatio = TURN_GEAR_RATIO;
+    turnConfig.Feedback.SensorToMechanismRatio = 1;
     turnConfig.Feedback.FeedbackRotorOffset =
         0.0; // Is this right? I think CANcoder config handles this
 
-    turnConfig.Slot0.kV = 0.0; // TODO SysID
+    turnConfig.Slot0.kV = 2.5678;
     turnConfig.Slot0.kA = 0.0;
-    turnConfig.Slot0.kS = 0.0;
-    turnConfig.Slot0.kP = 50.0; // TODO SysID and hand tune
-    turnConfig.Slot0.kD = 0.0;
+    turnConfig.Slot0.kS = 0.16677;
+    turnConfig.Slot0.kP = 75;
+    turnConfig.Slot0.kD = 0;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     turnTalon.getConfigurator().apply(turnConfig);
     setTurnBrakeMode(true);
-
-    // Cancoder
-    var cancoderConfig = new CANcoderConfiguration();
-    cancoderConfig.MagnetSensor.MagnetOffset = absoluteEncoderOffset.getRotations();
-    cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
     // Status Signals
     timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
@@ -214,19 +215,20 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
     inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
-    inputs.turnPosition =
-        Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
-    inputs.turnVelocityRadPerSec =
-        Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
+    inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
+    inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());
     inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
     inputs.turnCurrentAmps = new double[] {turnCurrent.getValueAsDouble()};
 
     inputs.odometryTimestamps =
-        timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+        timestampQueue.stream().mapToDouble((Double value) -> value).limit(100).toArray();
     inputs.odometryDrivePositionsMeters =
-        drivePositionQueue.stream().mapToDouble(Double::doubleValue).toArray();
+        drivePositionQueue.stream().mapToDouble(Double::doubleValue).limit(100).toArray();
     inputs.odometryTurnPositions =
-        turnPositionQueue.stream().map(Rotation2d::fromRotations).toArray(Rotation2d[]::new);
+        turnPositionQueue.stream()
+            .map(Rotation2d::fromRotations)
+            .limit(100)
+            .toArray(Rotation2d[]::new);
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();

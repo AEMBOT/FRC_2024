@@ -42,33 +42,33 @@ public final class Constants {
 
   public static final double UPDATE_PERIOD = 0.02;
 
-  public final class PivotConstants {
-    public static final double PIVOT_MAX_POS_RAD = 0;
-    public static final double PIVOT_MIN_POS_RAD = 0;
+  public static final class PivotConstants {
+    public static final double PIVOT_MAX_POS_RAD = 2.20;
+    public static final double PIVOT_MIN_POS_RAD = 0.40;
   }
 
   public static final class IndexerConstants {
     /* PORTS */
-    public static final int indexerMotorPortBottom = 0; // PLACEHOLDER VALUE
-    public static final int indexerMotorPortTop = 1; // PLACEHOLDER VALUE
-    public static final int indexerBeamBrake = 1; // PLACEHOLDER VALUE
+    public static final int indexerMotorPortBottom = 16;
+    public static final int indexerMotorPortTop = 19;
+    public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 1; // PLACEHOLDER VALUE
+    public static final double indexerMotorVoltage = 2;
   }
 
   public static final class IntakeConstants {
-    public static final int intakeMotorPortBottom = 2; // PLACEHOLDER VALUE
-    public static final int intakeMotorPortTop = 3; // PLACEHOLDER VALUE
-    public static final int intakeBeamBrake = 2; // PLACEHOLDER VALUE
+    public static final int intakeMotorPortBottom = 13;
+    public static final int intakeMotorPortTop = 12;
+    public static final int intakeBeamBrake = 7;
 
     /*VOLTAGES*/
-    public static final double intakeMotorVoltage = 1; // PLACEHOLDER VALUE
+    public static final double intakeMotorVoltage = 10;
   }
 
   public static final class ShooterConstants {
     public static final double shooterSpeedRPM = 7840;
-    public static final double shooterIdleRPM = 1960;
+    public static final double shooterIdleRPM = 980;
   }
 
   public static final AprilTagFieldLayout aprilTagFieldLayout =

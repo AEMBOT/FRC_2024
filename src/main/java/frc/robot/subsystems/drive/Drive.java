@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -52,7 +53,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.14); // MK4i L2+
+  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.5); // MK4i L3+
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(22.75); // 28 in square chassis
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(22.75);
   private static final double DRIVE_BASE_RADIUS =
@@ -151,8 +152,8 @@ public class Drive extends SubsystemBase {
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null, // Default ramp rate is acceptable
-                Volts.of(4), // Reduce dynamic voltage to 4 to prevent motor brownout
-                Seconds.of(5),
+                Volts.of(6), // Reduce dynamic voltage to 6 to prevent motor brownout
+                Seconds.of(20),
                 // Log state with Phoenix SignalLogger class
                 (state) -> SignalLogger.writeString("state", state.toString())),
             new SysIdRoutine.Mechanism(
@@ -192,7 +193,7 @@ public class Drive extends SubsystemBase {
     // vision also corrects for async odo so maybe just cope
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
+    int sampleCount = min(sampleTimestamps.length, gyroInputs.odometryYawPositions.length);
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
@@ -418,14 +419,11 @@ public class Drive extends SubsystemBase {
     return Commands.sequence(
         this.runOnce(SignalLogger::start),
         moduleSteerRoutine.quasistatic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.quasistatic(kReverse),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.dynamic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.dynamic(kReverse),
         this.runOnce(SignalLogger::stop));
   }
@@ -434,14 +432,11 @@ public class Drive extends SubsystemBase {
     return Commands.sequence(
         this.runOnce(SignalLogger::start),
         driveRoutine.quasistatic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.quasistatic(kReverse),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.dynamic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.dynamic(kReverse),
         this.runOnce(SignalLogger::stop));
   }
