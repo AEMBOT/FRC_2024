@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.climber.ClimberIO.ClimberIOInputs;
+import org.littletonrobotics.junction.Logger;
 
 public class ClimberIOSparkMax implements ClimberIO {
   private static final double GEAR_RATIO = 15;
@@ -19,6 +20,8 @@ public class ClimberIOSparkMax implements ClimberIO {
 
   private final LinearFilter currentFilterLeft = LinearFilter.singlePoleIIR(0.2, 0.02);
   private final LinearFilter currentFilterRight = LinearFilter.singlePoleIIR(0.2, 0.02);
+  private double currentFilterLeftValue = 0.0;
+  private double currentFilterRightValue = 0.0;
 
   private final CANSparkMax m_winchMotorRight =
       new CANSparkMax(winchMotorRightCanID, MotorType.kBrushless);
@@ -26,8 +29,8 @@ public class ClimberIOSparkMax implements ClimberIO {
       new CANSparkMax(winchMotorLeftCanID, MotorType.kBrushless);
   private final RelativeEncoder encoderRight = m_winchMotorRight.getEncoder();
   private final RelativeEncoder encoderLeft = m_winchMotorLeft.getEncoder();
-  private final PIDController pidControllerUp = new PIDController(10, 0, 0); // TODO: tune
-  private final PIDController pidControllerDown = new PIDController(20, 0, 0); // TODO: tune
+  private final PIDController pidControllerUp = new PIDController(100, 0, 0); // TODO: tune
+  private final PIDController pidControllerDown = new PIDController(200, 0, 0); // TODO: tune
 
   public ClimberIOSparkMax() {
     m_winchMotorLeft.restoreFactoryDefaults();
@@ -68,8 +71,13 @@ public class ClimberIOSparkMax implements ClimberIO {
     inputs.climberCurrentAmps =
         new double[] {m_winchMotorLeft.getOutputCurrent(), m_winchMotorRight.getOutputCurrent()};
     inputs.climberSetpointPosition = climberSetpoint;
-
     inputs.openLoopStatus = openLoop;
+
+    currentFilterLeftValue = currentFilterLeft.calculate(m_winchMotorLeft.getOutputCurrent());
+    currentFilterRightValue = currentFilterRight.calculate(m_winchMotorRight.getOutputCurrent());
+
+    Logger.recordOutput("Current Filter Left Calculated Value", currentFilterLeftValue);
+    Logger.recordOutput("Current Filter Right Calculated Value", currentFilterRightValue);
   }
 
   @Override
@@ -113,7 +121,6 @@ public class ClimberIOSparkMax implements ClimberIO {
   }
 
   public boolean isCurrentLimited() {
-    return currentFilterLeft.calculate(m_winchMotorLeft.getOutputCurrent()) > 15
-        && currentFilterRight.calculate(m_winchMotorRight.getAppliedOutput()) > 15;
+    return currentFilterLeftValue > 20 && currentFilterRightValue > 20;
   }
 }

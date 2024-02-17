@@ -46,7 +46,7 @@ public class Climber extends SubsystemBase {
   }
 
   public Command setPositionCommand(double targetPosition) {
-    return run(() -> setPosition(targetPosition));
+    return run(() -> setPosition(targetPosition)).finallyDo(() -> io.setVoltage(0.0));
   }
 
   public Command getHomingCommand() {

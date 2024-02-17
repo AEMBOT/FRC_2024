@@ -55,18 +55,24 @@ public class ClimberIOSim implements ClimberIO {
   }
 
   @Override
-public void updateInputs(ClimberIOInputs inputs) {
+  public void updateInputs(ClimberIOInputs inputs) {
     double currentVelocity = sim.getVelocityMetersPerSecond();
     double positionError = climberSetpoint.position - sim.getPositionMeters();
 
     if (positionError > 0) {
-        climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
-        appliedVolts = climberFFModelUp.calculate(climberSetpoint.position, climberSetpoint.velocity,
-                (climberSetpoint.velocity - currentVelocity) / 0.02);
+      climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
+      appliedVolts =
+          climberFFModelUp.calculate(
+              climberSetpoint.position,
+              climberSetpoint.velocity,
+              (climberSetpoint.velocity - currentVelocity) / 0.02);
     } else {
-        climberSetpoint = climberProfileDown.calculate(0.02, climberSetpoint, climberGoal);
-        appliedVolts = climberFFModelDown.calculate(climberSetpoint.position, climberSetpoint.velocity,
-                (climberSetpoint.velocity - currentVelocity) / 0.02);
+      climberSetpoint = climberProfileDown.calculate(0.02, climberSetpoint, climberGoal);
+      appliedVolts =
+          climberFFModelDown.calculate(
+              climberSetpoint.position,
+              climberSetpoint.velocity,
+              (climberSetpoint.velocity - currentVelocity) / 0.02);
     }
 
     double pidOutput = pidController.calculate(sim.getPositionMeters(), climberSetpoint.position);
@@ -75,12 +81,11 @@ public void updateInputs(ClimberIOInputs inputs) {
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
 
-    inputs.climberCurrentAmps = new double[] { sim.getCurrentDrawAmps() };
+    inputs.climberCurrentAmps = new double[] {sim.getCurrentDrawAmps()};
     inputs.climberSetpointPosition = climberSetpoint.position;
     inputs.climberLeftVelocityMetersPerSec = climberSetpoint.velocity;
     inputs.climberRightVelocityMetersPerSec = climberSetpoint.velocity;
-}
-
+  }
 
   @Override
   public void setPosition(double position) {
