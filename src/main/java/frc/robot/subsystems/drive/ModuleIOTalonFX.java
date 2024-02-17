@@ -130,10 +130,10 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Feedback.SensorToMechanismRatio =
         (DRIVE_GEAR_RATIO) * (1.0 / (WHEEL_RADIUS * 2 * Math.PI));
 
-    driveConfig.Slot0.kV = 2.0; // TODO SysID
-    driveConfig.Slot0.kA = 0.0;
-    driveConfig.Slot0.kS = 0.0;
-    driveConfig.Slot0.kP = 0.25; // TODO SysID and hand tune
+    driveConfig.Slot0.kV = 2.28;
+    driveConfig.Slot0.kA = 0.08;
+    driveConfig.Slot0.kS = 0.25;
+    driveConfig.Slot0.kP = 2.5; // TODO hand tune
     driveConfig.Slot0.kD = 0.0;
 
     driveTalon.getConfigurator().apply(driveConfig);
@@ -152,11 +152,11 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.Feedback.FeedbackRotorOffset =
         0.0; // Is this right? I think CANcoder config handles this
 
-    turnConfig.Slot0.kV = 0.0; // TODO SysID
+    turnConfig.Slot0.kV = 2.5678;
     turnConfig.Slot0.kA = 0.0;
-    turnConfig.Slot0.kS = 0.0;
-    turnConfig.Slot0.kP = 50.0; // TODO SysID and hand tune
-    turnConfig.Slot0.kD = 0.0;
+    turnConfig.Slot0.kS = 0.16677;
+    turnConfig.Slot0.kP = 75;
+    turnConfig.Slot0.kD = 0;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     turnTalon.getConfigurator().apply(turnConfig);
@@ -221,11 +221,14 @@ public class ModuleIOTalonFX implements ModuleIO {
     inputs.turnCurrentAmps = new double[] {turnCurrent.getValueAsDouble()};
 
     inputs.odometryTimestamps =
-        timestampQueue.stream().mapToDouble((Double value) -> value).toArray();
+        timestampQueue.stream().mapToDouble((Double value) -> value).limit(100).toArray();
     inputs.odometryDrivePositionsMeters =
-        drivePositionQueue.stream().mapToDouble(Double::doubleValue).toArray();
+        drivePositionQueue.stream().mapToDouble(Double::doubleValue).limit(100).toArray();
     inputs.odometryTurnPositions =
-        turnPositionQueue.stream().map(Rotation2d::fromRotations).toArray(Rotation2d[]::new);
+        turnPositionQueue.stream()
+            .map(Rotation2d::fromRotations)
+            .limit(100)
+            .toArray(Rotation2d[]::new);
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();

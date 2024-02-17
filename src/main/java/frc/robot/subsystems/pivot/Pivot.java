@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -20,6 +21,8 @@ public class Pivot extends SubsystemBase {
 
   public Pivot(PivotIO io) {
     this.io = io;
+
+    new Trigger(() -> inputs.openLoopStatus).onFalse(runOnce(io::resetExponentialProfile));
 
     // Configure SysId
     sysId =
@@ -40,8 +43,7 @@ public class Pivot extends SubsystemBase {
 
   @AutoLogOutput
   public boolean inHandoffZone() {
-    return Units.degreesToRadians(30) < inputs.pivotAbsolutePositionRad
-        && inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
+    return inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -67,7 +69,12 @@ public class Pivot extends SubsystemBase {
   }
 
   public Command getDefault() {
-    return setPositionCommand(() -> Units.degreesToRadians(40));
+    // return setPositionCommand(() -> Units.degreesToRadians(40));
+    return defer(
+        () -> {
+          double holdPos = inputs.pivotAbsolutePositionRad;
+          return setPositionCommand(() -> holdPos);
+        });
   }
 
   // These functions should only be accessed through command mutexing, hence private

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
+import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -38,10 +39,18 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
   }
 
+  public boolean isAtShootSpeed() {
+    return abs(shooterSpeedRPM - findMin(inputs.shooterVelocityRPM)) < 200;
+  }
+
   public Command getDefault() {
     // If the shooter was running fast and is now coasting down,
     // we don't want to force the speed down-- preserve momentum
-    return Commands.waitUntil(() -> findMin(inputs.shooterVelocityRPM) < shooterIdleRPM)
+    return Commands.waitUntil(
+            () -> {
+              Logger.recordOutput("shooter min velocity", findMin(inputs.shooterVelocityRPM));
+              return findMin(inputs.shooterVelocityRPM) < shooterIdleRPM;
+            })
         .andThen(run(() -> setVelocityRPM(shooterIdleRPM)));
   }
 

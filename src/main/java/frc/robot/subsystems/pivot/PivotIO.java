@@ -29,4 +29,6 @@ public interface PivotIO {
 
   /** Stop in open loop. */
   public default void stop() {}
+
+  public default void resetExponentialProfile() {}
 }

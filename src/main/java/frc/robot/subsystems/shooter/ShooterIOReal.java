@@ -38,6 +38,11 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.setInverted(false);
     topMotorFollower.setInverted(false);
 
+    topMotorLeader.enableVoltageCompensation(10.0);
+    topMotorFollower.enableVoltageCompensation(10.0);
+    bottomMotorLeader.enableVoltageCompensation(10.0);
+    bottomMotorFollower.enableVoltageCompensation(10.0);
+
     // Tune acceptable current limit, don't want to use all power if shoot while moving
     topMotorLeader.setSmartCurrentLimit(80);
     topMotorFollower.setSmartCurrentLimit(80);
@@ -74,10 +79,10 @@ public class ShooterIOReal implements ShooterIO {
     topMotorPID = topMotorLeader.getPIDController();
     bottomMotorPID = bottomMotorLeader.getPIDController();
 
-    topMotorPID.setP(1e-6); // TODO tune
-    bottomMotorPID.setP(1e-6);
-    topMotorPID.setFF(0.0010967);
-    bottomMotorPID.setFF(0.0010492);
+    topMotorPID.setP(1e-4); // TODO tune
+    bottomMotorPID.setP(1e-4);
+    topMotorPID.setFF(1.05 * 0.0010967 / 10.0); // Divide by 10 because of voltage compensation
+    bottomMotorPID.setFF(1.05 * 0.0010492 / 10.0); // FF needs fudging???
 
     topMotorFollower.follow(topMotorLeader, true);
     bottomMotorFollower.follow(bottomMotorLeader, true);
