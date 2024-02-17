@@ -55,7 +55,10 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
-    return run(() -> setVelocityRPM(velRPM));
+    // The finallyDo shooter stop sets voltage to 0, which lets the motor coast down
+    // without unintended latent power application from PID still running
+    // after the run is interrupted (ex by letting go of button)
+    return run(() -> setVelocityRPM(velRPM)).finallyDo(io::stop);
   }
 
   public Command stopCommand() {
