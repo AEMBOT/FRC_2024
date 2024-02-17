@@ -88,15 +88,17 @@ public final class Constants {
       }
     }
   }
-  public final class shootingSpeakerConstants{
+
+  public final class shootingSpeakerConstants {
     public static double kP = 0;
     public static double kI = 0;
     public static double kD = 0;
     public static double maxVelocity = 0;
     public static double maxAcceleration = 0;
-    public static double[][] shooterInterpolationPoints = new double[][]{
-            new double[]{0,0},
-            new double[]{1,1} // Guess what we need the whole robot for?
-    };
+    public static double[][] shooterInterpolationPoints =
+        new double[][] {
+          new double[] {0, 0},
+          new double[] {1, 1} // Guess what we need the whole robot for?
+        };
   }
 }
