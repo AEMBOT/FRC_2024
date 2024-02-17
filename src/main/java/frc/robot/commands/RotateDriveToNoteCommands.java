@@ -9,16 +9,6 @@ import frc.robot.subsystems.drive.Drive;
 public class RotateDriveToNoteCommands {
 
   private RotateDriveToNoteCommands() {
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable table = inst.getTable("NotesDetection");
-    StringSubscriber notePosChar = table.getStringTopic("note position").subscribe("center");
-    DoubleSubscriber notePosX = table.getDoubleTopic("note x pixel").subscribe(0.0);
-    DoubleSubscriber notePosY = table.getDoubleTopic("note y pixel").subscribe(0.0);
-    DoubleArraySubscriber notePosYArray =
-        table.getDoubleArrayTopic("note y pixel array").subscribe(new double[] {});
-    DoubleArraySubscriber notePosXArray =
-        table.getDoubleArrayTopic("note x pixel array").subscribe(new double[] {});
-
     // default values need to be center and center (like 50, 50 or something)
     // need to build in logic to take left, right, center of closest (y value) and/or xpixel based
     // on closest
