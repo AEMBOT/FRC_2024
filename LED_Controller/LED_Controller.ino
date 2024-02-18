@@ -1,6 +1,12 @@
 //FRC 2024 LED controller, team 6443 AEMBOT, written by c2bVids
 
 /*
+~Version History~
+ V1 - Added main functions
+ V2 - Added more comments, version history, and off button support
+*/
+
+/*
 Possible CHARACTERS that can be sent:
 
 ~Alliance Colors~
@@ -39,7 +45,7 @@ Send characters through the serial port at 115200 baud, not too fast though plea
 
 #define MountedPin 3
 //define which pin controls the Mounted LEDs
-#define MountedLength 20
+#define MountedLength 58
 //define how long the Mounted LED strip is
 
 Adafruit_NeoPixel Underglow = Adafruit_NeoPixel(UnderglowLength, UnderglowPin, NEO_GRB + NEO_KHZ800);
@@ -47,10 +53,14 @@ Adafruit_NeoPixel Underglow = Adafruit_NeoPixel(UnderglowLength, UnderglowPin, N
 Adafruit_NeoPixel Mounted = Adafruit_NeoPixel(MountedLength, MountedPin, NEO_GRB + NEO_KHZ800);
 //declare the Mounted strip
 
+#define ButtonPin 4
+//which pin the button is connected to
+
 int shift = 0;
 //the value that offsets the patterns during animation
 
 int setLength = 10;
+
 //how long each repeating section of pattern is
 
 int speed = 45;
@@ -77,6 +87,8 @@ void setup() { //setup function, to run once then jump to the 'loop' function
   //declare the pin that controls the Underglow LED strip as an output pin
   pinMode(MountedPin, OUTPUT);
   //declare the pin that controls the Mounted LED strip as an output pin
+  pinMode(ButtonPin, INPUT);
+  //declare the pin that reads the button as an input pin
 
   turnOn(41, 20, 60, 112, 203);
   //run a function to turn on both strips of LEDs in a cool pattern with color (60, 112, 203), also known as AEMlight
@@ -85,6 +97,19 @@ void setup() { //setup function, to run once then jump to the 'loop' function
 
     getColor();
     //gets a viable color, speed, or function sent via the Serial port
+
+    if (digitalRead(ButtonPin) != HIGH) { //off button
+
+      Underglow.clear();
+      //off
+      Underglow.show();
+      //off
+      Mounted.clear();
+      //off
+      Mounted.show();
+      //off?
+
+    }
 
   }
 
@@ -109,25 +134,41 @@ float modulo(float a, int n) { //modulo function with support for a float input,
 
 void loop() { //loop function, to run indefinitally unless told otherwise
 
-  getColor();
-  //gets a viable color, speed, or function sent via the Serial port
+  while (digitalRead(ButtonPin) == HIGH) { //while not off
 
-  if (red != 0 || green != 0 || blue != 0) { //check if the current color isn't 'off'
+    getColor();
+    //gets a viable color, speed, or function sent via the Serial port
 
-    sawtoothFade(red, green, blue);
-    //makes a sawtooth pattern on the LED strips
+    if (red != 0 || green != 0 || blue != 0) { //check if the current color isn't 'off'
 
-    shift = modulo(shift+-1, setLength);
-    //increments the shift variable, moving the animation, but doesn't let the variable go over the pattern length to save memory
+      sawtoothFade(red, green, blue);
+      //makes a sawtooth pattern on the LED strips
 
-    delay(speed);
-    //delay so the shift between frames isn't instant
+      shift = modulo(shift+-1, setLength);
+      //increments the shift variable, moving the animation, but doesn't let the variable go over the pattern length to save memory
+
+      delay(speed);
+      //delay so the shift between frames isn't instant
+    }
+
+  }
+
+  while(1) { //off button
+
+    Underglow.clear();
+    //off
+    Underglow.show();
+    //off?
+    Mounted.clear();
+    //off
+    Mounted.show();
+    //off!
 
   }
 
 }
 
-void turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) { //function to turn on the LED strips, but *cool*
+int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) { //function to turn on the LED strips, but *cool*
 
   for (int i=0; i<UnderglowLength; i++) { //loops through all of the pixel indexes on the Underglow LED strips
 
@@ -139,6 +180,12 @@ void turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) 
 
     delay(UnderglowSpeed);
     //delay so the strip doesn't just light up all at once
+
+    if (digitalRead(ButtonPin) != HIGH) {
+      Underglow.clear();
+      Underglow.show();
+      return 0;
+    }
 
   }
 
@@ -156,7 +203,17 @@ void turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) 
     delay(MountedSpeed);
     //delay so the strip doesn't just light up all at once
 
+    if (digitalRead(ButtonPin) != HIGH) {
+      Underglow.clear();
+      Underglow.show();
+      Mounted.clear();
+      Mounted.show();
+      return 0;
+    }
+
   }
+
+  return 0;
 
 }
 
@@ -189,7 +246,7 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
 
       red = 255;
       //red
-      green = 40;
+      green = 100;
       //some green
       blue = 0;
       //no blue
@@ -292,7 +349,7 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
       Mounted.show();
       //t̶a̶s̶t̶e̶ show the rainbow
 
-    }
+    } 
 
   }
 
