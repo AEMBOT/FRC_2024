@@ -13,7 +13,9 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -185,6 +187,18 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(indexer.intakeInCommand());
     // "Intake Out" - Indexer Manual Run
     controller.leftBumper().whileTrue(indexer.indexerInCommand());
+
+    // Auto Rotation Lock Shooter Pivot Interp
+    controller
+        .a()
+        .whileTrue(
+            shootSpeaker(
+                drive,
+                pivot,
+                drive::getPose,
+                getSpeaker(),
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX()));
 
     // TODO what button IDs are these
     // Z, climb up
