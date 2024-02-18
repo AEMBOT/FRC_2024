@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -15,6 +16,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.pivot.Pivot;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.Constants.FieldConstants;
 
 public class TrapClimbingCommands {
  //center with vision
@@ -24,12 +26,10 @@ public class TrapClimbingCommands {
  //bring climber down
  //once thats done sequential command for bring pivot down
 
- public static Command DriveAndClimb(Drive drive, Climber climber, Pivot pivot) {
+    public static Command DriveAndClimb(Drive drive, Climber climber, Pivot pivot) {
     //TODO: change values for pivot and climber setpoints to realistic positions
-    return Commands.run(
+        return Commands.run(
         ()->{
-        boolean reachedCenter = false;
-        boolean reachedChain = false;
         boolean isFlipped =
         DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
@@ -38,29 +38,24 @@ public class TrapClimbingCommands {
         //center to the trap
                 Commands.run(
                     () -> 
-                drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-                0, 
-                0,
-                0,
-                isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()))).until(() -> reachedCenter) //center drivebase to apriltag
+                drive.pathFindingCommand(
+                    isFlipped
+                        ? FieldConstants.RED_TRAP_CHAIN_POSE
+                        : FieldConstants.BLUE_TRAP_CHAIN_POSE) //center drivebase to trap
                 .andThen(
                 new WaitCommand(0.5) //wait .5 seconds after, only for testing
                 .andThen(
-                    Commands.run(()-> drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-                        0, 
-                        0,
-                        0,
+                    drive.pathFindingCommand(
                         isFlipped
-                        ?  drive.getRotation().plus(new Rotation2d(Math.PI))
-                        :drive.getRotation()))).until(() -> reachedChain) //drivebase translation to chain
+                        ?FieldConstants.RED_TRAP_CENTER_POSE
+                        : FieldConstants.BLUE_TRAP_CHAIN_POSE
+                    ) //drivebase translation to chain
                 )
                 .andThen(
                 climber.setPositionCommand(4) //pull down climber after drivebase translation
                 .andThen(
                 pivot.setPositionCommand(()-> 70) //pull down pivot after climber pull down
-            ))));
+            )))));
         });     
     }
 }

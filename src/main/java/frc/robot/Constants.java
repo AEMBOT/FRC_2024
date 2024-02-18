@@ -15,6 +15,8 @@ package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -89,6 +91,10 @@ public final class Constants {
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
     public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
+    public static final Pose2d BLUE_TRAP_CENTER_POSE = new Pose2d(0,0 , Rotation2d.fromDegrees(180)); //TODO: Get values for the 4 below
+    public static final Pose2d RED_TRAP_CENTER_POSE = new Pose2d(0,0,Rotation2d.fromDegrees(180));
+    public static final Pose2d BLUE_TRAP_CHAIN_POSE = new Pose2d(0,0 , Rotation2d.fromDegrees(180));
+    public static final Pose2d RED_TRAP_CHAIN_POSE = new Pose2d(0,0,Rotation2d.fromDegrees(180));
 
     public static Translation2d getSpeaker() {
       if (DriverStation.getAlliance().isPresent()) {
