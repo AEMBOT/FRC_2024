@@ -6,7 +6,6 @@ import static frc.robot.Constants.IntakeConstants.*;
 
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState;
 
 public class IndexerIOSparkMax implements IndexerIO {
   private final CANSparkMax indexerMotorTop = new CANSparkMax(indexerMotorPortTop, kBrushless);
@@ -54,30 +53,11 @@ public class IndexerIOSparkMax implements IndexerIO {
         new double[] {indexerMotorTop.getOutputCurrent(), indexerMotorBottom.getOutputCurrent()};
   }
 
-  @Override
-  public void setShooterIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        indexerMotorTop.setVoltage(0);
-        break;
-      case IN:
-        indexerMotorTop.setVoltage(indexerMotorVoltage);
-      case OUT:
-        indexerMotorTop.setVoltage(-indexerMotorVoltage);
-    }
+  public void setShooterVoltage(double voltage) {
+    indexerMotorTop.setVoltage(voltage);
   }
 
-  @Override
-  public void setIntakeIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        intakeMotorTop.setVoltage(0);
-        break;
-      case IN:
-        intakeMotorTop.setVoltage(intakeMotorVoltage);
-        break;
-      case OUT:
-        intakeMotorTop.setVoltage(-intakeMotorVoltage);
-    }
+  public void setIntakeVoltage(double voltage) {
+    intakeMotorTop.setVoltage(voltage);
   }
 }
