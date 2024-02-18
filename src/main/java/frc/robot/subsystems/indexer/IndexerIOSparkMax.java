@@ -29,10 +29,10 @@ public class IndexerIOSparkMax implements IndexerIO {
     indexerMotorTop.setSmartCurrentLimit(40);
     indexerMotorBottom.setSmartCurrentLimit(40);
 
+    indexerMotorTop.setInverted(true);
+    indexerMotorBottom.setInverted(true);
     intakeMotorTop.setInverted(true);
     intakeMotorBottom.setInverted(true);
-    indexerMotorTop.setInverted(false);
-    indexerMotorBottom.setInverted(false);
 
     indexerMotorBottom.follow(indexerMotorTop);
     intakeMotorBottom.follow(intakeMotorTop);

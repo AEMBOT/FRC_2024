@@ -66,7 +66,8 @@ public class Pivot extends SubsystemBase {
   }
 
   public Command changeGoalPosition(double velocityRadPerSec) {
-    return setPositionCommand(() -> inputs.pivotGoalPosition + (velocityRadPerSec * UPDATE_PERIOD));
+    return setPositionCommand(() -> inputs.pivotGoalPosition + (velocityRadPerSec * UPDATE_PERIOD))
+        .finallyDo(io::resetExponentialProfile);
   }
 
   public Command setPositionCommand(DoubleSupplier posRad) {

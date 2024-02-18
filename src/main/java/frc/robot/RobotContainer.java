@@ -79,9 +79,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(2),
                 new ModuleIOTalonFX(3),
                 new AprilTagVisionIOReal());
-        indexer = new Indexer(new IndexerIO() {});
-        pivot = new Pivot(new PivotIO() {});
-        shooter = new Shooter(new ShooterIO() {});
+        indexer = new Indexer(new IndexerIOSparkMax());
+        pivot = new Pivot(new PivotIOReal());
+        shooter = new Shooter(new ShooterIOReal());
         climber = new Climber(new ClimberIOSparkMax());
         break;
 
