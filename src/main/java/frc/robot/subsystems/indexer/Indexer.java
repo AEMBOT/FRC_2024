@@ -63,11 +63,6 @@ public class Indexer extends SubsystemBase {
     io.setShooterVoltage(0);
   }
 
-  public void indexOnIntakeOff() {
-    io.setIntakeVoltage(0);
-    io.setShooterVoltage(-IndexerConstants.indexerMotorVoltage);
-  }
-
   public void indexerIn() {
     io.setShooterVoltage(IndexerConstants.indexerMotorVoltage);
   }
@@ -98,7 +93,11 @@ public class Indexer extends SubsystemBase {
 
   // Commands
   public Command shootCommand() {
-    return run(this::indexOnIntakeOff);
+    return run(
+        () -> {
+          io.setShooterVoltage(8.0);
+          io.setIntakeVoltage(0.0);
+        });
   }
 
   public Command intakeInCommand() {
