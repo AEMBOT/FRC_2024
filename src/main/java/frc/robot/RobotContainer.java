@@ -13,13 +13,15 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -37,11 +39,14 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -152,24 +157,48 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -controller.getRightX(),
+            () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
     indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Subwoofer
     controller
         .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
+        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)).until(pivot::atGoal));
+    // Trap
+    controller
+        .y()
+        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)).until(pivot::atGoal));
+    // Amp
+    controller
+        .x()
+        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)).until(pivot::atGoal));
 
-    controller.rightTrigger().whileTrue(climber.runVoltsCommand(10.0));
-    controller.leftTrigger().whileTrue(climber.runVoltsCommand(-10.0));
+    // Climb Manual Up
+    controller.povLeft().whileTrue(climber.runVoltsCommand(6.0));
+    // Climb Manual Down
+    controller.povRight().whileTrue(climber.runVoltsCommand(-6.0));
+
+    // Intake Manual In
+    controller.rightBumper().whileTrue(indexer.intakeInCommand());
+    // "Intake Out" - Indexer Manual Run
+    controller.leftBumper().whileTrue(indexer.indexerInCommand());
+
+    // TODO what button IDs are these
+    // Z, climb up
+    controller.button(20).whileTrue(climber.setPositionCommand(0.75));
+    // C, climb down
+    controller.button(21).whileTrue(climber.setPositionCommand(0.05));
+
+    controller
+        .rightTrigger()
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(shooterSpeedRPM)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
   }
 
   /**
