@@ -16,6 +16,7 @@ package frc.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = Mode.SIM;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -89,16 +90,20 @@ public final class Constants {
     }
   }
 
-  public final class shootingSpeakerConstants {
-    public static double kP = 0;
+  public static final class shootingSpeakerConstants {
+    public static double kP = 5;
     public static double kI = 0;
     public static double kD = 0;
-    public static double maxVelocity = 0;
-    public static double maxAcceleration = 0;
+    public static double maxVelocity = 1;
+    public static double maxAcceleration = 1;
     public static double[][] shooterInterpolationPoints =
         new double[][] {
-          new double[] {0, 0},
-          new double[] {1, 1} // Guess what we need the whole robot for?
+          new double[] {1.0, Units.degreesToRadians(60)},
+          new double[] {2.0, Units.degreesToRadians(40)},
+          new double[] {3.0, Units.degreesToRadians(30)},
+          new double[] {4.0, Units.degreesToRadians(23)},
+          new double[] {4.85, 0.360},
+          new double[] {3.45, 0.483}
         };
   }
 }

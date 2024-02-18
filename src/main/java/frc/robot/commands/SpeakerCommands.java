@@ -22,12 +22,12 @@ import java.util.function.Supplier;
 public class SpeakerCommands {
   private static final double DEADBAND = 0.1;
 
-  private static double interpolation(double distance) {
-    InterpolatingDoubleTreeMap interpolator = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap interpolator = new InterpolatingDoubleTreeMap();
+
+  static {
     for (int i = 0; i <= shooterInterpolationPoints.length; i++) {
       interpolator.put(shooterInterpolationPoints[i][0], shooterInterpolationPoints[i][1]);
     }
-    return interpolator.get(distance);
   }
 
   public static Command shootSpeaker(
@@ -52,14 +52,11 @@ public class SpeakerCommands {
               Rotation2d linearDirection =
                   new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
               double omega =
-                  MathUtil.applyDeadband(
-                      pidController.calculate(
-                          drive.getRotation().getRadians(), targetAngle.getRadians()),
-                      DEADBAND);
+                  pidController.calculate(
+                      drive.getRotation().getRadians(), targetAngle.getRadians());
 
               // Square values
               linearMagnitude = linearMagnitude * linearMagnitude;
-              omega = Math.copySign(omega * omega, omega);
 
               // Calcaulate new linear velocity
               Translation2d linearVelocity =
@@ -75,13 +72,13 @@ public class SpeakerCommands {
                   ChassisSpeeds.fromFieldRelativeSpeeds(
                       linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                       linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                      omega * drive.getMaxAngularSpeedRadPerSec(),
+                      omega,
                       isFlipped
                           ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
             },
             drive);
 
-    return driveTrainCommand.alongWith(pivot.setPositionCommand(() -> interpolation(distance)));
+    return driveTrainCommand.alongWith(pivot.setPositionCommand(() -> interpolator.get(distance)));
   }
 }
