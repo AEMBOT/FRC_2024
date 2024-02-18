@@ -3,7 +3,8 @@
 /*
 ~Version History~
  V1 - Added main functions
- V2 - Added more comments, version history, and off button support
+ V2 (not on github) - Added more comments, version history, and off button support
+ V3 - Added 'pulse' function (I got bored)
 */
 
 /*
@@ -349,7 +350,12 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
       Mounted.show();
       //t̶a̶s̶t̶e̶ show the rainbow
 
-    } 
+    } else if (input == ',') { //check if 'input' is the character ','
+
+      pulse(0, 63, 5);
+      //pulse function, pulse from 0 to 63 5 times
+      
+    }
 
   }
 
@@ -484,6 +490,51 @@ void sawtoothFade(int red, int green, int blue) { //function that plays a sawtoo
   //show the queued pixel colors on the Underglow LED strip all at once
   Mounted.show();
   //show the queued pixel colors on the Mounted LED strip all at once
+
+}
+
+void pulse(int low, int high, int reps) { //pulses the LEDs
+
+  Underglow.fill(Underglow.Color(red, green, blue));
+  //fills it one color
+  Underglow.show();
+  //shows said color
+
+  for (int i=0; i<reps; i++) { //repeats 'reps' times
+
+    for (int b=low; b<=high; b++) { //rising pulse
+
+      Underglow.fill(Underglow.Color(red, green, blue));
+      //set the color
+      Underglow.setBrightness(b);
+      //set the brightness
+      Underglow.show();
+      //show the color
+
+      delay(speed);
+      //delay for effect
+
+    }
+
+    for (int b=high; b>=low; b--) { //falling pulse
+
+      Underglow.fill(Underglow.Color(red, green, blue));
+      //set the color
+      Underglow.setBrightness(b);
+      //set the brightness
+      Underglow.show();
+      //show the color
+
+      delay(speed);
+      //delay for effect
+    }
+
+  }
+
+  Underglow.setBrightness(255);
+  //reset brightness
+  Underglow.show();
+  //show brightness
 
 }
 
