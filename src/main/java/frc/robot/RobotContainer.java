@@ -71,14 +71,6 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        //        drive =
-        //            new Drive(
-        //                new GyroIONavX(),
-        //                new ModuleIOTalonFX(0),
-        //                new ModuleIOTalonFX(1),
-        //                new ModuleIOTalonFX(2),
-        //                new ModuleIOTalonFX(3),
-        //                new AprilTagVisionIOReal());
         drive =
             new Drive(
                 new GyroIONavX(),
@@ -87,17 +79,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(2),
                 new ModuleIOTalonFX(3),
                 new AprilTagVisionIOReal());
-        //        drive =
-        //            new Drive(
-        //                new GyroIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new AprilTagVisionIO() {});
-        //        indexer = new Indexer(new IndexerIOSparkMax());
-        //        pivot = new Pivot(new PivotIOReal());
-        //                shooter = new Shooter(new ShooterIOReal());
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
