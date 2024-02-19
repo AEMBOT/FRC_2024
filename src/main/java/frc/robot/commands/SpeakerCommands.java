@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.shootingSpeakerConstants.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.pivot.Pivot;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class SpeakerCommands {
   private static final double DEADBAND = 0.1;
@@ -25,20 +26,15 @@ public class SpeakerCommands {
   private static final InterpolatingDoubleTreeMap interpolator = new InterpolatingDoubleTreeMap();
 
   static {
-    for (int i = 0; i <= shooterInterpolationPoints.length; i++) {
-      interpolator.put(shooterInterpolationPoints[i][0], shooterInterpolationPoints[i][1]);
+    for (double[] shooterInterpolationPoint : shooterInterpolationPoints) {
+      interpolator.put(shooterInterpolationPoint[1], shooterInterpolationPoint[0]);
     }
   }
 
   public static Command shootSpeaker(
-      Drive drive,
-      Pivot pivot,
-      Supplier<Pose2d> robotPosition,
-      Translation2d speakerPosition,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier) {
-    double distance = robotPosition.get().getTranslation().getDistance(speakerPosition);
-    Rotation2d targetAngle = speakerPosition.minus(robotPosition.get().getTranslation()).getAngle();
+      Drive drive, Pivot pivot, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    double distance = getSpeaker().getDistance(drive.getPose().getTranslation());
+    Rotation2d targetAngle = getSpeaker().minus(drive.getPose().getTranslation()).getAngle();
     ProfiledPIDController pidController =
         new ProfiledPIDController(
             kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
@@ -76,6 +72,8 @@ public class SpeakerCommands {
                       isFlipped // Is this necessary? test on field
                           ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
+
+              Logger.recordOutput("Interpolator Distance", interpolator.get(distance));
             },
             drive);
 

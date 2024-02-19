@@ -192,13 +192,7 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(
-            shootSpeaker(
-                drive,
-                pivot,
-                drive::getPose,
-                getSpeaker(),
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX()));
+            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
 
     // TODO what button IDs are these
     // Z, climb up
