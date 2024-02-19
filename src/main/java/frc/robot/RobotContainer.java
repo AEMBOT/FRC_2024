@@ -224,4 +224,8 @@ public class RobotContainer {
     mechanismPoses[0] = pivot.getPose3D();
     return mechanismPoses;
   }
+
+  public void homeClimber() {
+    CommandScheduler.getInstance().schedule(climber.getHomingCommand().withTimeout(10.0));
+  }
 }
