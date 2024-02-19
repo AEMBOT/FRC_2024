@@ -25,12 +25,13 @@ public class PivotIOReal implements PivotIO {
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
   private final Encoder velEncoder = new Encoder(2, 1, true);
-  private final ArmFeedforward pivotFFModel = new ArmFeedforward(0.29, 0.28, 6.32, 0.04);
-  private final PIDController pidController = new PIDController(6, 0, 0);
+  private final ArmFeedforward pivotFFModel =
+      new ArmFeedforward(0.29, 0.28, 1.79, 0.21); // 6.32 sysid
+  private final PIDController pidController = new PIDController(6, 0, 0.01);
   private final ExponentialProfile pivotProfile =
       new ExponentialProfile(
           ExponentialProfile.Constraints.fromCharacteristics(
-              10, pivotFFModel.kv * 1.1, pivotFFModel.ka * 1.1));
+              10, pivotFFModel.kv * 1.2, pivotFFModel.ka * 1.2));
   private ExponentialProfile.State pivotGoal;
   private ExponentialProfile.State pivotSetpoint;
 
@@ -51,6 +52,8 @@ public class PivotIOReal implements PivotIO {
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
 
+    motorLeader.getEncoder().setVelocityConversionFactor(((2 * Math.PI) / 60) / 92);
+
     delay(0.25);
 
     motorFollower.follow(motorLeader, true);
@@ -58,7 +61,7 @@ public class PivotIOReal implements PivotIO {
     encoder.setPositionOffset(
         2.85765 / (2 * Math.PI)); // Convert from offset rads to offset rotations
 
-    velEncoder.setDistancePerPulse((2 * Math.PI) / 8192.0);
+    velEncoder.setDistancePerPulse((2 * Math.PI) / 2048.0);
 
     while (getAbsoluteEncoderPosition() < 0.1) {
       delay(1);
@@ -73,7 +76,7 @@ public class PivotIOReal implements PivotIO {
     inputs.pivotAppliedVolts = motorLeader.getAppliedOutput() * motorLeader.getBusVoltage();
     inputs.pivotCurrentAmps =
         new double[] {motorLeader.getOutputCurrent(), motorFollower.getOutputCurrent()};
-    inputs.pivotAbsoluteVelocityRadPerSec = velEncoder.getRate();
+    inputs.pivotAbsoluteVelocityRadPerSec = motorLeader.getEncoder().getVelocity();
     inputs.pivotGoalPosition = pivotGoal.position;
     inputs.pivotSetpointPosition = pivotSetpoint.position;
     inputs.pivotSetpointVelocity = pivotSetpoint.velocity;
