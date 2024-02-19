@@ -45,7 +45,11 @@ public class GyroIONavX implements GyroIO {
         yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryYawPositions =
         yawPositionQueue.stream()
-            .map((Double value) -> Rotation2d.fromDegrees(-value)) // negate bc navx is CW+
+            // NavX is normally CW+ so this should be wrong
+            // But this fixes the drivetrain
+            // I believe the problem is that the NavX has not been correctly
+            // TODO NavX OMNIMOUNT configure both bots
+            .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
