@@ -38,7 +38,7 @@ public class Indexer extends SubsystemBase {
             run(
                 () -> {
                   shootReady = true;
-                  indexOffIntakeBack();
+                  indexOffIntakeOff();
                 }))
         .finallyDo(this::indexOffIntakeOff);
   }

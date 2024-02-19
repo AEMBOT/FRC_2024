@@ -67,7 +67,7 @@ public final class Constants {
     public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 2;
+    public static final double indexerMotorVoltage = 1.5;
   }
 
   public static final class IntakeConstants {
