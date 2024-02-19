@@ -13,7 +13,7 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.FieldConstants.getSpeaker;
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
@@ -27,6 +27,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
@@ -128,7 +129,7 @@ public class RobotContainer {
     // Set up auto routines
     NamedCommands.registerCommand(
         "Nine Piece Auto",
-        Commands.runOnce(
+        runOnce(
                 () ->
                     drive.setPose(
                         PathPlannerPath.fromChoreoTrajectory("ninepieceauto")
@@ -142,6 +143,18 @@ public class RobotContainer {
     // Set up SysId routines
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
+    autoChooser.addOption(
+        "Score Preload",
+        pivot
+            .setPositionCommand(() -> Units.degreesToRadians(60))
+            .alongWith(
+                shooter
+                    .setVelocityRPMCommand(shooterSpeedRPM)
+                    .alongWith(
+                        Commands.waitUntil(shooter::isAtShootSpeed)
+                            .andThen(indexer.shootCommand())))
+            .withTimeout(5.0)
+            .andThen(drive.runVelocityFieldRelative(() -> new ChassisSpeeds(0.1, 0, 0))));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -173,15 +186,19 @@ public class RobotContainer {
     controller
         .y()
         .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)).until(pivot::atGoal));
-    // Amp
+    // Return to Stow
     controller
         .x()
-        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)).until(pivot::atGoal));
+        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)).until(pivot::atGoal));
 
     // Climb Manual Up
-    controller.povLeft().whileTrue(climber.runVoltsCommand(6.0));
+    controller.povRight().whileTrue(climber.runVoltsCommand(6.0));
     // Climb Manual Down
-    controller.povRight().whileTrue(climber.runVoltsCommand(-6.0));
+    controller.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
+
+    // Pivot Manual Up
+    controller.povUp().whileTrue(pivot.changeGoalPosition(0.5));
+    controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
 
     // Intake Manual In
     controller.rightBumper().whileTrue(indexer.intakeInCommand());
@@ -194,11 +211,10 @@ public class RobotContainer {
         .whileTrue(
             shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
 
-    // TODO what button IDs are these
     // Z, climb up
-    controller.button(20).whileTrue(climber.setPositionCommand(0.75));
+    controller.button(10).whileTrue(climber.setPositionCommand(0.75));
     // C, climb down
-    controller.button(21).whileTrue(climber.setPositionCommand(0.05));
+    controller.button(9).whileTrue(climber.setPositionCommand(0.05));
 
     controller
         .rightTrigger()
@@ -207,6 +223,8 @@ public class RobotContainer {
                 .setVelocityRPMCommand(shooterSpeedRPM)
                 .alongWith(
                     Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
+
+    controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
   }
 
   /**
