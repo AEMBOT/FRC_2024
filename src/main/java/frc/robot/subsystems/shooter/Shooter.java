@@ -61,6 +61,10 @@ public class Shooter extends SubsystemBase {
     return run(() -> setVelocityRPM(velRPM)).finallyDo(io::stop);
   }
 
+  public Command setVelocityRPMClimberModeCommand(double velRPM){
+    return run(() -> setVelocityRPMClimberMode(velRPM)).finallyDo(io::stop);
+  }
+
   public Command stopCommand() {
     return runOnce(() -> io.setVoltage(0.0));
   }
@@ -71,6 +75,10 @@ public class Shooter extends SubsystemBase {
 
   private void setVelocityRPM(double velRPM) {
     io.setVelocity(velRPM);
+  }
+
+  private void setVelocityRPMClimberMode(double velRPM){
+    io.setVelocityClimberMode(velRPM);
   }
 
   // We're using this because the overhead of the Java Stream API sucks

@@ -21,6 +21,8 @@ public interface ShooterIO {
   /** Run closed loop at the specified velocity. */
   public default void setVelocity(double velocityRPM) {}
 
+  public default void setVelocityClimberMode(double velocityRPM){}
+
   /** Stop in open loop. */
   public default void stop() {}
 }
