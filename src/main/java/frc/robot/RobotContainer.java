@@ -70,6 +70,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController backupController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -174,22 +175,16 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX(),
             () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
-    indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
+    indexer.setDefaultCommand(indexer.run(indexer::indexOffIntakeOff));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
     // Subwoofer
-    controller
-        .b()
-        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)).until(pivot::atGoal));
+    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     // Trap
-    controller
-        .y()
-        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)).until(pivot::atGoal));
+    controller.y().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)));
     // Return to Stow
-    controller
-        .x()
-        .onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)).until(pivot::atGoal));
+    controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
 
     // Climb Manual Up
     controller.povRight().whileTrue(climber.runVoltsCommand(6.0));
@@ -201,9 +196,16 @@ public class RobotContainer {
     controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
 
     // Intake Manual In
-    controller.rightBumper().whileTrue(indexer.intakeInCommand());
+    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
     // "Intake Out" - Indexer Manual Run
-    controller.leftBumper().whileTrue(indexer.indexerInCommand());
+    controller
+        .leftBumper()
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(2000)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed)
+                        .andThen(indexer.indexerInCommand())));
 
     // Auto Rotation Lock Shooter Pivot Interp
     controller

@@ -25,6 +25,9 @@ public class ShooterIOReal implements ShooterIO {
   private final SparkPIDController topMotorPID;
   private final SparkPIDController bottomMotorPID;
 
+  private double topShooterSetpoint;
+  private double bottomShooterSetpoint;
+
   public ShooterIOReal() {
     topMotorLeader.restoreFactoryDefaults();
     topMotorFollower.restoreFactoryDefaults();
@@ -107,6 +110,8 @@ public class ShooterIOReal implements ShooterIO {
           topMotorLeader.getEncoder().getVelocity(), bottomMotorLeader.getEncoder().getVelocity()
         };
     inputs.openLoopStatus = openLoop;
+    inputs.topShooterSetpoint = topShooterSetpoint;
+    inputs.bottomShooterSetpoint = bottomShooterSetpoint;
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
@@ -122,6 +127,9 @@ public class ShooterIOReal implements ShooterIO {
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
     topMotorPID.setReference(velocityRPM, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
     bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
+
+    topShooterSetpoint = velocityRPM;
+    bottomShooterSetpoint = velocityRPM;
   }
 
   /** Stop in open loop. */

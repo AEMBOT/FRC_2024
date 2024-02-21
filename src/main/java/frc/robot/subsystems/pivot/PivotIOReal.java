@@ -11,7 +11,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.ExponentialProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
@@ -20,20 +20,19 @@ import org.littletonrobotics.junction.Logger;
 public class PivotIOReal implements PivotIO {
 
   private boolean openLoop = true;
+  private static final double GEAR_RATIO = 5 * 4 * (42.0 / 9.0);
 
   private final CANSparkMax motorLeader = new CANSparkMax(11, MotorType.kBrushless);
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
   private final Encoder velEncoder = new Encoder(2, 1, true);
   private final ArmFeedforward pivotFFModel =
-      new ArmFeedforward(0.29, 0.28, 1.79, 0.21); // 6.32 sysid
-  private final PIDController pidController = new PIDController(6, 0, 0.01);
-  private final ExponentialProfile pivotProfile =
-      new ExponentialProfile(
-          ExponentialProfile.Constraints.fromCharacteristics(
-              10, pivotFFModel.kv * 1.2, pivotFFModel.ka * 1.2));
-  private ExponentialProfile.State pivotGoal;
-  private ExponentialProfile.State pivotSetpoint;
+      new ArmFeedforward(0.29, 0.28, 1.79, 0.04); // 6.32 sysid
+  private final PIDController pidController = new PIDController(0, 0, 0.00);
+  private final TrapezoidProfile pivotProfile =
+      new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 10000));
+  private TrapezoidProfile.State pivotGoal;
+  private TrapezoidProfile.State pivotSetpoint;
 
   public PivotIOReal() {
     motorLeader.restoreFactoryDefaults();
@@ -52,7 +51,7 @@ public class PivotIOReal implements PivotIO {
     motorLeader.setSmartCurrentLimit(60);
     motorFollower.setSmartCurrentLimit(60);
 
-    motorLeader.getEncoder().setVelocityConversionFactor(((2 * Math.PI) / 60) / 92);
+    motorLeader.getEncoder().setVelocityConversionFactor(((2 * Math.PI) / 60) / GEAR_RATIO);
 
     delay(0.25);
 
@@ -66,8 +65,8 @@ public class PivotIOReal implements PivotIO {
     while (getAbsoluteEncoderPosition() < 0.1) {
       delay(1);
     }
-    pivotGoal = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
-    pivotSetpoint = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
+    pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
+    pivotSetpoint = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
   }
 
   @Override
@@ -87,7 +86,7 @@ public class PivotIOReal implements PivotIO {
   @Override
   public void setPosition(double positionRad) {
     openLoop = false;
-    pivotGoal = new ExponentialProfile.State(positionRad, 0);
+    pivotGoal = new TrapezoidProfile.State(positionRad, 0);
     double currentVelocity = pivotSetpoint.velocity;
     pivotSetpoint = pivotProfile.calculate(UPDATE_PERIOD, pivotSetpoint, pivotGoal);
     double feedForward =
@@ -135,7 +134,7 @@ public class PivotIOReal implements PivotIO {
 
   @Override
   public void resetExponentialProfile() {
-    pivotGoal = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
-    pivotSetpoint = new ExponentialProfile.State(getAbsoluteEncoderPosition(), 0);
+    pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
+    pivotSetpoint = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
   }
 }
