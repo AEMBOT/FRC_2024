@@ -34,10 +34,16 @@ public class SpeakerCommands {
   public static Command shootSpeaker(
       Drive drive, Pivot pivot, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     double distance = getSpeaker().getDistance(drive.getPose().getTranslation());
-    Rotation2d targetAngle = getSpeaker().minus(drive.getPose().getTranslation()).getAngle();
+    Rotation2d targetAngle =
+        drive
+            .getPose()
+            .minus(new Pose2d(getSpeaker(), new Rotation2d()))
+            .getTranslation()
+            .getAngle();
     ProfiledPIDController pidController =
         new ProfiledPIDController(
             kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+    pidController.enableContinuousInput(0, 2 * Math.PI);
     Command driveTrainCommand =
         Commands.run(
             () -> {
