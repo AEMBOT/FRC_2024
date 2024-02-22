@@ -5,10 +5,7 @@ import static frc.robot.Constants.shootingSpeakerConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -23,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
 public class SpeakerCommands {
   private static final double DEADBAND = 0.1;
 
-  private static final InterpolatingDoubleTreeMap interpolator = new InterpolatingDoubleTreeMap();
+  public static final InterpolatingDoubleTreeMap interpolator = new InterpolatingDoubleTreeMap();
 
   static {
     for (double[] shooterInterpolationPoint : shooterInterpolationPoints) {
@@ -37,7 +34,7 @@ public class SpeakerCommands {
     ProfiledPIDController pidController =
         new ProfiledPIDController(
             kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
-    pidController.enableContinuousInput(0, 2 * Math.PI);
+    pidController.enableContinuousInput(-Math.PI, Math.PI);
     Command driveTrainCommand =
         Commands.run(
             () -> {
