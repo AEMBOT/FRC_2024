@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TrapClimbingCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
@@ -189,6 +190,8 @@ public class RobotContainer {
 
     controller.rightTrigger().whileTrue(climber.runVoltsCommand(10.0));
     controller.leftTrigger().whileTrue(climber.runVoltsCommand(-10.0));
+
+    controller.a().whileTrue(TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter));
   }
 
   /**

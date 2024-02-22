@@ -51,29 +51,29 @@ public class TrapClimbingCommands {
                 && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
                 if (!isFlipped){
                     List<Pose2d> poseList = new ArrayList<>();
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(14    ).get().toPose2d());
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(15).get().toPose2d());
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(16).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(14).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(15).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(16).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
                     nearestTrapPose2d = drive.getPose().nearest(poseList);
                 }
                 else{
                     List<Pose2d> poseList = new ArrayList<>();
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(11    ).get().toPose2d());
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(12).get().toPose2d());
-                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(13).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(11).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(12).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(13).get().toPose2d().plus(Constants.ONE_METER_BACK.times(0.25)));
                     nearestTrapPose2d = drive.getPose().nearest(poseList);
                 }
+                final Pose2d trapPose2d = nearestTrapPose2d;
                 climber.setPositionCommand(0.75)
                 .alongWith(
                     pivot.setPositionCommand(() -> 120),
-                    shooter.setVelocityRPMClimberModeCommand(1000)
-                )
-                .andThen(drive.pathFindingCommand(nearestTrapPose2d)
-                )
+                    shooter.setVelocityRPMClimberModeCommand(1000),
+                    drive.pathFindingCommand(nearestTrapPose2d)
+                ).until(())
                 .andThen(pivot.setPositionCommand(() -> 90))
                 .alongWith(
                     drive.pathFindingCommand(nearestTrapPose2d.plus(Constants.ONE_METER_BACK.times(0.5)))
-                )
+                ).until(() -> trapPose2d.getX() >0.45)
                 .andThen(new WaitCommand(1))
                 .andThen(climber.setPositionCommand(0.05))
                 .andThen(pivot.setPositionCommand(() ->40));
