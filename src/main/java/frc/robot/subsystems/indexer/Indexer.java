@@ -43,6 +43,10 @@ public class Indexer extends SubsystemBase {
         .finallyDo(this::indexOffIntakeOff);
   }
 
+  public boolean intakedNote() {
+    return inputs.intakeBeamBreakState;
+  }
+
   public void indexOffIntakeOn() {
     io.setShooterVoltage(0);
     io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);

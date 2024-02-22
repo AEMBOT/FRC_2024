@@ -39,8 +39,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtShootSpeed() {
-    return abs(inputs.topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 200
-        && abs(inputs.bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 200;
+    return inputs.atShootSpeed;
   }
 
   public Command getDefault() {

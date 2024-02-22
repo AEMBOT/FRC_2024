@@ -27,19 +27,13 @@ public class SpeakerCommands {
 
   static {
     for (double[] shooterInterpolationPoint : shooterInterpolationPoints) {
-      interpolator.put(shooterInterpolationPoint[1], shooterInterpolationPoint[0]);
+      interpolator.put(shooterInterpolationPoint[0], shooterInterpolationPoint[1]);
     }
   }
 
   public static Command shootSpeaker(
       Drive drive, Pivot pivot, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
-    double distance = getSpeaker().getDistance(drive.getPose().getTranslation());
-    Rotation2d targetAngle =
-        drive
-            .getPose()
-            .minus(new Pose2d(getSpeaker(), new Rotation2d()))
-            .getTranslation()
-            .getAngle();
+    DoubleSupplier distance = () -> getSpeaker().getDistance(drive.getPose().getTranslation());
     ProfiledPIDController pidController =
         new ProfiledPIDController(
             kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
@@ -47,6 +41,9 @@ public class SpeakerCommands {
     Command driveTrainCommand =
         Commands.run(
             () -> {
+              Rotation2d targetAngle =
+                  getSpeaker().minus(drive.getPose().getTranslation()).getAngle();
+              Logger.recordOutput("Target Angle", targetAngle);
               // Apply deadband
               double linearMagnitude =
                   MathUtil.applyDeadband(
@@ -79,10 +76,12 @@ public class SpeakerCommands {
                           ? drive.getRotation().plus(new Rotation2d(Math.PI))
                           : drive.getRotation()));
 
-              Logger.recordOutput("Interpolator Distance", interpolator.get(distance));
+              Logger.recordOutput(
+                  "Interpolator Distance", interpolator.get(distance.getAsDouble()));
             },
             drive);
 
-    return driveTrainCommand.alongWith(pivot.setPositionCommand(() -> interpolator.get(distance)));
+    return driveTrainCommand.alongWith(
+        pivot.setPositionCommand(() -> interpolator.get(distance.getAsDouble())));
   }
 }

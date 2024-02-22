@@ -48,6 +48,7 @@ public class Pivot extends SubsystemBase {
     return inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
   }
 
+  @AutoLogOutput
   public boolean atGoal() {
     return abs(inputs.pivotAbsolutePositionRad - inputs.pivotGoalPosition) < 0.02;
   }

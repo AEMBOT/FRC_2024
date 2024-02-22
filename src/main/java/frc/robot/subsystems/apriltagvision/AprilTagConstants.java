@@ -35,9 +35,9 @@ public final class AprilTagConstants {
               Units.inchesToMeters(10.58)),
           new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(-147)));
   public static final Matrix<N3, N1> highResSingleTagStdDev =
-      VecBuilder.fill(0.25, 0.25, Double.MAX_VALUE);
+      VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
   public static final Matrix<N3, N1> normalSingleTagStdDev =
-      VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE);
-  public static final Matrix<N3, N1> highResMultiTagStdDev = VecBuilder.fill(0.1, 0.1, 1);
-  public static final Matrix<N3, N1> normalMultiTagStdDev = VecBuilder.fill(0.2, 0.2, 2);
+      VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
+  public static final Matrix<N3, N1> highResMultiTagStdDev = VecBuilder.fill(0.15, 0.15, 1);
+  public static final Matrix<N3, N1> normalMultiTagStdDev = VecBuilder.fill(0.3, 0.3, 2);
 }

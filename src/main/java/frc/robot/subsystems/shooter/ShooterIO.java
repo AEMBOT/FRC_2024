@@ -12,6 +12,7 @@ public interface ShooterIO {
     public double topShooterSetpoint = 0.0;
     public double bottomShooterSetpoint = 0.0;
     public boolean openLoopStatus = true;
+    public boolean atShootSpeed = false;
   }
 
   /** Updates the set of loggable inputs. */

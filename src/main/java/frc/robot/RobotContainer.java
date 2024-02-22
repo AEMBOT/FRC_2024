@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
@@ -182,7 +183,8 @@ public class RobotContainer {
     // Subwoofer
     controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     // Trap
-    controller.y().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(100)));
+    controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
+    controller.y().onFalse(pivot.setPositionCommand(() -> 0.4).until(pivot::atGoal));
     // Return to Stow
     controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
 
@@ -202,7 +204,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             shooter
-                .setVelocityRPMCommand(2000)
+                .setVelocityRPMCommand(1600)
                 .alongWith(
                     Commands.waitUntil(shooter::isAtShootSpeed)
                         .andThen(indexer.indexerInCommand())));
@@ -227,6 +229,17 @@ public class RobotContainer {
                     Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
 
     controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
+
+    new Trigger(indexer::intakedNote)
+        .onTrue(
+            Commands.run(
+                    () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
+                .withTimeout(0.2)
+                .andThen(
+                    Commands.runOnce(
+                        () ->
+                            controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
+                .ignoringDisable(true));
   }
 
   /**

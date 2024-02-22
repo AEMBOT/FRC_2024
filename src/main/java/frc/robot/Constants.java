@@ -113,9 +113,11 @@ public final class Constants {
           new double[] {1.0, Units.degreesToRadians(60)},
           new double[] {2.0, Units.degreesToRadians(40)},
           new double[] {3.0, Units.degreesToRadians(30)},
+          new double[] {3.45, 0.483},
           new double[] {4.0, Units.degreesToRadians(23)},
           new double[] {4.85, 0.360},
-          new double[] {3.45, 0.483}
+          new double[] {5.0, 0.350},
+          new double[] {6.0, 0.28}
         };
   }
 }

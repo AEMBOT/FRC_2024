@@ -4,7 +4,6 @@ import static edu.wpi.first.math.MathUtil.clamp;
 import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.PivotConstants.PIVOT_MAX_POS_RAD;
 import static frc.robot.Constants.PivotConstants.PIVOT_MIN_POS_RAD;
-import static frc.robot.Constants.UPDATE_PERIOD;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -15,22 +14,24 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 public class PivotIOReal implements PivotIO {
 
   private boolean openLoop = true;
   private static final double GEAR_RATIO = 5 * 4 * (42.0 / 9.0);
+  private double LAST_TIME = 0.0;
 
   private final CANSparkMax motorLeader = new CANSparkMax(11, MotorType.kBrushless);
   private final CANSparkMax motorFollower = new CANSparkMax(10, MotorType.kBrushless);
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(3);
   private final Encoder velEncoder = new Encoder(2, 1, true);
   private final ArmFeedforward pivotFFModel =
-      new ArmFeedforward(0.29, 0.28, 1.79, 0.04); // 6.32 sysid
-  private final PIDController pidController = new PIDController(0, 0, 0.00);
+      new ArmFeedforward(0.35, 0.35, 1.79, 0.3); // 6.32 sysid
+  private final PIDController pidController = new PIDController(12, 0, 0.00);
   private final TrapezoidProfile pivotProfile =
-      new TrapezoidProfile(new TrapezoidProfile.Constraints(1, 10000));
+      new TrapezoidProfile(new TrapezoidProfile.Constraints(2, 5));
   private TrapezoidProfile.State pivotGoal;
   private TrapezoidProfile.State pivotSetpoint;
 
@@ -88,12 +89,21 @@ public class PivotIOReal implements PivotIO {
     openLoop = false;
     pivotGoal = new TrapezoidProfile.State(positionRad, 0);
     double currentVelocity = pivotSetpoint.velocity;
-    pivotSetpoint = pivotProfile.calculate(UPDATE_PERIOD, pivotSetpoint, pivotGoal);
+    pivotSetpoint =
+        pivotProfile.calculate(
+            // If new profile starting 0.02
+            // Else make sure profile is moving at actual loop time
+            (Timer.getFPGATimestamp() - LAST_TIME > 0.25)
+                ? (Timer.getFPGATimestamp() - LAST_TIME)
+                : 0.02,
+            pivotSetpoint,
+            pivotGoal);
     double feedForward =
-        pivotFFModel.calculate(
-            pivotSetpoint.position,
-            pivotSetpoint.velocity,
-            (pivotSetpoint.velocity - currentVelocity) / UPDATE_PERIOD);
+        //        pivotFFModel.calculate(
+        //            pivotSetpoint.position,
+        //            pivotSetpoint.velocity,
+        //            (pivotSetpoint.velocity - currentVelocity) / UPDATE_PERIOD);
+        pivotFFModel.calculate(pivotGoal.position, 0);
     double pidOutput =
         pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
 
@@ -101,6 +111,8 @@ public class PivotIOReal implements PivotIO {
     Logger.recordOutput("Pivot/PIDCommandVolts", pidOutput);
 
     setMotorVoltage(feedForward + pidOutput);
+
+    LAST_TIME = Timer.getFPGATimestamp();
   }
 
   /** Run open loop at the specified voltage. */
