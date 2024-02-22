@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -88,6 +89,14 @@ public final class Constants {
   public static final AprilTagFieldLayout aprilTagFieldLayout =
       AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
+  public static final Transform2d ONE_METER_BACK = new Transform2d(
+                new Translation2d(
+                        -1,
+                        0
+                ),
+                new Rotation2d()
+        );
+
   public final class FieldConstants {
     public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
     public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
@@ -97,6 +106,9 @@ public final class Constants {
     public static final Pose2d RED_TRAP_STAGE_POSE = new Pose2d(0,0,Rotation2d.fromDegrees(180));
     public static final Pose2d BLUE_TRAP_CHAIN_POSE = new Pose2d(0,0 , Rotation2d.fromDegrees(180));
     public static final Pose2d RED_TRAP_CHAIN_POSE = new Pose2d(0,0,Rotation2d.fromDegrees(180));
+
+    public static final Pose2d BLUE_TRAP = 
+      aprilTagFieldLayout.getTagPose(2).get().toPose2d();
 
     public static Translation2d getSpeaker() {
       if (DriverStation.getAlliance().isPresent()) {

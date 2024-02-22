@@ -3,6 +3,8 @@ package frc.robot.commands;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,6 +21,7 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.shooter.Shooter;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.Constants;
 import frc.robot.Constants.FieldConstants;
 import com.kauailabs.navx.*;
 
@@ -42,30 +45,37 @@ public class TrapClimbingCommands {
     public static Command DriveFastAndClimb(Drive drive, Climber climber, Pivot pivot, Shooter shooter){
         return Commands.run(
             () -> {
-                 boolean isFlipped =
+                Pose2d neartestTrapPose2d = new Pose2d(0,0,Rotation2d.fromDegrees(0));
+                boolean isFlipped =
                  DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
-                climber.setPositionCommand(10)
+                if (!isFlipped){
+                    List<Pose2d> poseList = new ArrayList<>();
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(14    ).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(15).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(16).get().toPose2d());
+                    Pose2d nearestTrapPose2d = drive.getPose().nearest(poseList);
+                }
+                else{
+                    List<Pose2d> poseList = new ArrayList<>();
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(11    ).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(12).get().toPose2d());
+                    poseList.add(Constants.aprilTagFieldLayout.getTagPose(13).get().toPose2d());
+                    Pose2d nearestTrapPose2d = drive.getPose().nearest(poseList);
+                }
+                climber.setPositionCommand(0.75)
                 .alongWith(
                     pivot.setPositionCommand(() -> 120),
                     shooter.setVelocityRPMClimberModeCommand(1000)
                 )
-                .andThen(drive.pathFindingCommand(isFlipped
-                ? FieldConstants.RED_TRAP_STAGE_POSE
-                : FieldConstants.BLUE_TRAP_STAGE_POSE)
+                .andThen(drive.pathFindingCommand(neartestTrapPose2d)
                 )
                 .andThen(pivot.setPositionCommand(() -> 90))
                 .alongWith(
-                    drive.pathFindingCommand(isFlipped
-                    ? FieldConstants.RED_TRAP_CHAIN_POSE
-                    : FieldConstants.BLUE_TRAP_CHAIN_POSE)
-                    /*drive.runVelocityCommand(()->
-                    ChassisSpeeds.fromRobotRelativeSpeeds(0, 
-                    0, 
-                    0, drive.getRotation())*/
+                    drive.pathFindingCommand(neartestTrapPose2d.plus(Constants.ONE_METER_BACK.times(0.5)))
                 )
                 .andThen(new WaitCommand(1))
-                .andThen(climber.setPositionCommand(4))
+                .andThen(climber.setPositionCommand(0.05))
                 .andThen(pivot.setPositionCommand(() ->40));
     });
 }
