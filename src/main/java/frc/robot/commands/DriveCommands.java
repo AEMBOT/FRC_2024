@@ -28,7 +28,7 @@ import java.util.function.DoubleSupplier;
 
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
-  private static final double SLOWMODE_MAX_METERS_PER_SEC = 0.5;
+  private static final double SLOWMODE_MAX_METERS_PER_SEC = 1;
   private static final double SLOWMODE_ROTATION_SPEED_FACTOR = 0.2;
 
   private DriveCommands() {}

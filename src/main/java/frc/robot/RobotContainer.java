@@ -210,7 +210,7 @@ public class RobotContainer {
     controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
-    controller.y().onFalse(pivot.setPositionCommand(() -> 0.4).until(pivot::atGoal));
+    controller.y().onFalse(pivot.setPositionCommand(() -> 0.4));
     // Return to Stow
     controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
 
