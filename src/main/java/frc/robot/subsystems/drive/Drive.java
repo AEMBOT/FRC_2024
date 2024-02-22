@@ -22,12 +22,7 @@ import static java.lang.Math.min;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindHolonomic;
-import com.pathplanner.lib.commands.PathfindThenFollowPathHolonomic;
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerTrajectory;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -451,9 +446,13 @@ public class Drive extends SubsystemBase {
         this.runOnce(SignalLogger::stop));
   }
 
-  public Command pathFindingCommand(Pose2d targetPose){
-    PathConstraints constraints = new PathConstraints(1,1,
-    Units.degreesToRadians(100), Units.degreesToRadians(100)); //TODO: Get better values for constraints
-    return AutoBuilder.pathfindToPose(targetPose, constraints,0,0);
-    }
+  public Command pathFindingCommand(Pose2d targetPose) {
+    PathConstraints constraints =
+        new PathConstraints(
+            1,
+            1,
+            Units.degreesToRadians(100),
+            Units.degreesToRadians(100)); // TODO: Get better values for constraints
+    return AutoBuilder.pathfindToPose(targetPose, constraints, 0, 0);
+  }
 }

@@ -138,7 +138,7 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
   }
 
-  public void setVelocityClimberMode(double velocityRPM){
+  public void setVelocityClimberMode(double velocityRPM) {
     openLoop = false;
     topMotorPID.setReference(velocityRPM, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
     bottomMotorPID.setReference(-velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);

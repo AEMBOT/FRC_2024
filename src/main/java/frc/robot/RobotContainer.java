@@ -13,9 +13,11 @@
 
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.defer;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-import static frc.robot.commands.SpeakerCommands.shootSpeaker;
+
+import java.util.Set;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
@@ -210,12 +213,6 @@ public class RobotContainer {
                     Commands.waitUntil(shooter::isAtShootSpeed)
                         .andThen(indexer.indexerInCommand())));
 
-    // Auto Rotation Lock Shooter Pivot Interp
-    controller
-        .a()
-        .whileTrue(
-            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
-
     // Z, climb up
     controller.button(10).whileTrue(climber.setPositionCommand(0.75));
     // C, climb down
@@ -242,10 +239,9 @@ public class RobotContainer {
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
 
-    controller.rightTrigger().whileTrue(climber.runVoltsCommand(10.0));
-    controller.leftTrigger().whileTrue(climber.runVoltsCommand(-10.0));
-
-    controller.a().whileTrue(TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter));
+    controller
+        .a()
+        .whileTrue(defer(() -> TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter), Set.of(drive, climber, pivot, shooter)));
   }
 
   /**

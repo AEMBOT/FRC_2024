@@ -60,7 +60,7 @@ public class Shooter extends SubsystemBase {
     return run(() -> setVelocityRPM(velRPM)).finallyDo(io::stop);
   }
 
-  public Command setVelocityRPMClimberModeCommand(double velRPM){
+  public Command setVelocityRPMClimberModeCommand(double velRPM) {
     return run(() -> setVelocityRPMClimberMode(velRPM)).finallyDo(io::stop);
   }
 
@@ -76,7 +76,7 @@ public class Shooter extends SubsystemBase {
     io.setVelocity(velRPM);
   }
 
-  private void setVelocityRPMClimberMode(double velRPM){
+  private void setVelocityRPMClimberMode(double velRPM) {
     io.setVelocityClimberMode(velRPM);
   }
 

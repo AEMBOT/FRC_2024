@@ -2,11 +2,13 @@ package frc.robot.subsystems.climber;
 
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ClimberConstants.*;
+import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
@@ -31,6 +33,11 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
+  }
+
+  @AutoLogOutput
+  public boolean atGoal() {
+    return abs(inputs.climberLeftPositionMeters - inputs.climberSetpointPosition) < 0.02;
   }
 
   private void runVolts(double volts) {
