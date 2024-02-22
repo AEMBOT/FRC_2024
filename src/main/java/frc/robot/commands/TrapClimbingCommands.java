@@ -45,7 +45,7 @@ public class TrapClimbingCommands {
     public static Command DriveFastAndClimb(Drive drive, Climber climber, Pivot pivot, Shooter shooter){
         return Commands.run(
             () -> {
-                Pose2d neartestTrapPose2d = new Pose2d(0,0,Rotation2d.fromDegrees(0));
+                Pose2d nearestTrapPose2d = new Pose2d(0,0,Rotation2d.fromDegrees(0));
                 boolean isFlipped =
                  DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
@@ -54,25 +54,25 @@ public class TrapClimbingCommands {
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(14    ).get().toPose2d());
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(15).get().toPose2d());
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(16).get().toPose2d());
-                    Pose2d nearestTrapPose2d = drive.getPose().nearest(poseList);
+                    nearestTrapPose2d = drive.getPose().nearest(poseList);
                 }
                 else{
                     List<Pose2d> poseList = new ArrayList<>();
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(11    ).get().toPose2d());
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(12).get().toPose2d());
                     poseList.add(Constants.aprilTagFieldLayout.getTagPose(13).get().toPose2d());
-                    Pose2d nearestTrapPose2d = drive.getPose().nearest(poseList);
+                    nearestTrapPose2d = drive.getPose().nearest(poseList);
                 }
                 climber.setPositionCommand(0.75)
                 .alongWith(
                     pivot.setPositionCommand(() -> 120),
                     shooter.setVelocityRPMClimberModeCommand(1000)
                 )
-                .andThen(drive.pathFindingCommand(neartestTrapPose2d)
+                .andThen(drive.pathFindingCommand(nearestTrapPose2d)
                 )
                 .andThen(pivot.setPositionCommand(() -> 90))
                 .alongWith(
-                    drive.pathFindingCommand(neartestTrapPose2d.plus(Constants.ONE_METER_BACK.times(0.5)))
+                    drive.pathFindingCommand(nearestTrapPose2d.plus(Constants.ONE_METER_BACK.times(0.5)))
                 )
                 .andThen(new WaitCommand(1))
                 .andThen(climber.setPositionCommand(0.05))
