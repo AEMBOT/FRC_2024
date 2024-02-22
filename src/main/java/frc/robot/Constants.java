@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -69,7 +70,7 @@ public final class Constants {
     public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 2;
+    public static final double indexerMotorVoltage = 1.5;
   }
 
   public static final class IntakeConstants {
@@ -119,5 +120,24 @@ public final class Constants {
         return BLUE_SPEAKER_POSE; // default to blue
       }
     }
+  }
+
+  public static final class shootingSpeakerConstants {
+    public static double kP = 5;
+    public static double kI = 0;
+    public static double kD = 0;
+    public static double maxVelocity = 1;
+    public static double maxAcceleration = 1;
+    public static double[][] shooterInterpolationPoints =
+        new double[][] {
+          new double[] {1.0, Units.degreesToRadians(60)},
+          new double[] {2.0, Units.degreesToRadians(40)},
+          new double[] {3.0, Units.degreesToRadians(30)},
+          new double[] {3.45, 0.483},
+          new double[] {4.0, Units.degreesToRadians(23)},
+          new double[] {4.85, 0.360},
+          new double[] {5.0, 0.350},
+          new double[] {6.0, 0.28}
+        };
   }
 }

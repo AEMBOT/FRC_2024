@@ -19,7 +19,7 @@ public final class AprilTagConstants {
       new Transform3d(
           new Translation3d(
               Units.inchesToMeters(11.32), Units.inchesToMeters(7.08), Units.inchesToMeters(7.8)),
-          new Rotation3d(0.0, Units.degreesToRadians(-30), 0.0));
+          new Rotation3d(Units.degreesToRadians(180), Units.degreesToRadians(-30), 0.0));
   public static final Transform3d leftCamToRobot =
       new Transform3d(
           new Translation3d(
@@ -35,9 +35,9 @@ public final class AprilTagConstants {
               Units.inchesToMeters(10.58)),
           new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(-147)));
   public static final Matrix<N3, N1> highResSingleTagStdDev =
-      VecBuilder.fill(0.25, 0.25, Double.MAX_VALUE);
+      VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
   public static final Matrix<N3, N1> normalSingleTagStdDev =
-      VecBuilder.fill(0.5, 0.5, Double.MAX_VALUE);
-  public static final Matrix<N3, N1> highResMultiTagStdDev = VecBuilder.fill(0.1, 0.1, 2);
-  public static final Matrix<N3, N1> normalMultiTagStdDev = VecBuilder.fill(0.2, 0.2, 4);
+      VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
+  public static final Matrix<N3, N1> highResMultiTagStdDev = VecBuilder.fill(0.15, 0.15, 1);
+  public static final Matrix<N3, N1> normalMultiTagStdDev = VecBuilder.fill(0.3, 0.3, 2);
 }

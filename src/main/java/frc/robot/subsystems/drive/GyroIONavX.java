@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import java.util.Queue;
+import org.littletonrobotics.junction.Logger;
 
 /** IO implementation for NavX */
 public class GyroIONavX implements GyroIO {
@@ -44,9 +45,16 @@ public class GyroIONavX implements GyroIO {
         yawTimestampQueue.stream().mapToDouble((Double value) -> value).toArray();
     inputs.odometryYawPositions =
         yawPositionQueue.stream()
+            // NavX is normally CW+ so this should be wrong
+            // But this fixes the drivetrain
+            // I believe the problem is that the NavX has not been correctly
+            // TODO NavX OMNIMOUNT configure both bots
             .map((Double value) -> Rotation2d.fromDegrees(value))
             .toArray(Rotation2d[]::new);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();
+
+    Logger.recordOutput("NavX Rotation", navX.getRotation2d());
+    Logger.recordOutput("NavX Last Sensor Timestamp", navX.getLastSensorTimestamp());
   }
 }

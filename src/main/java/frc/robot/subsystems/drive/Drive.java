@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
+import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 
@@ -256,6 +257,9 @@ public class Drive extends SubsystemBase {
                 aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
       }
     }
+
+    Logger.recordOutput(
+        "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));
   }
 
   /**

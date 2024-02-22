@@ -2,6 +2,8 @@ package frc.robot.subsystems.pivot;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.Constants.UPDATE_PERIOD;
+import static java.lang.Math.abs;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -28,8 +30,8 @@ public class Pivot extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                Volts.of(0.2).per(Seconds.of(1)),
-                Volts.of(8),
+                Volts.of(0.1).per(Seconds.of(1)),
+                Volts.of(4),
                 Seconds.of(30),
                 (state) -> Logger.recordOutput("Flywheel/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> runVolts(voltage.in(Volts)), null, this));
@@ -44,6 +46,11 @@ public class Pivot extends SubsystemBase {
   @AutoLogOutput
   public boolean inHandoffZone() {
     return inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
+  }
+
+  @AutoLogOutput
+  public boolean atGoal() {
+    return abs(inputs.pivotAbsolutePositionRad - inputs.pivotGoalPosition) < 0.02;
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -62,6 +69,11 @@ public class Pivot extends SubsystemBase {
 
   public Command runVoltsCommand(double volts) {
     return run(() -> runVolts(volts)).finallyDo(() -> runVolts(0.0));
+  }
+
+  public Command changeGoalPosition(double velocityRadPerSec) {
+    return setPositionCommand(() -> inputs.pivotGoalPosition + (velocityRadPerSec * UPDATE_PERIOD))
+        .finallyDo(io::resetExponentialProfile);
   }
 
   public Command setPositionCommand(DoubleSupplier posRad) {

@@ -13,18 +13,24 @@
 
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static frc.robot.commands.SpeakerCommands.shootSpeaker;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TrapClimbingCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
@@ -38,11 +44,14 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
+import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -63,6 +72,7 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController backupController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -72,14 +82,6 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        //        drive =
-        //            new Drive(
-        //                new GyroIONavX(),
-        //                new ModuleIOTalonFX(0),
-        //                new ModuleIOTalonFX(1),
-        //                new ModuleIOTalonFX(2),
-        //                new ModuleIOTalonFX(3),
-        //                new AprilTagVisionIOReal());
         drive =
             new Drive(
                 new GyroIONavX(),
@@ -88,20 +90,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(2),
                 new ModuleIOTalonFX(3),
                 new AprilTagVisionIOReal());
-        //        drive =
-        //            new Drive(
-        //                new GyroIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new ModuleIO() {},
-        //                new AprilTagVisionIO() {});
-        //        indexer = new Indexer(new IndexerIOSparkMax());
-        //        pivot = new Pivot(new PivotIOReal());
-        //                shooter = new Shooter(new ShooterIOReal());
-        indexer = new Indexer(new IndexerIO() {});
-        pivot = new Pivot(new PivotIO() {});
-        shooter = new Shooter(new ShooterIO() {});
+        indexer = new Indexer(new IndexerIOSparkMax());
+        pivot = new Pivot(new PivotIOReal());
+        shooter = new Shooter(new ShooterIOReal());
         climber = new Climber(new ClimberIOSparkMax());
         break;
 
@@ -141,7 +132,7 @@ public class RobotContainer {
     // Set up auto routines
     NamedCommands.registerCommand(
         "Nine Piece Auto",
-        Commands.runOnce(
+        runOnce(
                 () ->
                     drive.setPose(
                         PathPlannerPath.fromChoreoTrajectory("ninepieceauto")
@@ -155,6 +146,18 @@ public class RobotContainer {
     // Set up SysId routines
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
+    autoChooser.addOption(
+        "Score Preload",
+        pivot
+            .setPositionCommand(() -> Units.degreesToRadians(60))
+            .alongWith(
+                shooter
+                    .setVelocityRPMCommand(shooterSpeedRPM)
+                    .alongWith(
+                        Commands.waitUntil(shooter::isAtShootSpeed)
+                            .andThen(indexer.shootCommand())))
+            .withTimeout(5.0)
+            .andThen(drive.runVelocityFieldRelative(() -> new ChassisSpeeds(0.1, 0, 0))));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -172,20 +175,71 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    indexer.setDefaultCommand(indexer.getDefault(pivot::inHandoffZone));
+            () -> -controller.getRightX(),
+            () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
+    indexer.setDefaultCommand(indexer.run(indexer::indexOffIntakeOff));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Subwoofer
+    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
+    // Trap
+    controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
+    controller.y().onFalse(pivot.setPositionCommand(() -> 0.4).until(pivot::atGoal));
+    // Return to Stow
+    controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
+
+    // Climb Manual Up
+    controller.povRight().whileTrue(climber.runVoltsCommand(6.0));
+    // Climb Manual Down
+    controller.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
+
+    // Pivot Manual Up
+    controller.povUp().whileTrue(pivot.changeGoalPosition(0.5));
+    controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
+
+    // Intake Manual In
+    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
+    // "Intake Out" - Indexer Manual Run
     controller
-        .b()
+        .leftBumper()
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(1600)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed)
+                        .andThen(indexer.indexerInCommand())));
+
+    // Auto Rotation Lock Shooter Pivot Interp
+    controller
+        .a()
+        .whileTrue(
+            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+
+    // Z, climb up
+    controller.button(10).whileTrue(climber.setPositionCommand(0.75));
+    // C, climb down
+    controller.button(9).whileTrue(climber.setPositionCommand(0.05));
+
+    controller
+        .rightTrigger()
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(shooterSpeedRPM)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
+
+    controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
+
+    new Trigger(indexer::intakedNote)
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
+            Commands.run(
+                    () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
+                .withTimeout(0.2)
+                .andThen(
+                    Commands.runOnce(
+                        () ->
+                            controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
 
     controller.rightTrigger().whileTrue(climber.runVoltsCommand(10.0));
@@ -208,5 +262,9 @@ public class RobotContainer {
     Pose3d[] mechanismPoses = new Pose3d[1];
     mechanismPoses[0] = pivot.getPose3D();
     return mechanismPoses;
+  }
+
+  public void homeClimber() {
+    CommandScheduler.getInstance().schedule(climber.getHomingCommand().withTimeout(10.0));
   }
 }

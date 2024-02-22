@@ -9,7 +9,10 @@ public interface ShooterIO {
     public double[] shooterVelocityRPM = new double[] {};
     public double[] shooterCurrentAmps =
         new double[] {}; // Log motors individually, useful for failure analysis
+    public double topShooterSetpoint = 0.0;
+    public double bottomShooterSetpoint = 0.0;
     public boolean openLoopStatus = true;
+    public boolean atShootSpeed = false;
   }
 
   /** Updates the set of loggable inputs. */

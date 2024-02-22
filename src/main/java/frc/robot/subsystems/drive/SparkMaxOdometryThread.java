@@ -48,7 +48,8 @@ public class SparkMaxOdometryThread {
   }
 
   public void start() {
-    if (timestampQueues.size() > 0) {
+    if (timestampQueues.size() > 0
+        || signals.size() > 0) { // AdvantageKit WTF, what if I don't want timestamp queues
       notifier.startPeriodic(1.0 / Module.ODOMETRY_FREQUENCY);
     }
   }
