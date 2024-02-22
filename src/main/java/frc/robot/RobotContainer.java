@@ -137,7 +137,7 @@ public class RobotContainer {
         Commands.deadline(
             waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
                 .andThen(indexer.shootCommand().withTimeout(0.5)),
-            pivot.setPositionCommand(() -> 60),
+            pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
     NamedCommands.registerCommand(
         "shootNoteAuto",
