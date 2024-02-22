@@ -6,6 +6,7 @@
  V2 - Added more comments, version history, and off button support
  V3 - Added 'pulse' function (I got bored)
  V4 - Added comments to off button support (don't know why I didn't do that already), and optimized 'gayFade' function to use less memory and power
+ V5 - replaced the old 'gayFade' function and the 'changeColor' function with a better version, removed the 'pulse' function
 */
 
 /*
@@ -230,6 +231,7 @@ int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) {
   }
 
   return 0;
+  //end the function, gets mad if i don't put this
 
 }
 
@@ -343,7 +345,11 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
 
     } else if (input == 'f') { //check if 'input' is the character 'f'
 
-      gayFade(10, UnderglowLength);
+      red = 0;
+      green = 0;
+      blue = 0;
+
+      gayFade();
       //runs a function that plays all the hue colors through both the Underglow and Mounted LED strips
 
     } else if (input == 'w') { //check if 'input' is the character 'w'
@@ -365,121 +371,7 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
       Mounted.show();
       //t̶a̶s̶t̶e̶ show the rainbow
 
-    } else if (input == ',') { //check if 'input' is the character ','
-
-      pulse(0, 63, 5);
-      //pulse function, pulse from 0 to 63 5 times
-      
     }
-
-  }
-
-}
-
-void gayFade(int speed, int length) { //said funtion that plays all the hue colors through both the Underglow and Mounted LED strips
-
-  Underglow.clear();
-  //clears the Underglow strip; turns it off
-  Mounted.clear();
-  //clears the Mounted strip; turns it off
-
-  int color[3];
-  //initialize an array to allocate memory - which will be passed around through functions so that there aren't a lot of unneccesary variables
-
-  int* nextColor = color;
-  //declare a pointer variable (points to the address of another variable instead of telling the actual value) that points to the 'color' memory
-
-  int red, green, blue;
-  //declare that colors are a thing
-
-  for (int i=0; i<(length+763); i++) { //repeat through all the pixels that would show a hue color, the frame offset (bigger than the strip length so the animation doesn't end when the first hue color gets to the end of the strip)
-
-    red = 254; green = 0; blue = 0;
-    //resets the first hue color to red at the start of every frame
-
-    nextColor[0] = red; nextColor[1] = green; nextColor[2] = blue;
-    //set the empty memory in 'nextColor' to the red, green, and blue values
-
-    for (int j=0; j>-762; j--) { //repeats through all the pixels that will show a hue color for this frame, the hue line
-
-      if (i+j >= 0) { //ignores pixels that are before the strip to save processing power (couldn't find a way to exclude pixels beyond the strip without colors breaking)
-
-        Underglow.setPixelColor(j+i, Underglow.Color(red, green, blue));
-        //queue the pixel color to the hue at a pixel index that is the sum of the frame offset and the current index in the hue line
-        Mounted.setPixelColor(j+i, Mounted.Color(red, green, blue));
-        //queue the pixel color to the hue at a pixel index that is the sum of the frame offset and the current index in the hue line
-
-        changeColor(nextColor);
-        //sets the red, green, and blue values to the next in the sequence
-
-        red = nextColor[0]; green = nextColor[1]; blue = nextColor[2];
-        //sets the RGB values to the resulting colors
-
-      }
-
-    }
-
-    Underglow.setPixelColor(i-762, Underglow.Color(0,0,0));
-    //queues the final pixel in the Underglow hue line to off, so that the end of the line turns off instead of leaving a random red pixel
-    Mounted.setPixelColor(i-762, Mounted.Color(0,0,0));
-    //queues the final pixel in the Mounted hue line to off, so that the end of the line turns off instead of leaving a random red pixel
-
-    Underglow.setBrightness(127);
-    //set the brightness to half, so the LEDs don't draw too much power
-
-    Underglow.show();
-    //shows the queued Underglow hue colors all at once
-    Mounted.show();
-    //shows the queued Mounted hue colors all at once
-
-    delay(speed);
-    //delay so the animation plays smoothly and doesn't give people a seizure
-
-  }
-
-  Underglow.setBrightness(255);
-  //reset brightness to full
-
-}
-
-void changeColor(int* Color) { //function that sets the next hue color for the gayFade() function, int* to declare it's result as a pointer variable so gayFade() can read the result properly
-
-  int red = Color[0];
-  //set red to the first item in the 'color' pointer list
-  int green = Color[1];
-  //set green to the second item in the 'color' pointer list
-  int blue = Color[2];
-  //set blue to the third item in the 'color' pointer list
-
-  if (red == 254 && blue == 0 && green < 254) { //checks if red is at the max value and if green is smaller than its max value (254 because the function increments by 2 so gayFade() doesn't take until the end of time to play)
-
-    Color[0] = red; Color[1] = green+2; Color[2] = blue;
-    //sets the resultant variable to the RGB values, incrementing green by 2
-
-  } else if (green == 254 && blue == 0 && red > 0) { //checks if green is at its max f=value and if red is bigger than its min value
-
-    Color[0] = red-2; Color[1] = green; Color[2] = blue;
-    //sets the resultant variable to the RGB values, deincrementing red by 2
-    
-  } else if (green == 254 && red == 0 && blue < 254) { //checks if green is at its max value and if blue is smaller than its max value
-
-    Color[0] = red; Color[1] = green; Color[2] = blue+2;
-    //sets the resultant variable to the RGB values, incrementing blue by 2
-
-  } else if (blue == 254 && red == 0 && green > 0) { //checks if blue is at its max value and if green is bigger than its min value
-
-    Color[0] = red; Color[1] = green-2; Color[2] = blue;
-    //sets the resultant variable to the RGB values, deincrementing green by 2
-
-  } else if (blue == 254 && green == 0 && red < 254) { //checks if blue is at its max value and if red is smaller than its max value
-  
-    Color[0] = red+2; Color[1] = green; Color[2] = blue;
-    //sets the resultant variable to the RGB values, incrementing red by 2
-
-  } else if (red == 254 && green == 0 && blue > 0) { //checks if red is at its max value and if blue is bigger than its min value
-
-    Color[0] = red; Color[1] = green; Color[2] = blue-2;
-    //sets the resultant variable to the RGB values, deincrementing blue by 2
 
   }
 
@@ -516,6 +408,11 @@ void sawtoothFade(int red, int green, int blue) { //function that plays a sawtoo
 
   }
 
+  Underglow.setBrightness(127);
+  //set underglow brightness to half brightness
+  Mounted.setBrightness(127);
+  //set mounted brightness to half brightness
+
   Underglow.show();
   //show the queued pixel colors on the Underglow LED strip all at once
   Mounted.show();
@@ -523,49 +420,53 @@ void sawtoothFade(int red, int green, int blue) { //function that plays a sawtoo
 
 }
 
-void pulse(int low, int high, int reps) { //pulses the LEDs
+void gayFade() { //function to play a parade of hue colors until a new input is sent through Serial port
 
-  Underglow.fill(Underglow.Color(red, green, blue));
-  //fills it one color
-  Underglow.show();
-  //shows said color
+  int fadeShift = 0;
+  //pattern offset value
 
-  for (int i=0; i<reps; i++) { //repeats 'reps' times
+  unsigned int hue;
+  //declaring hue variable that holds the hue value per pixel, unsigned so that it doesn't try to enter -4.3 billion as a viable hue (I love 2's complement)
 
-    for (int b=low; b<=high; b++) { //rising pulse
+  while (Serial.available()) { //detect if there are character in the Serial port, so it can clear them
 
-      Underglow.fill(Underglow.Color(red, green, blue));
-      //set the color
-      Underglow.setBrightness(b);
-      //set the brightness
-      Underglow.show();
-      //show the color
-
-      delay(speed);
-      //delay for effect
-
-    }
-
-    for (int b=high; b>=low; b--) { //falling pulse
-
-      Underglow.fill(Underglow.Color(red, green, blue));
-      //set the color
-      Underglow.setBrightness(b);
-      //set the brightness
-      Underglow.show();
-      //show the color
-
-      delay(speed);
-      //delay for effect
-    }
+    Serial.read();
+    //read the last information sent through the serial port, so that it doesn't break the while loop later
 
   }
 
-  Underglow.setBrightness(255);
-  //reset brightness
-  Underglow.show();
-  //show brightness
+  while (!Serial.available()) { //repeats while there is no new information sent through the serial port
 
+    for (int i=0; i<UnderglowLength; i++) { //repeats through all the pixels in the strips
+
+      hue = (i+fadeShift)*364;
+      //sets the hue variable for the current pixel, which is the index of the current pixel added to the offset, multiplied by 65535 (max hue value for ColorHSV()) divided by 180 (hue colors per repeat)
+
+      Underglow.setPixelColor(i, Underglow.ColorHSV(hue, 255, 255));
+      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library)
+      Mounted.setPixelColor(i, Mounted.ColorHSV(hue, 255, 255));
+      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library)
+
+    }
+
+    Underglow.setBrightness(127);
+    //sets the brightness of the underglow strips to half brightness
+    Mounted.setBrightness(127);
+    //sets the brightness of the mounted strips to half brightness
+
+    Underglow.show();
+    //shows the queued colors on the underglow strips
+    Mounted.show();
+    //shows the queued colors on the mounted strips
+
+    fadeShift = modulo((fadeShift+1), 180);
+    //increments the shift variable, modding it to 180 (the number of hue colors displayed)
+
+    delay(speed);
+    //delay for effect
+
+  }
+  
 }
 
 //end
