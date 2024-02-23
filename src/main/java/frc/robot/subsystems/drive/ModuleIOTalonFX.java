@@ -84,32 +84,32 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(7, "*");
         turnTalon = new TalonFX(8, "*");
         cancoder = new CANcoder(26, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(0.32827); // MUST BE CALIBRATED
-        isDriveMotorInverted = false;
+        absoluteEncoderOffset = Rotation2d.fromRadians(0.33577 + Math.PI); // MUST BE CALIBRATED
+        isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
       case 1:
         driveTalon = new TalonFX(5, "*");
         turnTalon = new TalonFX(6, "*");
         cancoder = new CANcoder(24, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-0.65654 + Math.PI); // MUST BE CALIBRATED
-        isDriveMotorInverted = false;
+        absoluteEncoderOffset = Rotation2d.fromRadians(-0.66554); // MUST BE CALIBRATED
+        isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
       case 2:
         driveTalon = new TalonFX(3, "*");
         turnTalon = new TalonFX(4, "*");
         cancoder = new CANcoder(25, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41586); // MUST BE CALIBRATED
-        isDriveMotorInverted = false;
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.28486 + Math.PI); // MUST BE CALIBRATED
+        isDriveMotorInverted = true;
         isTurnMotorInverted = false;
         break;
       case 3:
         driveTalon = new TalonFX(9, "*");
         turnTalon = new TalonFX(2, "*");
         cancoder = new CANcoder(23, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.29468 + Math.PI); // MUST BE CALIBRATED
-        isDriveMotorInverted = true;
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41268); // MUST BE CALIBRATED
+        isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
       default:
@@ -133,8 +133,8 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kV = 2.28;
     driveConfig.Slot0.kA = 0.08;
     driveConfig.Slot0.kS = 0.25;
-    driveConfig.Slot0.kP = 2.5; // TODO hand tune
-    driveConfig.Slot0.kD = 0.0;
+    driveConfig.Slot0.kP = 8.0; // TODO hand tune
+    driveConfig.Slot0.kD = 0.005;
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -209,8 +209,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnAppliedVolts,
         turnCurrent);
 
-    inputs.drivePositionMeters = drivePosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
-    inputs.driveVelocityMetersPerSec = driveVelocity.getValueAsDouble() / DRIVE_GEAR_RATIO;
+    inputs.drivePositionMeters = drivePosition.getValueAsDouble();
+    inputs.driveVelocityMetersPerSec = driveVelocity.getValueAsDouble();
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 

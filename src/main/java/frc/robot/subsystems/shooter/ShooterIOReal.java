@@ -3,6 +3,8 @@ package frc.robot.subsystems.shooter;
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
 import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 import static edu.wpi.first.wpilibj.Timer.delay;
+import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
+import static java.lang.Math.abs;
 
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
@@ -24,6 +26,9 @@ public class ShooterIOReal implements ShooterIO {
 
   private final SparkPIDController topMotorPID;
   private final SparkPIDController bottomMotorPID;
+
+  private double topShooterSetpoint;
+  private double bottomShooterSetpoint;
 
   public ShooterIOReal() {
     topMotorLeader.restoreFactoryDefaults();
@@ -107,6 +112,13 @@ public class ShooterIOReal implements ShooterIO {
           topMotorLeader.getEncoder().getVelocity(), bottomMotorLeader.getEncoder().getVelocity()
         };
     inputs.openLoopStatus = openLoop;
+    inputs.topShooterSetpoint = topShooterSetpoint;
+    inputs.bottomShooterSetpoint = bottomShooterSetpoint;
+    inputs.atShootSpeed =
+        abs(topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 250
+            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 250
+            && (topShooterSetpoint > (shooterIdleRPM * 1.5)
+                || bottomShooterSetpoint > (shooterIdleRPM * 1.5));
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
@@ -119,8 +131,10 @@ public class ShooterIOReal implements ShooterIO {
   /** Run closed loop at the specified velocity. */
   public void setVelocity(double velocityRPM) {
     openLoop = false;
+    topShooterSetpoint = velocityRPM * 1.05;
+    bottomShooterSetpoint = velocityRPM;
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
-    topMotorPID.setReference(velocityRPM, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    topMotorPID.setReference(velocityRPM * 1.05, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
     bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
   }
 

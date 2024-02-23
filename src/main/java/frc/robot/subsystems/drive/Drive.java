@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
+import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 
@@ -108,8 +109,8 @@ public class Drive extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
-            new PIDConstants(5.0),
-            new PIDConstants(5.0),
+            new PIDConstants(10.0),
+            new PIDConstants(10.0),
             MAX_LINEAR_SPEED,
             DRIVE_BASE_RADIUS,
             new ReplanningConfig(true, true)), // PP can't replan choreo paths
@@ -250,6 +251,9 @@ public class Drive extends SubsystemBase {
                 aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
       }
     }
+
+    Logger.recordOutput(
+        "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));
   }
 
   /**

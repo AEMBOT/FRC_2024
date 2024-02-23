@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
-import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,7 +39,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isAtShootSpeed() {
-    return abs(shooterSpeedRPM - findMin(inputs.shooterVelocityRPM)) < 200;
+    return inputs.atShootSpeed;
   }
 
   public Command getDefault() {
