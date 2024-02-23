@@ -85,7 +85,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   NetworkTableInstance inst = NetworkTableInstance.getDefault();
-  NetworkTable table = inst.getTable("NotesDetection");
+  NetworkTable table = inst.getTable("photonvision");
+  /* 
   StringSubscriber notePosChar = table.getStringTopic("note position").subscribe("center");
   DoubleSubscriber notePosX = table.getDoubleTopic("note x pixel").subscribe(0.0);
   DoubleSubscriber notePosY = table.getDoubleTopic("note y pixel").subscribe(0.0);
@@ -93,7 +94,8 @@ public class RobotContainer {
       table.getDoubleArrayTopic("note y pixel array").subscribe(new double[] {});
   DoubleArraySubscriber notePosXArray =
       table.getDoubleArrayTopic("note x pixel array").subscribe(new double[] {});
-
+*/
+  DoubleSubscriber noteYaw = table.getDoubleTopic("targetYaw").subscribe(0.0);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -291,12 +293,11 @@ public class RobotContainer {
                         () ->
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
-    controller.y().onTrue(RotateDriveToNoteCommands.DriveToNote(drive, notePosChar.get()));
     controller
         .a()
         .onTrue(
-            RotateDriveToNoteCommands.RotateToNoteWithArray(
-                drive, notePosXArray.get(), notePosYArray.get()));
+            RotateDriveToNoteCommands.RotateToNote(
+                drive, noteYaw.get()));
   }
 
   /**

@@ -43,7 +43,7 @@ public class RotateDriveToNoteCommands {
           }
         });
   }
-
+/* 
   public static Command RotateToNote(
       Drive drive, String notePosChar, double notePosX, double notePosY) {
     return Commands.run(
@@ -60,7 +60,24 @@ public class RotateDriveToNoteCommands {
               ChassisSpeeds.fromRobotRelativeSpeeds(0, 0, omega * 0.3, drive.getRotation()));
         });
   }
+*/
 
+  public static Command RotateToNote(Drive drive, double targetYaw){
+    return Commands.run(() -> {
+      double omega = 0;
+      if (targetYaw < -4){
+        omega = -20;
+      } 
+      else if(targetYaw > 4){
+        omega = 20;
+      }
+      drive.runVelocity(ChassisSpeeds.fromRobotRelativeSpeeds(0,
+      0,
+      omega * 0.3, 
+      drive.getRotation()));
+    });
+  }
+  
   public static Command DriveToNote(Drive drive, String notePosChar) {
     return Commands.run(
         () -> {
