@@ -28,9 +28,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
@@ -134,21 +132,23 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "shootNoteSubwoofer",
         Commands.deadline(
-            waitSeconds(0.2)
-                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(indexer.shootCommand().withTimeout(0.5)),
-            pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
-            shooter.setVelocityRPMCommand(shooterSpeedRPM)));
+                waitSeconds(0.1)
+                    .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+                    .andThen(indexer.shootCommand().withTimeout(0.3)),
+                pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
+                shooter.setVelocityRPMCommand(shooterSpeedRPM))
+            .andThen(pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
     NamedCommands.registerCommand(
         "shootNoteAuto",
         Commands.deadline(
             waitSeconds(0.2)
                 .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(indexer.shootCommand().withTimeout(0.5)),
+                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
             pivot.setPositionCommand(
                 () -> interpolator.get(getSpeaker().getDistance(drive.getPose().getTranslation()))),
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
-    NamedCommands.registerCommand("intakeNote", indexer.getDefault(() -> true));
+    NamedCommands.registerCommand(
+        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(

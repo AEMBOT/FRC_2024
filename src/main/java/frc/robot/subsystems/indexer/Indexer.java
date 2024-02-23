@@ -35,7 +35,7 @@ public class Indexer extends SubsystemBase {
                         .until(pivotHandoff)
                         .andThen(run(this::indexOnIntakeOn))))
         .andThen(
-            runOnce(
+            run(
                 () -> {
                   shootReady = true;
                   indexOffIntakeOff();
