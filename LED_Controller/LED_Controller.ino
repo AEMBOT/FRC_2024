@@ -6,7 +6,8 @@
  V2 - Added more comments, version history, and off button support
  V3 - Added 'pulse' function (I got bored)
  V4 - Added comments to off button support (don't know why I didn't do that already), and optimized 'gayFade' function to use less memory and power
- V5 - replaced the old 'gayFade' function and the 'changeColor' function with a better version, removed the 'pulse' function
+ V5 - Replaced the old 'gayFade' function and the 'changeColor' function with a better version, removed the 'pulse' function
+ V6 - Added more features to 'gayFade' function, capitalized the 'r' in the previous version's update
 */
 
 /*
@@ -435,17 +436,24 @@ void gayFade() { //function to play a parade of hue colors until a new input is 
 
   }
 
-  while (!Serial.available()) { //repeats while there is no new information sent through the serial port
+  while (!Serial.available() || Serial.peek() == '1' || Serial.peek() == '2') { //repeats while there is no new information sent through the serial port
+    if (Serial.peek() == '1') {
+      speed = 45;
+      Serial.read();
+    } else if (Serial.peek() == '2') {
+      speed = 10;
+      Serial.read();
+    }
 
     for (int i=0; i<UnderglowLength; i++) { //repeats through all the pixels in the strips
 
-      hue = (i+fadeShift)*364;
+      hue = (i+fadeShift)*182;
       //sets the hue variable for the current pixel, which is the index of the current pixel added to the offset, multiplied by 65535 (max hue value for ColorHSV()) divided by 180 (hue colors per repeat)
 
-      Underglow.setPixelColor(i, Underglow.ColorHSV(hue, 255, 255));
-      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library)
-      Mounted.setPixelColor(i, Mounted.ColorHSV(hue, 255, 255));
-      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library)
+      Underglow.setPixelColor(i, Underglow.ColorHSV(65535-hue, 255, 255));
+      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library) (using 65535-hue to invert hue)
+      Mounted.setPixelColor(i, Mounted.ColorHSV(65535-hue, 255, 255));
+      //queues the pixel at the index using an HSV to RGB converter (built-in to the neopixel library) (using 65535-hue to invert hue)
 
     }
 
@@ -459,7 +467,7 @@ void gayFade() { //function to play a parade of hue colors until a new input is 
     Mounted.show();
     //shows the queued colors on the mounted strips
 
-    fadeShift = modulo((fadeShift+1), 180);
+    fadeShift = modulo((fadeShift-1), 360);
     //increments the shift variable, modding it to 180 (the number of hue colors displayed)
 
     delay(speed);
