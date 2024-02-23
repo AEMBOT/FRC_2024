@@ -84,7 +84,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(7, "*");
         turnTalon = new TalonFX(8, "*");
         cancoder = new CANcoder(26, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(0.32827 + Math.PI); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromRadians(0.33577 + Math.PI); // MUST BE CALIBRATED
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
@@ -92,7 +92,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(5, "*");
         turnTalon = new TalonFX(6, "*");
         cancoder = new CANcoder(24, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-0.65654); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromRadians(-0.66554); // MUST BE CALIBRATED
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
@@ -100,7 +100,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(3, "*");
         turnTalon = new TalonFX(4, "*");
         cancoder = new CANcoder(25, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41586 + Math.PI); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.28486 + Math.PI); // MUST BE CALIBRATED
         isDriveMotorInverted = true;
         isTurnMotorInverted = false;
         break;
@@ -108,7 +108,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(9, "*");
         turnTalon = new TalonFX(2, "*");
         cancoder = new CANcoder(23, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.29468); // MUST BE CALIBRATED
+        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41268); // MUST BE CALIBRATED
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
