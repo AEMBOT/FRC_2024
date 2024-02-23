@@ -26,7 +26,7 @@ public class IndexerIOSim implements IndexerIO {
     inputs.shooterIndexerCurrentAmps = new double[] {indexerSim.getCurrentDrawAmps()};
   }
 
-  public void setShooterVoltage(double voltage) {
+  public void setIndexerVoltage(double voltage) {
     indexerSim.setInputVoltage(voltage);
     indexerAppliedVolts = voltage;
   }

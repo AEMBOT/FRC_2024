@@ -53,7 +53,7 @@ public class IndexerIOSparkMax implements IndexerIO {
         new double[] {indexerMotorTop.getOutputCurrent(), indexerMotorBottom.getOutputCurrent()};
   }
 
-  public void setShooterVoltage(double voltage) {
+  public void setIndexerVoltage(double voltage) {
     indexerMotorTop.setVoltage(voltage);
   }
 

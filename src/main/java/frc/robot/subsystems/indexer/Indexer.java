@@ -48,35 +48,35 @@ public class Indexer extends SubsystemBase {
   }
 
   public void indexOffIntakeOn() {
-    io.setShooterVoltage(0);
+    io.setIndexerVoltage(0);
     io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOnIntakeOn() {
-    io.setShooterVoltage(IndexerConstants.indexerMotorVoltage);
+    io.setIndexerVoltage(IndexerConstants.indexerMotorVoltage);
     io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOffIntakeOff() {
     io.setIntakeVoltage(0);
-    io.setShooterVoltage(0);
+    io.setIndexerVoltage(0);
   }
 
   public void indexOffIntakeBack() {
     io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
-    io.setShooterVoltage(0);
+    io.setIndexerVoltage(0);
   }
 
   public void indexerIn() {
-    io.setShooterVoltage(IndexerConstants.indexerMotorVoltage);
+    io.setIndexerVoltage(IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerOut() {
-    io.setShooterVoltage(-IndexerConstants.indexerMotorVoltage);
+    io.setIndexerVoltage(-IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerStop() {
-    io.setShooterVoltage(0);
+    io.setIndexerVoltage(0);
   }
 
   public void intakeIn() {
@@ -99,7 +99,7 @@ public class Indexer extends SubsystemBase {
   public Command shootCommand() {
     return run(
         () -> {
-          io.setShooterVoltage(8.0);
+          io.setIndexerVoltage(8.0);
           io.setIntakeVoltage(0.0);
         });
   }
