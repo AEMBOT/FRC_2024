@@ -133,7 +133,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kV = 2.28;
     driveConfig.Slot0.kA = 0.08;
     driveConfig.Slot0.kS = 0.25;
-    driveConfig.Slot0.kP = 8.5; // TODO hand tune
+    driveConfig.Slot0.kP = 8.0; // TODO hand tune
     driveConfig.Slot0.kD = 0.005;
 
     driveTalon.getConfigurator().apply(driveConfig);

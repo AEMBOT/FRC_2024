@@ -13,8 +13,7 @@
 
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
-import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static frc.robot.commands.SpeakerCommands.interpolator;
@@ -135,19 +134,21 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "shootNoteSubwoofer",
         Commands.deadline(
-            waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
+            waitSeconds(0.2)
+                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
                 .andThen(indexer.shootCommand().withTimeout(0.5)),
             pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
     NamedCommands.registerCommand(
         "shootNoteAuto",
         Commands.deadline(
-            waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
+            waitSeconds(0.2)
+                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
                 .andThen(indexer.shootCommand().withTimeout(0.5)),
             pivot.setPositionCommand(
                 () -> interpolator.get(getSpeaker().getDistance(drive.getPose().getTranslation()))),
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
-    NamedCommands.registerCommand("intakeNote", indexer.getDefault(pivot::inHandoffZone));
+    NamedCommands.registerCommand("intakeNote", indexer.getDefault(() -> true));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(
