@@ -3,6 +3,8 @@ package frc.robot.subsystems.indexer;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IndexerIOSim implements IndexerIO {
   private final DIOSim intakeBeamBreak = new DIOSim(0);
@@ -12,6 +14,24 @@ public class IndexerIOSim implements IndexerIO {
 
   private double intakeAppliedVolts = 0.0;
   private double indexerAppliedVolts = 0.0;
+
+  public IndexerIOSim() {
+    new Trigger(() -> intakeSim.getAngularVelocityRPM() > 1.0)
+        .debounce(0.2)
+        .onTrue(Commands.runOnce(() -> intakeBeamBreak.setValue(true)));
+    new Trigger(() -> indexerSim.getAngularVelocityRPM() > 1.0)
+        .debounce(0.2)
+        .onTrue(Commands.runOnce(() -> indexerBeamBreak.setValue(true)));
+
+    new Trigger(() -> indexerSim.getAngularVelocityRPM() > 3000 && indexerBeamBreak.getValue())
+        .debounce(0.1)
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  intakeBeamBreak.setValue(false);
+                  indexerBeamBreak.setValue(false);
+                }));
+  }
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {

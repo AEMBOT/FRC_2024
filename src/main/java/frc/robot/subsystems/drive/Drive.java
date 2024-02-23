@@ -47,6 +47,7 @@ import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -254,6 +255,9 @@ public class Drive extends SubsystemBase {
 
     Logger.recordOutput(
         "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));
+    Logger.recordOutput(
+        "Drive/Running Command",
+        Optional.ofNullable(this.getCurrentCommand()).map(Command::getName).orElse("None"));
   }
 
   /**

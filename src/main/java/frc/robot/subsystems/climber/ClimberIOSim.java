@@ -61,18 +61,10 @@ public class ClimberIOSim implements ClimberIO {
 
     if (positionError > 0) {
       climberSetpoint = climberProfile.calculate(0.02, climberSetpoint, climberGoal);
-      appliedVolts =
-          climberFFModelUp.calculate(
-              climberSetpoint.position,
-              climberSetpoint.velocity,
-              (climberSetpoint.velocity - currentVelocity) / 0.02);
+      appliedVolts = climberFFModelUp.calculate(currentVelocity, climberSetpoint.velocity, 0.02);
     } else {
       climberSetpoint = climberProfileDown.calculate(0.02, climberSetpoint, climberGoal);
-      appliedVolts =
-          climberFFModelDown.calculate(
-              climberSetpoint.position,
-              climberSetpoint.velocity,
-              (climberSetpoint.velocity - currentVelocity) / 0.02);
+      appliedVolts = climberFFModelDown.calculate(currentVelocity, climberSetpoint.velocity, 0.02);
     }
 
     double pidOutput = pidController.calculate(sim.getPositionMeters(), climberSetpoint.position);
