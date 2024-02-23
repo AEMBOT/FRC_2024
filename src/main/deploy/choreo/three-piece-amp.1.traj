@@ -256,29 +256,6 @@
   "eventMarkers": [
     {
       "name": "Marker",
-      "timestamp": 1.3299534480904351,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "wait",
-              "data": {
-                "waitTime": 1
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "shootNoteAuto"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Marker",
       "timestamp": 0.5897140607093477,
       "command": {
         "type": "named",

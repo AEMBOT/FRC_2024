@@ -714,43 +714,6 @@
             "eventMarkers": [
                 {
                     "name": "Marker",
-                    "target": 2,
-                    "targetTimestamp": 1.3299534480904351,
-                    "offset": 0,
-                    "command": {
-                        "type": "parallel",
-                        "data": {
-                            "commands": [
-                                {
-                                    "type": "wait",
-                                    "data": {
-                                        "waitTime": 1
-                                    }
-                                },
-                                {
-                                    "type": "named",
-                                    "data": {
-                                        "name": "shootNoteAuto"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 4,
-                    "targetTimestamp": 4.307162128611181,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": "shootNoteAuto"
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
                     "target": 1,
                     "targetTimestamp": 0.6897140607093477,
                     "offset": -0.1,
@@ -774,7 +737,7 @@
                     }
                 }
             ],
-            "isTrajectoryStale": true
+            "isTrajectoryStale": false
         },
         "three-piece-center": {
             "waypoints": [
@@ -2029,18 +1992,6 @@
                         "type": "named",
                         "data": {
                             "name": "intakeNote"
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 5,
-                    "targetTimestamp": 4.1304355331353815,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": "shootNoteAuto"
                         }
                     }
                 }
@@ -3419,43 +3370,6 @@
                         "type": "named",
                         "data": {
                             "name": "intakeNote"
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 1,
-                    "targetTimestamp": 0.9597343620076235,
-                    "offset": 0,
-                    "command": {
-                        "type": "parallel",
-                        "data": {
-                            "commands": [
-                                {
-                                    "type": "wait",
-                                    "data": {
-                                        "waitTime": 1
-                                    }
-                                },
-                                {
-                                    "type": "named",
-                                    "data": {
-                                        "name": "shootNoteAuto"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 6,
-                    "targetTimestamp": 4.77375811552341,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": "shootNoteAuto"
                         }
                     }
                 }

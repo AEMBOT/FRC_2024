@@ -1055,39 +1055,6 @@
           "name": "intakeNote"
         }
       }
-    },
-    {
-      "name": "Marker",
-      "timestamp": 0,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "wait",
-              "data": {
-                "waitTime": 1
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "shootNoteAuto"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Marker",
-      "timestamp": 3.814023753515787,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "shootNoteAuto"
-        }
-      }
     }
   ]
 }

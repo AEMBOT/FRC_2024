@@ -155,29 +155,6 @@
           "name": "intakeNote"
         }
       }
-    },
-    {
-      "name": "Marker",
-      "timestamp": 0.9597343620076235,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "wait",
-              "data": {
-                "waitTime": 1
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "shootNoteAuto"
-              }
-            }
-          ]
-        }
-      }
     }
   ]
 }

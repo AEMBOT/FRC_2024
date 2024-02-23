@@ -1101,16 +1101,6 @@
           "name": "intakeNote"
         }
       }
-    },
-    {
-      "name": "Marker",
-      "timestamp": 4.1304355331353815,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "shootNoteAuto"
-        }
-      }
     }
   ]
 }
