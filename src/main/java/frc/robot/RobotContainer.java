@@ -13,11 +13,8 @@
 
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.defer;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-
-import java.util.Set;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -31,7 +28,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
@@ -185,7 +181,7 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.getDefault());
 
     // Subwoofer
-    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
+    // controller.whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
     controller.y().onFalse(pivot.setPositionCommand(() -> 0.4).until(pivot::atGoal));
@@ -238,10 +234,17 @@ public class RobotContainer {
                         () ->
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
-
+    /*
     controller
         .a()
         .whileTrue(defer(() -> TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter), Set.of(drive, climber, pivot, shooter)));
+        */
+    // controller.a().whileTrue(TrapClimbingCommands.OTFTesting(drive));
+    /*controller
+    .a()
+    .whileTrue(TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter));*/
+    controller.a().whileTrue(TrapClimbingCommands.ClimbFirstHalf(climber, pivot, shooter));
+    controller.b().whileTrue(TrapClimbingCommands.ClimbSecondHalf(climber, pivot));
   }
 
   /**
