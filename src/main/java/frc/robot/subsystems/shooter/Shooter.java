@@ -65,7 +65,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command stopCommand() {
-    return runOnce(() -> io.setVoltage(0.0));
+    return run(() -> io.setVoltage(0.0));
   }
 
   public Command setVoltageCommand(double volts) {
@@ -86,14 +86,11 @@ public class Shooter extends SubsystemBase {
   public Command runShooterCharacterization() {
     return Commands.sequence(
         sysId.quasistatic(kForward),
-        stopCommand(),
-        Commands.waitSeconds(2.0),
+        stopCommand().withTimeout(2.0),
         sysId.quasistatic(kReverse),
-        stopCommand(),
-        Commands.waitSeconds(2.0),
-        sysId.dynamic(kForward),
-        stopCommand(),
-        Commands.waitSeconds(2.0),
-        sysId.dynamic(kReverse));
+        stopCommand().withTimeout(2.0),
+        sysId.dynamic(kForward).withTimeout(5.0),
+        stopCommand().withTimeout(2.0),
+        sysId.dynamic(kReverse).withTimeout(5.0));
   }
 }

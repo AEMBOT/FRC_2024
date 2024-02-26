@@ -14,9 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-import static frc.robot.commands.SpeakerCommands.interpolator;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -31,7 +29,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
@@ -39,7 +36,6 @@ import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
@@ -93,7 +89,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIOReal());
         shooter = new Shooter(new ShooterIOReal());
-        climber = new Climber(new ClimberIOSparkMax());
+        climber = new Climber(new ClimberIO() {});
         break;
 
       case SIM:
@@ -216,7 +212,7 @@ public class RobotContainer {
     indexer.setDefaultCommand(
         indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
     pivot.setDefaultCommand(pivot.getDefault());
-    shooter.setDefaultCommand(shooter.getDefault());
+    // shooter.setDefaultCommand(shooter.getDefault());
 
     // Subwoofer
     controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
@@ -278,6 +274,8 @@ public class RobotContainer {
                         () ->
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
+
+    backupController.povUp().whileTrue(shooter.runShooterCharacterization());
   }
 
   /**
