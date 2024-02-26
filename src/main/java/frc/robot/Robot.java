@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.urcl.URCL;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -82,7 +83,7 @@ public class Robot extends LoggedRobot {
     // Logger.disableDeterministicTimestamps()
 
     // Start AdvantageKit logger
-    // Logger.registerURCL(URCL.startExternal());
+    Logger.registerURCL(URCL.startExternal());
     Logger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
@@ -118,6 +119,12 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }
+
+    robotContainer.indexer.setDefaultCommand(
+        robotContainer
+            .indexer
+            .getDefault(robotContainer.pivot::inHandoffZone)
+            .withName("Indexer Auto Default Run"));
   }
 
   /** This function is called periodically during autonomous. */
@@ -136,6 +143,8 @@ public class Robot extends LoggedRobot {
     }
 
     robotContainer.homeClimber();
+    robotContainer.indexer.setDefaultCommand(
+        robotContainer.indexer.run(() -> robotContainer.indexer.indexOffIntakeOff()));
   }
 
   /** This function is called periodically during operator control. */

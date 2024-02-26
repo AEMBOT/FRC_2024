@@ -31,10 +31,10 @@ public class Pivot extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new SysIdRoutine.Config(
-                Volts.of(0.1).per(Seconds.of(1)),
-                Volts.of(4),
+                Volts.of(0.2).per(Seconds.of(1)),
+                Volts.of(6),
                 Seconds.of(30),
-                (state) -> Logger.recordOutput("Flywheel/SysIdState", state.toString())),
+                (state) -> Logger.recordOutput("Pivot/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism((voltage) -> runVolts(voltage.in(Volts)), null, this));
   }
 

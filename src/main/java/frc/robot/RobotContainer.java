@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
@@ -64,8 +65,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Indexer indexer;
-  private final Pivot pivot;
+  public final Indexer indexer;
+  public final Pivot pivot;
   private final Shooter shooter;
   private final Climber climber;
 
@@ -132,23 +133,32 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "shootNoteSubwoofer",
         Commands.deadline(
-                waitSeconds(0.1)
+                waitSeconds(0.2)
                     .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                    .andThen(indexer.shootCommand().withTimeout(0.3)),
+                    .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
                 pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
                 shooter.setVelocityRPMCommand(shooterSpeedRPM))
             .andThen(pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
+    //    NamedCommands.registerCommand(
+    //        "shootNoteAuto",
+    //        Commands.deadline(
+    //            waitSeconds(0.2)
+    //                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+    //                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+    //            pivot.setPositionCommand(
+    //                () ->
+    // interpolator.get(getSpeaker().getDistance(drive.getPose().getTranslation()))),
+    //            shooter.setVelocityRPMCommand(shooterSpeedRPM)));
     NamedCommands.registerCommand(
         "shootNoteAuto",
         Commands.deadline(
-            waitSeconds(0.2)
+            waitSeconds(0.6)
                 .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
-            pivot.setPositionCommand(
-                () -> interpolator.get(getSpeaker().getDistance(drive.getPose().getTranslation()))),
+                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.4))),
+            shootSpeaker(drive, pivot, () -> 0, () -> 0),
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
-    NamedCommands.registerCommand(
-        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
+    //    NamedCommands.registerCommand(
+    //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(
@@ -203,7 +213,8 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX(),
             () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
-    indexer.setDefaultCommand(indexer.run(indexer::indexOffIntakeOff));
+    indexer.setDefaultCommand(
+        indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 

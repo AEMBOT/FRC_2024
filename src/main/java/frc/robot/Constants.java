@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  */
 public final class Constants {
   public static final Mode currentMode = Mode.REAL;
+  public static final Robot currentRobot = Robot.LIGHTCYCLE;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -39,6 +40,11 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public enum Robot {
+    CLEF,
+    LIGHTCYCLE
   }
 
   public static final class ClimberConstants {
@@ -57,7 +63,7 @@ public final class Constants {
 
   public static final class PivotConstants {
     public static final double PIVOT_MAX_POS_RAD = 2.20;
-    public static final double PIVOT_MIN_POS_RAD = 0.40;
+    public static final double PIVOT_MIN_POS_RAD = 0.30;
   }
 
   public static final class IndexerConstants {
@@ -106,8 +112,8 @@ public final class Constants {
     public static double kP = 5;
     public static double kI = 0;
     public static double kD = 0;
-    public static double maxVelocity = 1;
-    public static double maxAcceleration = 1;
+    public static double maxVelocity = 2;
+    public static double maxAcceleration = 4;
     public static double[][] shooterInterpolationPoints =
         new double[][] {
           new double[] {1.0, Units.degreesToRadians(60)},
@@ -117,7 +123,8 @@ public final class Constants {
           new double[] {4.0, Units.degreesToRadians(23)},
           new double[] {4.85, 0.360},
           new double[] {5.0, 0.350},
-          new double[] {6.0, 0.28}
+          new double[] {6.0, 0.32},
+          new double[] {7.0, 0.29}
         };
   }
 }

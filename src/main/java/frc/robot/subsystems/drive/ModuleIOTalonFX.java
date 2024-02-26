@@ -65,7 +65,7 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Double> turnCurrent;
 
   // Gear ratios for SDS MK4i L2+, adjust as necessary
-  private final double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (17.0 / 27.0) * (45.0 / 15.0);
+  private final double DRIVE_GEAR_RATIO = (50.0 / 16.0) * (16.0 / 28.0) * (45.0 / 15.0);
   private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
   private final boolean isDriveMotorInverted;
@@ -133,7 +133,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     driveConfig.Slot0.kV = 2.28;
     driveConfig.Slot0.kA = 0.08;
     driveConfig.Slot0.kS = 0.25;
-    driveConfig.Slot0.kP = 8.0; // TODO hand tune
+    driveConfig.Slot0.kP = 7.5; // TODO hand tune
     driveConfig.Slot0.kD = 0.005;
 
     driveTalon.getConfigurator().apply(driveConfig);
