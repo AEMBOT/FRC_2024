@@ -14,9 +14,8 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-import static frc.robot.commands.SpeakerCommands.interpolator;
+import static frc.robot.commands.SpeakerCommands.intakeNote;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -31,7 +30,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
@@ -45,6 +43,8 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSparkMax;
+import frc.robot.subsystems.notevision.NoteVisionIO;
+import frc.robot.subsystems.notevision.NoteVisionIOReal;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOReal;
@@ -54,6 +54,7 @@ import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -89,7 +90,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(1),
                 new ModuleIOTalonFX(2),
                 new ModuleIOTalonFX(3),
-                new AprilTagVisionIOReal());
+                new AprilTagVisionIOReal(),
+                new NoteVisionIOReal());
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIOReal());
         shooter = new Shooter(new ShooterIOReal());
@@ -105,7 +107,8 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new AprilTagVisionIOSim());
+                new AprilTagVisionIOSim(),
+                new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         shooter = new Shooter(new ShooterIOSim());
@@ -121,7 +124,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new AprilTagVisionIO() {});
+                new AprilTagVisionIO() {},
+                new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
@@ -159,6 +163,8 @@ public class RobotContainer {
             shooter.setVelocityRPMCommand(shooterSpeedRPM)));
     //    NamedCommands.registerCommand(
     //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
+    NamedCommands.registerCommand(
+        "intakeNote", new InstantCommand(() -> Logger.recordOutput("Intake Scheduled", true)));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(
@@ -236,7 +242,18 @@ public class RobotContainer {
     controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
 
     // Intake Manual In
-    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
+    //    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
+    // Intake Note Vision In
+    controller
+        .rightBumper()
+        .whileTrue(
+            intakeNote(
+                drive,
+                indexer,
+                pivot,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX()));
     // "Intake Out" - Indexer Manual Run
     controller
         .leftBumper()
