@@ -24,8 +24,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.XboxController;
@@ -238,7 +238,7 @@ public class RobotContainer {
         serial.writeString("b");
       }
     } else {
-      serial.writeString("o");
+      serial.writeString("f");
     }
 
     controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));

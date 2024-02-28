@@ -64,7 +64,7 @@ Adafruit_NeoPixel Mounted = Adafruit_NeoPixel(MountedLength, MountedPin, NEO_GRB
 int shift = 0;
 //the value that offsets the patterns during animation
 
-const int UnderglowHalf = 19;
+const int UnderglowHalf = 35;
 
 const int setLength = 10;
 
@@ -128,23 +128,19 @@ float modulo(float a, int n) { //modulo function with support for a float input,
 
 void loop() { //loop function, to run indefinitally unless told otherwise
 
-  while (digitalRead(ButtonPin) == LOW) { //while not off
+  getColor();
+  //gets a viable color, speed, or function sent via the Serial port
 
-    getColor();
-    //gets a viable color, speed, or function sent via the Serial port
+  if (red != 0 || green != 0 || blue != 0) { //check if the current color isn't 'off'
 
-    if (red != 0 || green != 0 || blue != 0) { //check if the current color isn't 'off'
+    sawtoothFade(red, green, blue);
+    //makes a sawtooth pattern on the LED strips
 
-      sawtoothFade(red, green, blue);
-      //makes a sawtooth pattern on the LED strips
+    shift = modulo(shift-1, setLength);
+    //increments the shift variable, moving the animation, but doesn't let the variable go over the pattern length to save memory
 
-      shift = modulo(shift-1, setLength);
-      //increments the shift variable, moving the animation, but doesn't let the variable go over the pattern length to save memory
-
-      delay(speed);
-      //delay so the shift between frames isn't instant
-    }
-
+    delay(speed);
+    //delay so the shift between frames isn't instant
   }
 
 }
@@ -162,18 +158,6 @@ int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) {
     delay(UnderglowSpeed);
     //delay so the strip doesn't just light up all at once
 
-    if (digitalRead(ButtonPin) != LOW) { //off button
-
-      Underglow.clear();
-      //oof
-      Underglow.show();
-      //offf
-
-      return 0;
-      //end the function
-
-    }
-
   }
 
   delay(500);
@@ -189,22 +173,6 @@ int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) {
 
     delay(MountedSpeed);
     //delay so the strip doesn't just light up all at once
-
-    if (digitalRead(ButtonPin) != LOW) { //off button
-
-      Underglow.clear();
-      //off
-      Underglow.show();
-      //off?
-      Mounted.clear();
-      //off
-      Mounted.show();
-      //OFF
-
-      return 0;
-      //end the function
-
-    }
 
   }
 
