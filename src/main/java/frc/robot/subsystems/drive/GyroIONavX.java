@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.Constants.currentRobot;
 import static frc.robot.subsystems.drive.Module.ODOMETRY_FREQUENCY;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -49,7 +50,13 @@ public class GyroIONavX implements GyroIO {
             // But this fixes the drivetrain
             // I believe the problem is that the NavX has not been correctly
             // TODO NavX OMNIMOUNT configure both bots
-            .map((Double value) -> Rotation2d.fromDegrees(value))
+            .map(
+                (Double value) ->
+                    Rotation2d.fromDegrees(
+                        switch (currentRobot) {
+                          case CLEF -> value; // Clef NavX is inverted and I don't want to fix it
+                          case LIGHTCYCLE -> -value;
+                        }))
             .toArray(Rotation2d[]::new);
     yawTimestampQueue.clear();
     yawPositionQueue.clear();

@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.Constants.currentRobot;
 import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -84,7 +85,11 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(7, "*");
         turnTalon = new TalonFX(8, "*");
         cancoder = new CANcoder(26, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(0.33577 + Math.PI); // MUST BE CALIBRATED
+        absoluteEncoderOffset =
+            switch (currentRobot) {
+              case CLEF -> Rotation2d.fromRadians(0.33577);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.521864415283994);
+            };
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
@@ -92,7 +97,11 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(5, "*");
         turnTalon = new TalonFX(6, "*");
         cancoder = new CANcoder(24, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-0.66554); // MUST BE CALIBRATED
+        absoluteEncoderOffset =
+            switch (currentRobot) {
+              case CLEF -> Rotation2d.fromRadians(-0.66554);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.9176314585584895 + Math.PI);
+            };
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
         break;
@@ -100,7 +109,11 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(3, "*");
         turnTalon = new TalonFX(4, "*");
         cancoder = new CANcoder(25, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.28486 + Math.PI); // MUST BE CALIBRATED
+        absoluteEncoderOffset =
+            switch (currentRobot) {
+              case CLEF -> Rotation2d.fromRadians(-1.28486 + Math.PI);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(0.9725438195194965);
+            };
         isDriveMotorInverted = true;
         isTurnMotorInverted = false;
         break;
@@ -108,7 +121,11 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(9, "*");
         turnTalon = new TalonFX(2, "*");
         cancoder = new CANcoder(23, "*");
-        absoluteEncoderOffset = Rotation2d.fromRadians(-1.41268); // MUST BE CALIBRATED
+        absoluteEncoderOffset =
+            switch (currentRobot) {
+              case CLEF -> Rotation2d.fromRadians(-1.41268);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.426757606435084 + Math.PI);
+            };
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
         break;
