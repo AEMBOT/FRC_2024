@@ -1,5 +1,7 @@
 package frc.robot.subsystems.apriltagvision;
 
+import static frc.robot.Constants.currentRobot;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -21,12 +23,24 @@ public final class AprilTagConstants {
               Units.inchesToMeters(11.32), Units.inchesToMeters(7.08), Units.inchesToMeters(7.8)),
           new Rotation3d(Units.degreesToRadians(180), Units.degreesToRadians(-30), 0.0));
   public static final Transform3d leftCamToRobot =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(-12.01),
-              Units.inchesToMeters(11.65),
-              Units.inchesToMeters(10.58)),
-          new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(147)));
+      switch (currentRobot) {
+        case CLEF -> new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-12.01),
+                Units.inchesToMeters(11.65),
+                Units.inchesToMeters(10.58)),
+            new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(147)));
+        case LIGHTCYCLE -> new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-12.01),
+                Units.inchesToMeters(11.65),
+                Units.inchesToMeters(10.58)),
+            new Rotation3d(
+                Units.degreesToRadians(180),
+                Units.degreesToRadians(-23.5),
+                Units.degreesToRadians(147)));
+      };
+
   public static final Transform3d rightCamToRobot =
       new Transform3d(
           new Translation3d(
