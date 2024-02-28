@@ -61,6 +61,11 @@ public class Indexer extends SubsystemBase {
     io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
+  public void intakeIndexBackwards() {
+    io.setIndexerVoltage(-IndexerConstants.indexerMotorVoltage);
+    io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
+  }
+
   public void indexOffIntakeOff() {
     io.setIntakeVoltage(0);
     io.setIndexerVoltage(0);

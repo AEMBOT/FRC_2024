@@ -232,11 +232,6 @@ public class RobotContainer {
     // Return to Stow
     controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
 
-    // Climb Manual Up
-    controller.povRight().whileTrue(climber.runVoltsCommand(6.0));
-    // Climb Manual Down
-    controller.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
-
     // Pivot Manual Up
     controller.povUp().whileTrue(pivot.changeGoalPosition(0.5));
     controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
@@ -295,6 +290,13 @@ public class RobotContainer {
                         () ->
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
+
+    // Intake Indexer Backwards Eject
+    backupController.b().whileTrue(indexer.run(indexer::intakeIndexBackwards));
+    // Climb Manual Up
+    backupController.povRight().whileTrue(climber.runVoltsCommand(6.0));
+    // Climb Manual Down
+    backupController.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
   }
 
   /**
