@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Main",
+      "request": "launch",
+      "mainClass": "frc.robot.Main",
+      "projectName": "FRC_2024"
+    },
+    {
+      "type": "java",
       "name": "networktablestestingrev1",
       "request": "launch",
       "mainClass": "frc.robot.subsystems.notevision.networktablestestingrev1",

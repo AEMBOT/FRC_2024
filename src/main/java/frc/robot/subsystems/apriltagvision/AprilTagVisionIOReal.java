@@ -1,6 +1,7 @@
 package frc.robot.subsystems.apriltagvision;
 
 import static frc.robot.Constants.aprilTagFieldLayout;
+import static frc.robot.Constants.currentRobot;
 import static frc.robot.subsystems.apriltagvision.AprilTagConstants.*;
 import static java.lang.System.arraycopy;
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
@@ -78,7 +79,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           poseArray[1] = estimatedRobotPose.estimatedPose;
           timestampArray[1] = estimatedRobotPose.timestampSeconds;
           Matrix<N3, N1> stdDevs =
-              getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
+              getEstimationStdDevs(
+                  estimatedRobotPose,
+                  switch (currentRobot) {
+                    case CLEF -> CameraResolution.NORMAL;
+                    case LIGHTCYCLE -> CameraResolution.HIGH_RES;
+                  });
           arraycopy(stdDevs.getData(), 0, visionStdArray, 3, 3);
         },
         () -> {

@@ -3,15 +3,29 @@ package frc.robot.subsystems.shooter;
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
 import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 import static edu.wpi.first.wpilibj.Timer.delay;
+import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
+import static frc.robot.Constants.currentRobot;
+import static frc.robot.util.SparkUtils.Data.*;
+import static frc.robot.util.SparkUtils.Sensor.INTEGRATED;
+import static frc.robot.util.SparkUtils.configureFrameStrategy;
+import static java.lang.Math.abs;
 
-import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkPIDController.ArbFFUnits;
+import java.util.Set;
 
 public class ShooterIOReal implements ShooterIO {
-  private static final double topMotorkS = 0.13;
-  private static final double bottomMotorkS = 0.15;
+  private static final double topMotorkS =
+      switch (currentRobot) {
+        case CLEF -> 0.13;
+        case LIGHTCYCLE -> 0.25;
+      };
+  private static final double bottomMotorkS =
+      switch (currentRobot) {
+        case CLEF -> 0.15;
+        case LIGHTCYCLE -> 0.25;
+      };
 
   private boolean openLoop = false;
   private final CANSparkMax topMotorLeader = new CANSparkMax(20, CANSparkMax.MotorType.kBrushless);
@@ -24,6 +38,9 @@ public class ShooterIOReal implements ShooterIO {
 
   private final SparkPIDController topMotorPID;
   private final SparkPIDController bottomMotorPID;
+
+  private double topShooterSetpoint;
+  private double bottomShooterSetpoint;
 
   public ShooterIOReal() {
     topMotorLeader.restoreFactoryDefaults();
@@ -44,10 +61,10 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorFollower.enableVoltageCompensation(10.0);
 
     // Tune acceptable current limit, don't want to use all power if shoot while moving
-    topMotorLeader.setSmartCurrentLimit(80);
-    topMotorFollower.setSmartCurrentLimit(80);
-    bottomMotorLeader.setSmartCurrentLimit(80);
-    bottomMotorFollower.setSmartCurrentLimit(80);
+    topMotorLeader.setSmartCurrentLimit(60);
+    topMotorFollower.setSmartCurrentLimit(60);
+    bottomMotorLeader.setSmartCurrentLimit(60);
+    bottomMotorFollower.setSmartCurrentLimit(60);
 
     topMotorLeader.getEncoder().setVelocityConversionFactor(2);
     topMotorFollower.getEncoder().setVelocityConversionFactor(2);
@@ -59,10 +76,21 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.setIdleMode(kCoast);
     bottomMotorFollower.setIdleMode(kCoast);
 
-    topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
-    topMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 5);
-    bottomMotorLeader.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 5);
+    configureFrameStrategy(
+        topMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(topMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
+
+    configureFrameStrategy(
+        bottomMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(bottomMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
 
     topMotorLeader.getEncoder().setMeasurementPeriod(10);
     topMotorFollower.getEncoder().setMeasurementPeriod(10);
@@ -81,8 +109,17 @@ public class ShooterIOReal implements ShooterIO {
 
     topMotorPID.setP(1e-4); // TODO tune
     bottomMotorPID.setP(1e-4);
-    topMotorPID.setFF(1.05 * 0.0010967 / 10.0); // Divide by 10 because of voltage compensation
-    bottomMotorPID.setFF(1.05 * 0.0010492 / 10.0); // FF needs fudging???
+
+    topMotorPID.setFF(
+        switch (currentRobot) {
+          case CLEF -> 1.05 * 0.0010967 / 10.0;
+          case LIGHTCYCLE -> 0.98 * 0.001137 / 10.0;
+        }); // Divide by 10 because of voltage compensation
+    bottomMotorPID.setFF(
+        switch (currentRobot) {
+          case CLEF -> 1.05 * 0.0010492 / 10.0;
+          case LIGHTCYCLE -> 0.98 * 0.001137 / 10.0;
+        });
 
     topMotorFollower.follow(topMotorLeader, true);
     bottomMotorFollower.follow(bottomMotorLeader, true);
@@ -107,6 +144,13 @@ public class ShooterIOReal implements ShooterIO {
           topMotorLeader.getEncoder().getVelocity(), bottomMotorLeader.getEncoder().getVelocity()
         };
     inputs.openLoopStatus = openLoop;
+    inputs.topShooterSetpoint = topShooterSetpoint;
+    inputs.bottomShooterSetpoint = bottomShooterSetpoint;
+    inputs.atShootSpeed =
+        abs(topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 250
+            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 250
+            && (topShooterSetpoint > (shooterIdleRPM * 1.5)
+                || bottomShooterSetpoint > (shooterIdleRPM * 1.5));
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
@@ -119,8 +163,10 @@ public class ShooterIOReal implements ShooterIO {
   /** Run closed loop at the specified velocity. */
   public void setVelocity(double velocityRPM) {
     openLoop = false;
+    topShooterSetpoint = velocityRPM * 1.05;
+    bottomShooterSetpoint = velocityRPM;
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
-    topMotorPID.setReference(velocityRPM, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    topMotorPID.setReference(velocityRPM * 1.05, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
     bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
   }
 

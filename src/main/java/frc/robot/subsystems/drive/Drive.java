@@ -16,6 +16,7 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
+import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 
@@ -44,8 +45,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
+import frc.robot.subsystems.notevision.NoteVisionIO;
+import frc.robot.subsystems.notevision.NoteVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -83,19 +87,24 @@ public class Drive extends SubsystemBase {
   private final AprilTagVisionIOInputsAutoLogged aprilTagVisionInputs =
       new AprilTagVisionIOInputsAutoLogged();
 
+  private final NoteVisionIO noteVisionIO;
+  private final NoteVisionIOInputsAutoLogged noteVisionInputs = new NoteVisionIOInputsAutoLogged();
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
       ModuleIO brModuleIO,
-      AprilTagVisionIO aprilTagVisionIO) {
+      AprilTagVisionIO aprilTagVisionIO,
+      NoteVisionIO noteVisionIO) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0);
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
     this.aprilTagVisionIO = aprilTagVisionIO;
+    this.noteVisionIO = noteVisionIO;
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -249,7 +258,16 @@ public class Drive extends SubsystemBase {
                 aprilTagVisionInputs.visionStdDevs[3 * i + 1],
                 aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
       }
+
+      // Update Note Detection
+      noteVisionIO.updateInputs(noteVisionInputs);
     }
+
+    Logger.recordOutput(
+        "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));
+    Logger.recordOutput(
+        "Drive/Running Command",
+        Optional.ofNullable(this.getCurrentCommand()).map(Command::getName).orElse("None"));
   }
 
   /**
@@ -403,6 +421,14 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return MAX_ANGULAR_SPEED;
+  }
+
+  public boolean hasNoteTarget() {
+    return noteVisionInputs.hasTarget;
+  }
+
+  public double getNoteLocation() {
+    return noteVisionInputs.targetX;
   }
 
   /** Returns an array of module translations. */

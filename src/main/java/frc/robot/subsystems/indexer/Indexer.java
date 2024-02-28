@@ -1,10 +1,11 @@
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState.*;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IndexerConstants;
+import frc.robot.Constants.IntakeConstants;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -22,6 +23,9 @@ public class Indexer extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+    Logger.recordOutput(
+        "Indexer/Running Command",
+        Optional.ofNullable(this.getCurrentCommand()).map(Command::getName).orElse("None"));
   }
 
   public Command getDefault(BooleanSupplier pivotHandoff) {
@@ -38,58 +42,57 @@ public class Indexer extends SubsystemBase {
             run(
                 () -> {
                   shootReady = true;
-                  indexOffIntakeBack();
+                  indexOffIntakeOff();
                 }))
         .finallyDo(this::indexOffIntakeOff);
   }
 
+  public boolean intakedNote() {
+    return inputs.intakeBeamBreakState;
+  }
+
   public void indexOffIntakeOn() {
-    io.setShooterIndexer(OFF);
-    io.setIntakeIndexer(IN);
+    io.setIndexerVoltage(0);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOnIntakeOn() {
-    io.setShooterIndexer(IN);
-    io.setIntakeIndexer(IN);
+    io.setIndexerVoltage(IndexerConstants.indexerMotorVoltage);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void indexOffIntakeOff() {
-    io.setIntakeIndexer(OFF);
-    io.setShooterIndexer(OFF);
+    io.setIntakeVoltage(0);
+    io.setIndexerVoltage(0);
   }
 
   public void indexOffIntakeBack() {
-    io.setIntakeIndexer(OUT);
-    io.setShooterIndexer(OFF);
-  }
-
-  public void indexOnIntakeOff() {
-    io.setIntakeIndexer(OFF);
-    io.setShooterIndexer(OUT);
+    io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
+    io.setIndexerVoltage(0);
   }
 
   public void indexerIn() {
-    io.setShooterIndexer(IN);
+    io.setIndexerVoltage(IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerOut() {
-    io.setShooterIndexer(OUT);
+    io.setIndexerVoltage(-IndexerConstants.indexerMotorVoltage);
   }
 
   public void indexerStop() {
-    io.setShooterIndexer(OFF);
+    io.setIndexerVoltage(0);
   }
 
   public void intakeIn() {
-    io.setIntakeIndexer(IN);
+    io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
   }
 
   public void intakeOut() {
-    io.setIntakeIndexer(OUT);
+    io.setIntakeVoltage(-IntakeConstants.intakeMotorVoltage);
   }
 
   public void intakeStop() {
-    io.setIntakeIndexer(OFF);
+    io.setIntakeVoltage(0);
   }
 
   public boolean getShootReady() {
@@ -98,7 +101,11 @@ public class Indexer extends SubsystemBase {
 
   // Commands
   public Command shootCommand() {
-    return run(this::indexOnIntakeOff);
+    return run(
+        () -> {
+          io.setIndexerVoltage(8.0);
+          io.setIntakeVoltage(0.0);
+        });
   }
 
   public Command intakeInCommand() {

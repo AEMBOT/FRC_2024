@@ -16,6 +16,7 @@ package frc.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  */
 public final class Constants {
   public static final Mode currentMode = Mode.REAL;
+  public static final Robot currentRobot = Robot.LIGHTCYCLE;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -40,11 +42,28 @@ public final class Constants {
     REPLAY
   }
 
+  public enum Robot {
+    CLEF,
+    LIGHTCYCLE
+  }
+
+  public static final class ClimberConstants {
+    public static final int winchMotorRightCanID = 15;
+    public static final int winchMotorLeftCanID = 14;
+    public static final int homingCurrentLimit = 40;
+    public static final int extendCurrentLimit = 60;
+    public static final double extendToGrab = 10; // change this
+    public static final double extendToPullUp = 10; // change this
+    public static final double minExtendHardStop = 0;
+    public static final double maxExtendSoftStop = 10; // change this
+    public static final double extendMetersPerTick = 0.0160734375; // change this lmao
+  }
+
   public static final double UPDATE_PERIOD = 0.02;
 
   public static final class PivotConstants {
     public static final double PIVOT_MAX_POS_RAD = 2.20;
-    public static final double PIVOT_MIN_POS_RAD = 0.40;
+    public static final double PIVOT_MIN_POS_RAD = 0.30;
   }
 
   public static final class IndexerConstants {
@@ -54,7 +73,7 @@ public final class Constants {
     public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 2;
+    public static final double indexerMotorVoltage = 1.5;
   }
 
   public static final class IntakeConstants {
@@ -87,5 +106,25 @@ public final class Constants {
         return BLUE_SPEAKER_POSE; // default to blue
       }
     }
+  }
+
+  public static final class shootingSpeakerConstants {
+    public static double kP = 5;
+    public static double kI = 0;
+    public static double kD = 0;
+    public static double maxVelocity = 2;
+    public static double maxAcceleration = 4;
+    public static double[][] shooterInterpolationPoints =
+        new double[][] {
+          new double[] {1.0, Units.degreesToRadians(60)},
+          new double[] {2.0, Units.degreesToRadians(40)},
+          new double[] {3.0, Units.degreesToRadians(30)},
+          new double[] {3.45, 0.483},
+          new double[] {4.0, Units.degreesToRadians(23)},
+          new double[] {4.85, 0.360},
+          new double[] {5.0, 0.350},
+          new double[] {6.0, 0.32},
+          new double[] {7.0, 0.29}
+        };
   }
 }

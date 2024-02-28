@@ -5,13 +5,13 @@ import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
-import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static java.lang.Math.abs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -37,10 +37,13 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+    Logger.recordOutput(
+        "Shooter/Running Command",
+        Optional.ofNullable(this.getCurrentCommand()).map(Command::getName).orElse("None"));
   }
 
   public boolean isAtShootSpeed() {
-    return abs(shooterSpeedRPM - findMin(inputs.shooterVelocityRPM)) < 200;
+    return inputs.atShootSpeed;
   }
 
   public Command getDefault() {
