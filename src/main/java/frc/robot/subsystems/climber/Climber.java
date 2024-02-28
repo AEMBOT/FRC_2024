@@ -56,7 +56,13 @@ public class Climber extends SubsystemBase {
   public Command getHomingCommand() {
     return Commands.sequence(
         runOnce(() -> io.setHoming(true)),
-        runVoltsCommand(-2.0).until(io::isCurrentLimited),
+        Commands.parallel(
+            Commands.run(() -> io.setLeftVoltage(-2.0))
+                .until(io::isLeftCurrentLimited)
+                .finallyDo(() -> io.setLeftVoltage(0.0)),
+            Commands.run(() -> io.setRightVoltage(-2.0))
+                .until(io::isRightCurrentLimited)
+                .finallyDo(() -> io.setRightVoltage(0.0))),
         runOnce(io::resetEncoder),
         runOnce(() -> io.setHoming(false)));
   }
