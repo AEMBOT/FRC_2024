@@ -49,7 +49,8 @@ public class Pivot extends SubsystemBase {
 
   @AutoLogOutput
   public boolean inHandoffZone() {
-    return inputs.pivotAbsolutePositionRad < Units.degreesToRadians(80);
+    return Units.degreesToRadians(40) < inputs.pivotAbsolutePositionRad
+        && inputs.pivotAbsolutePositionRad < Units.degreesToRadians(50);
   }
 
   @AutoLogOutput
@@ -85,12 +86,13 @@ public class Pivot extends SubsystemBase {
   }
 
   public Command getDefault() {
-    // return setPositionCommand(() -> Units.degreesToRadians(40));
-    return defer(
-        () -> {
-          double holdPos = inputs.pivotAbsolutePositionRad;
-          return setPositionCommand(() -> holdPos);
-        });
+    return setPositionCommand(() -> Units.degreesToRadians(45));
+    //    return defer(
+    //        () -> {
+    //          double holdPos = MathUtil.clamp(inputs.pivotAbsolutePositionRad,
+    // Units.degreesToRadians(40), Units.degreesToRadians(80));
+    //          return setPositionCommand(() -> holdPos);
+    //        });
   }
 
   // These functions should only be accessed through command mutexing, hence private
