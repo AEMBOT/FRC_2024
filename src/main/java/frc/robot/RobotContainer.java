@@ -166,17 +166,17 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.getDefault());
 
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    
+
     if (DriverStation.getAlliance().isPresent()) {
-        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            serial.writeString("r");
-        } else {
-            serial.writeString("b");
-        }
+      if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        serial.writeString("r");
+      } else {
+        serial.writeString("b");
+      }
     } else {
-        serial.writeString("o");
+      serial.writeString("o");
     }
-    
+
     controller
         .b()
         .onTrue(
