@@ -91,7 +91,7 @@ public class SpeakerCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
-    PIDController pidController = new PIDController(0.2, 0, 0);
+    PIDController pidController = new PIDController(1, 0, 0);
     pidController.enableContinuousInput(-Math.PI, Math.PI);
     Command driveTrainCommand =
         Commands.run(
