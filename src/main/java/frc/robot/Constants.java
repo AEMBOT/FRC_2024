@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 
 /**
@@ -28,8 +29,9 @@ import edu.wpi.first.wpilibj.DriverStation;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final DigitalInput robotJumper = new DigitalInput(0);
   public static final Mode currentMode = Mode.REAL;
-  public static final Robot currentRobot = Robot.LIGHTCYCLE;
+  public static final Robot currentRobot = robotJumper.get() ? Robot.CLEF : Robot.LIGHTCYCLE;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -73,7 +75,7 @@ public final class Constants {
     public static final int indexerBeamBrake = 9;
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 1.5;
+    public static final double indexerMotorVoltage = 1;
   }
 
   public static final class IntakeConstants {
@@ -82,7 +84,7 @@ public final class Constants {
     public static final int intakeBeamBrake = 7;
 
     /*VOLTAGES*/
-    public static final double intakeMotorVoltage = 10;
+    public static final double intakeMotorVoltage = 12;
   }
 
   public static final class ShooterConstants {
