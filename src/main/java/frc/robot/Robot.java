@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.currentRobot;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -81,6 +83,9 @@ public class Robot extends LoggedRobot {
 
     // See http://bit.ly/3YIzFZ6 for more information on timestamps in AdvantageKit.
     // Logger.disableDeterministicTimestamps()
+
+    // Log Current Robot
+    Logger.recordMetadata("Current Robot", String.valueOf(currentRobot));
 
     // Start AdvantageKit logger
     Logger.registerURCL(URCL.startExternal());
