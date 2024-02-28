@@ -15,12 +15,12 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-import static frc.robot.commands.SpeakerCommands.intakeNote;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -228,7 +228,6 @@ public class RobotContainer {
     controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
-    controller.y().onFalse(pivot.setPositionCommand(() -> 0.4));
     // Return to Stow
     controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(20)));
 
@@ -237,18 +236,18 @@ public class RobotContainer {
     controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
 
     // Intake Manual In
-    //    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
+    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
     // Intake Note Vision In
-    controller
-        .rightBumper()
-        .whileTrue(
-            intakeNote(
-                drive,
-                indexer,
-                pivot,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX()));
+    //    controller
+    //        .rightBumper()
+    //        .whileTrue(
+    //            intakeNote(
+    //                drive,
+    //                indexer,
+    //                pivot,
+    //                () -> -controller.getLeftY(),
+    //                () -> -controller.getLeftX(),
+    //                () -> -controller.getRightX()));
     // "Intake Out" - Indexer Manual Run
     controller
         .leftBumper()
@@ -267,11 +266,14 @@ public class RobotContainer {
 
     // Z, climb up
     controller.button(10).whileTrue(climber.setPositionCommand(0.75));
+    controller.button(10).onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(120)));
+    controller.button(10).onFalse(pivot.setPositionCommand(() -> Units.degreesToRadians(90)));
     // C, climb down
     controller.button(9).whileTrue(climber.setPositionCommand(0.05));
 
     controller
         .rightTrigger()
+        .debounce(0.25, Debouncer.DebounceType.kFalling)
         .whileTrue(
             shooter
                 .setVelocityRPMCommand(shooterSpeedRPM)
