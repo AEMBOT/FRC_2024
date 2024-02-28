@@ -45,7 +45,7 @@ Send characters through the serial port at 115200 baud, not too fast though plea
 
 #define UnderglowPin 2
 //define which pin controls the Underglow LEDs
-#define UnderglowLength 58
+#define UnderglowLength 124
 //define how long the Underglow LED strip is
 
 #define MountedPin 3
@@ -105,19 +105,6 @@ void setup() { //setup function, to run once then jump to the 'loop' function
     getColor();
     //gets a viable color, speed, or function sent via the Serial port
 
-    if (digitalRead(ButtonPin) != HIGH) { //off button
-
-      Underglow.clear();
-      //off
-      Underglow.show();
-      //off
-      Mounted.clear();
-      //off
-      Mounted.show();
-      //off?
-
-    }
-
   }
 
 }
@@ -141,7 +128,7 @@ float modulo(float a, int n) { //modulo function with support for a float input,
 
 void loop() { //loop function, to run indefinitally unless told otherwise
 
-  while (digitalRead(ButtonPin) == HIGH) { //while not off
+  while (digitalRead(ButtonPin) == LOW) { //while not off
 
     getColor();
     //gets a viable color, speed, or function sent via the Serial port
@@ -160,19 +147,6 @@ void loop() { //loop function, to run indefinitally unless told otherwise
 
   }
 
-  while(1) { //off button
-
-    Underglow.clear();
-    //off
-    Underglow.show();
-    //off?
-    Mounted.clear();
-    //off
-    Mounted.show();
-    //off!
-
-  }
-
 }
 
 int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) { //function to turn on the LED strips, but *cool*
@@ -188,7 +162,7 @@ int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) {
     delay(UnderglowSpeed);
     //delay so the strip doesn't just light up all at once
 
-    if (digitalRead(ButtonPin) != HIGH) { //off button
+    if (digitalRead(ButtonPin) != LOW) { //off button
 
       Underglow.clear();
       //oof
@@ -216,7 +190,7 @@ int turnOn(int UnderglowSpeed, int MountedSpeed, int red, int green, int blue) {
     delay(MountedSpeed);
     //delay so the strip doesn't just light up all at once
 
-    if (digitalRead(ButtonPin) != HIGH) { //off button
+    if (digitalRead(ButtonPin) != LOW) { //off button
 
       Underglow.clear();
       //off

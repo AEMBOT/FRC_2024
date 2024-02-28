@@ -20,7 +20,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -60,6 +62,8 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+
+  private SerialPort serial;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -140,6 +144,7 @@ public class RobotContainer {
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
 
     // Configure the button bindings
+    serial = new SerialPort(115200, SerialPort.Port.kMXP);
     configureButtonBindings();
   }
 
@@ -161,6 +166,17 @@ public class RobotContainer {
     shooter.setDefaultCommand(shooter.getDefault());
 
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    
+    if (DriverStation.getAlliance().isPresent()) {
+        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            serial.writeString("r");
+        } else {
+            serial.writeString("b");
+        }
+    } else {
+        serial.writeString("o");
+    }
+    
     controller
         .b()
         .onTrue(
