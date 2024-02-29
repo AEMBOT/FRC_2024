@@ -9,6 +9,7 @@
  V5 - Replaced the old 'gayFade' function and the 'changeColor' function with a better version, removed the 'pulse' function
  V6 - Added more features to 'gayFade' function, capitalized the 'r' in the previous version's update
  V7 - Added a function to handle the start of the Underglow strip not being in the middle of the front or back, while still making patterns look cool, updated gayFade's method of exiting function
+ V8 - Removed support for off button, added 'gayShoot' function to play while shooting a note
 */
 
 /*
@@ -25,6 +26,7 @@ Possible CHARACTERS that can be sent:
 ~Fun Patterns~
  - hue fade (f)
  - rainbow (w)
+ - short and fast hue fade (s)
 
 ~Other Colors~
  - off (0)
@@ -50,7 +52,7 @@ Send characters through the serial port at 115200 baud, not too fast though plea
 
 #define MountedPin 3
 //define which pin controls the Mounted LEDs
-#define MountedLength 58
+#define MountedLength 29
 //define how long the Mounted LED strip is
 
 Adafruit_NeoPixel Underglow = Adafruit_NeoPixel(UnderglowLength, UnderglowPin, NEO_GRB + NEO_KHZ800);
@@ -65,9 +67,9 @@ int shift = 0;
 //the value that offsets the patterns during animation
 
 const int UnderglowHalf = 35;
+//the index of the pixel halfway through the front section of the Underglow strip (so patterns play properly)
 
 const int setLength = 10;
-
 //how long each repeating section of pattern is
 
 int speed = 45;
@@ -210,7 +212,7 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
 
       red = 255;
       //red
-      green = 100;
+      green = 120;
       //some green
       blue = 0;
       //no blue
@@ -316,6 +318,11 @@ void getColor() { //gets a viable color, speed, or function from the Serial port
       //t̶a̶s̶t̶e̶ show the rainbow
       Mounted.show();
       //t̶a̶s̶t̶e̶ show the rainbow
+
+    } else if (input == 's') { //check if 'input' is the character 's'
+
+      gayShoot(15);
+      //gayShoot with a frame delay of 15 milliseconds
 
     }
 
@@ -459,6 +466,53 @@ void setUnderglowColor(int index, int red, int green, int blue, bool HSV) { //fu
       //set the pixel color by subtracting the index from UnderglowHalf
 
     }
+
+  }
+
+}
+
+void gayShoot(int speed) { //Plays a short burst of gay while shooting
+
+  Underglow.clear();
+  //clear Underglow strips
+  Mounted.clear();
+  //clear Mounted strips
+  Underglow.show();
+  //actually turn off the strip
+  Mounted.show();
+  //actually turn off the strip
+
+  int step = round(65535/setLength);
+  //the step between hue values
+
+  for (int offset=(UnderglowLength/2)+setLength; offset>0-setLength; offset-=2) { //loop through all the stages the hue line can be at
+
+    for (int i=0; i<setLength; i++) { //loop through all the index in the hue line
+
+      setUnderglowColor(offset+i, step*i, 255, 255, true);
+      //queue the color on the Underglow strips
+      Mounted.setPixelColor(offset+i, Mounted.ColorHSV(step*i));
+      //queue the color on the Mounted strips
+
+    }
+
+    setUnderglowColor(offset+setLength, 0, 0, 0, false);
+    //queue the second-to-last pixel in the strip as black
+    setUnderglowColor(offset+setLength+1, 0, 0, 0, false);
+    //queue the lest pixel in the strip as black
+
+    Mounted.setPixelColor(offset+setLength, Mounted.Color(0,0,0));
+    //queue the second-to-last pixel in the strip as black
+    Mounted.setPixelColor(offset+setLength+1, Mounted.Color(0,0,0));
+    //queue the last pixel in the strip as black
+
+    Underglow.show();
+    //show all the colors
+    Mounted.show();
+    //show all the colors
+
+    delay(speed);
+    //delay for effect
 
   }
 
