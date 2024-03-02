@@ -14,9 +14,7 @@
 package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
-import static frc.robot.commands.SpeakerCommands.interpolator;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -167,26 +165,26 @@ public class RobotContainer {
             Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
             new ProxyCommand(
                 pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3))));
-    NamedCommands.registerCommand(
-        "shootNoteAuto",
-        Commands.deadline(
-            waitSeconds(0.2)
-                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
-            new ProxyCommand(
-                pivot.setPositionCommand(
-                    () ->
-                        interpolator.get(
-                            getSpeaker().getDistance(drive.getPose().getTranslation())))),
-            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
     //    NamedCommands.registerCommand(
     //        "shootNoteAuto",
     //        Commands.deadline(
-    //            waitSeconds(0.6)
+    //            waitSeconds(0.2)
     //                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-    //                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.4))),
-    //            shootSpeaker(drive, pivot, () -> 0, () -> 0),
-    //            shooter.setVelocityRPMCommand(shooterSpeedRPM)));
+    //                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+    //            new ProxyCommand(
+    //                pivot.setPositionCommand(
+    //                    () ->
+    //                        interpolator.get(
+    //                            getSpeaker().getDistance(drive.getPose().getTranslation())))),
+    //            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
+    NamedCommands.registerCommand(
+        "shootNoteAuto",
+        Commands.deadline(
+            waitSeconds(0.6)
+                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.4))),
+            shootSpeaker(drive, pivot, () -> 0, () -> 0),
+            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
     //    NamedCommands.registerCommand(
     //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
     NamedCommands.registerCommand(

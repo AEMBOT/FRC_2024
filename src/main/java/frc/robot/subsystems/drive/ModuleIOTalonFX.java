@@ -158,7 +158,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.Slot0.kD = 0.005;
       }
       case LIGHTCYCLE -> {
-        driveConfig.Slot0.kV = 2.13;
+        driveConfig.Slot0.kV = 2.14;
         driveConfig.Slot0.kA = 0.08;
         driveConfig.Slot0.kS = 0.11;
         driveConfig.Slot0.kP = 3; // TODO hand tune

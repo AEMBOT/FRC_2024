@@ -61,10 +61,10 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorFollower.enableVoltageCompensation(10.0);
 
     // Tune acceptable current limit, don't want to use all power if shoot while moving
-    topMotorLeader.setSmartCurrentLimit(60);
-    topMotorFollower.setSmartCurrentLimit(60);
-    bottomMotorLeader.setSmartCurrentLimit(60);
-    bottomMotorFollower.setSmartCurrentLimit(60);
+    topMotorLeader.setSmartCurrentLimit(50);
+    topMotorFollower.setSmartCurrentLimit(50);
+    bottomMotorLeader.setSmartCurrentLimit(50);
+    bottomMotorFollower.setSmartCurrentLimit(50);
 
     topMotorLeader.getEncoder().setVelocityConversionFactor(2);
     topMotorFollower.getEncoder().setVelocityConversionFactor(2);

@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -30,7 +31,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  */
 public final class Constants {
   public static final DigitalInput robotJumper = new DigitalInput(0);
-  public static final Mode currentMode = Mode.REAL;
+  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
   public static final Robot currentRobot = robotJumper.get() ? Robot.CLEF : Robot.LIGHTCYCLE;
 
   public enum Mode {

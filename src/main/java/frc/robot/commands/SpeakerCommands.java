@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.pivot.Pivot;
@@ -81,7 +82,7 @@ public class SpeakerCommands {
             drive);
 
     return driveTrainCommand.alongWith(
-        pivot.setPositionCommand(() -> interpolator.get(distance.getAsDouble())));
+        new ProxyCommand(pivot.setPositionCommand(() -> interpolator.get(distance.getAsDouble()))));
   }
 
   public static Command intakeNote(
