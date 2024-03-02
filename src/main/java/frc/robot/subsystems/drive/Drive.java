@@ -90,7 +90,7 @@ public class Drive extends SubsystemBase {
   private final NoteVisionIO noteVisionIO;
   private final NoteVisionIOInputsAutoLogged noteVisionInputs = new NoteVisionIOInputsAutoLogged();
 
-  public boolean useVision = true;
+  @AutoLogOutput public boolean useVision = true;
 
   public Drive(
       GyroIO gyroIO,
@@ -239,14 +239,22 @@ public class Drive extends SubsystemBase {
     Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
-      if (aprilTagVisionInputs.timestamps[i] <= 1.0) {
-        // Bounds check the pose is actually on the field
-        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 0.2
-            || aprilTagVisionInputs.visionPoses[i].getX() < 0
-            || aprilTagVisionInputs.visionPoses[i].getX() > 20
-            || aprilTagVisionInputs.visionPoses[i].getY() < 0
-            || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
-
+      if ( // Bounds check the pose is actually on the field
+      aprilTagVisionInputs.timestamps[i] >= 1.0
+          && abs(aprilTagVisionInputs.visionPoses[i].getZ()) < 0.2
+          && aprilTagVisionInputs.visionPoses[i].getX() > 0
+          && aprilTagVisionInputs.visionPoses[i].getX() < 16.5
+          && aprilTagVisionInputs.visionPoses[i].getY() > 0
+          && aprilTagVisionInputs.visionPoses[i].getY() < 8.5
+          && aprilTagVisionInputs.visionPoses[i].getRotation().getX() < 0.2
+          && aprilTagVisionInputs.visionPoses[i].getRotation().getY() < 0.2
+          && aprilTagVisionInputs
+                  .visionPoses[i]
+                  .toPose2d()
+                  .minus(poseEstimator.getEstimatedPosition())
+                  .getTranslation()
+                  .getNorm()
+              < 3.0) { // todo replace this with multi-tag only and no distance cap
         Logger.recordOutput(
             "Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i].toPose2d());
         Logger.recordOutput(
@@ -262,6 +270,9 @@ public class Drive extends SubsystemBase {
                   aprilTagVisionInputs.visionStdDevs[3 * i + 1],
                   aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
         }
+      } else {
+        Logger.recordOutput("Drive/AprilTagPose" + i, new Pose2d());
+        Logger.recordOutput("Drive/AprilTagStdDevs" + i, new double[] {0.0, 0.0, 0.0});
       }
 
       // Update Note Detection
