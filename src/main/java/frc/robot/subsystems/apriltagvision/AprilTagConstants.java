@@ -51,7 +51,9 @@ public final class AprilTagConstants {
   public static final Matrix<N3, N1> highResSingleTagStdDev =
       VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
   public static final Matrix<N3, N1> normalSingleTagStdDev =
+      VecBuilder.fill(0.8, 0.8, Double.MAX_VALUE);
+  public static final Matrix<N3, N1> highResMultiTagStdDev =
+      VecBuilder.fill(0.2, 0.2, Double.MAX_VALUE);
+  public static final Matrix<N3, N1> normalMultiTagStdDev =
       VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
-  public static final Matrix<N3, N1> highResMultiTagStdDev = VecBuilder.fill(0.15, 0.15, 1);
-  public static final Matrix<N3, N1> normalMultiTagStdDev = VecBuilder.fill(0.3, 0.3, 2);
 }

@@ -51,6 +51,10 @@ public class Indexer extends SubsystemBase {
     return inputs.intakeBeamBreakState;
   }
 
+  public boolean hasNote() {
+    return inputs.shooterBeamBreakState;
+  }
+
   public void indexOffIntakeOn() {
     io.setIndexerVoltage(0);
     io.setIntakeVoltage(IntakeConstants.intakeMotorVoltage);
@@ -109,6 +113,14 @@ public class Indexer extends SubsystemBase {
     return run(
         () -> {
           io.setIndexerVoltage(8.0);
+          io.setIntakeVoltage(0.0);
+        });
+  }
+
+  public Command ampCommand() {
+    return run(
+        () -> {
+          io.setIndexerVoltage(6.3); // Roughly match amp shoot speed and indexer speed
           io.setIntakeVoltage(0.0);
         });
   }

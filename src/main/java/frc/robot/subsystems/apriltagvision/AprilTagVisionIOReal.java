@@ -7,6 +7,7 @@ import static java.lang.System.arraycopy;
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -60,6 +61,8 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
   }
 
   public void getEstimatedPoseUpdates() {
+    Matrix<N3, N1> infiniteStdevs =
+        VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     Optional<EstimatedRobotPose> pose = frontPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
         estimatedRobotPose -> {
@@ -72,6 +75,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[0] = new Pose3d();
           timestampArray[0] = 0.0;
+          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
     pose = leftPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -90,6 +94,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[1] = new Pose3d();
           timestampArray[1] = 0.0;
+          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
     pose = rightPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -103,6 +108,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[2] = new Pose3d();
           timestampArray[2] = 0.0;
+          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
   }
 }

@@ -143,15 +143,28 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     driveConfig.CurrentLimits.SupplyCurrentLimit = 60.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 150.0;
+    driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio =
         (DRIVE_GEAR_RATIO) * (1.0 / (WHEEL_RADIUS * 2 * Math.PI));
 
-    driveConfig.Slot0.kV = 2.28;
-    driveConfig.Slot0.kA = 0.08;
-    driveConfig.Slot0.kS = 0.25;
-    driveConfig.Slot0.kP = 7.5; // TODO hand tune
-    driveConfig.Slot0.kD = 0.005;
+    switch (currentRobot) {
+      case CLEF -> {
+        driveConfig.Slot0.kV = 2.28;
+        driveConfig.Slot0.kA = 0.08;
+        driveConfig.Slot0.kS = 0.25;
+        driveConfig.Slot0.kP = 7.5; // TODO hand tune
+        driveConfig.Slot0.kD = 0.005;
+      }
+      case LIGHTCYCLE -> {
+        driveConfig.Slot0.kV = 2.13;
+        driveConfig.Slot0.kA = 0.08;
+        driveConfig.Slot0.kS = 0.11;
+        driveConfig.Slot0.kP = 3; // TODO hand tune
+        driveConfig.Slot0.kD = 0.005;
+      }
+    }
 
     driveTalon.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
@@ -169,11 +182,23 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.Feedback.FeedbackRotorOffset =
         0.0; // Is this right? I think CANcoder config handles this
 
-    turnConfig.Slot0.kV = 2.5678;
-    turnConfig.Slot0.kA = 0.0;
-    turnConfig.Slot0.kS = 0.16677;
-    turnConfig.Slot0.kP = 75;
-    turnConfig.Slot0.kD = 0;
+    switch (currentRobot) {
+      case CLEF -> {
+        turnConfig.Slot0.kV = 2.5678;
+        turnConfig.Slot0.kA = 0.0;
+        turnConfig.Slot0.kS = 0.16677;
+        turnConfig.Slot0.kP = 75;
+        turnConfig.Slot0.kD = 0;
+      }
+      case LIGHTCYCLE -> {
+        turnConfig.Slot0.kV = 2.6876;
+        turnConfig.Slot0.kA = 0.0;
+        turnConfig.Slot0.kS = 0.21416;
+        turnConfig.Slot0.kP = 75;
+        turnConfig.Slot0.kD = 0;
+      }
+    }
+
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     turnTalon.getConfigurator().apply(turnConfig);

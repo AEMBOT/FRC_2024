@@ -91,6 +91,21 @@ public class ShooterIOReal implements ShooterIO {
         true);
 
     configureFrameStrategy(bottomMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
+    configureFrameStrategy(
+        topMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(topMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
+
+    configureFrameStrategy(
+        bottomMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(bottomMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
 
     topMotorLeader.getEncoder().setMeasurementPeriod(10);
     topMotorFollower.getEncoder().setMeasurementPeriod(10);
@@ -166,8 +181,9 @@ public class ShooterIOReal implements ShooterIO {
     topShooterSetpoint = velocityRPM * 1.05;
     bottomShooterSetpoint = velocityRPM;
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
-    topMotorPID.setReference(velocityRPM * 1.05, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
-    bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
+    topMotorPID.setReference(topShooterSetpoint, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(
+        bottomShooterSetpoint, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
   }
 
   /** Stop in open loop. */

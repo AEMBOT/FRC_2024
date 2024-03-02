@@ -90,6 +90,8 @@ public class Drive extends SubsystemBase {
   private final NoteVisionIO noteVisionIO;
   private final NoteVisionIOInputsAutoLogged noteVisionInputs = new NoteVisionIOInputsAutoLogged();
 
+  public boolean useVision = true;
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -237,26 +239,29 @@ public class Drive extends SubsystemBase {
     Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
-      if (aprilTagVisionInputs.timestamps[i] != 0.0) {
+      if (aprilTagVisionInputs.timestamps[i] <= 1.0) {
         // Bounds check the pose is actually on the field
-        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 2.0
+        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 0.2
             || aprilTagVisionInputs.visionPoses[i].getX() < 0
             || aprilTagVisionInputs.visionPoses[i].getX() > 20
             || aprilTagVisionInputs.visionPoses[i].getY() < 0
             || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
 
-        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
+        Logger.recordOutput(
+            "Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i].toPose2d());
         Logger.recordOutput(
             "Drive/AprilTagStdDevs" + i,
             Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
 
-        poseEstimator.addVisionMeasurement(
-            aprilTagVisionInputs.visionPoses[i].toPose2d(),
-            aprilTagVisionInputs.timestamps[i],
-            VecBuilder.fill(
-                aprilTagVisionInputs.visionStdDevs[3 * i],
-                aprilTagVisionInputs.visionStdDevs[3 * i + 1],
-                aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+        if (useVision) {
+          poseEstimator.addVisionMeasurement(
+              aprilTagVisionInputs.visionPoses[i].toPose2d(),
+              aprilTagVisionInputs.timestamps[i],
+              VecBuilder.fill(
+                  aprilTagVisionInputs.visionStdDevs[3 * i],
+                  aprilTagVisionInputs.visionStdDevs[3 * i + 1],
+                  aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+        }
       }
 
       // Update Note Detection
@@ -465,5 +470,9 @@ public class Drive extends SubsystemBase {
         this.stopCommand().withTimeout(2.0),
         driveRoutine.dynamic(kReverse),
         this.runOnce(SignalLogger::stop));
+  }
+
+  public void setVisionState(boolean state) {
+    useVision = state;
   }
 }
