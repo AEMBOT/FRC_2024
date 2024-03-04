@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
 import static frc.robot.Constants.FieldConstants.getSpeaker;
+import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
 
@@ -60,7 +61,7 @@ public class Drive extends SubsystemBase {
   private static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.5); // MK4i L3+
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(22.75); // 28 in square chassis
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(22.75);
-  private static final double DRIVE_BASE_RADIUS =
+  public static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
@@ -407,6 +408,18 @@ public class Drive extends SubsystemBase {
   /** Returns the current odometry rotation. */
   public Rotation2d getRotation() {
     return getPose().getRotation();
+  }
+
+  /** Get the position of all drive wheels in radians. */
+  public double[] getWheelRadiusCharacterizationPosition() {
+    return Arrays.stream(modules)
+        .mapToDouble((module) -> module.getPosition().distanceMeters / WHEEL_RADIUS)
+        .toArray();
+  }
+
+  /** Gets the raw, unwrapped gyro heading from the gyro. Useful for wheel characterization */
+  public double getRawGyroYaw() {
+    return gyroInputs.yawPosition.getRadians();
   }
 
   /** Resets the current odometry pose. */
