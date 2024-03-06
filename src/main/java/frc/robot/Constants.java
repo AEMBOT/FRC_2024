@@ -112,6 +112,7 @@ public final class Constants {
   }
 
   public static final class shootingSpeakerConstants {
+    public static double noteVelocity = 5;
     public static double kP = 5;
     public static double kI = 0;
     public static double kD = 0;
