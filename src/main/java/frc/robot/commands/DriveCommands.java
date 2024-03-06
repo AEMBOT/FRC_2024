@@ -23,10 +23,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class DriveCommands {
-  private static final double DEADBAND = 0.1;
+  private static final double DEADBAND = 0.05;
+  private static final double SLOWMODE_MAX_METERS_PER_SEC = 1;
+  private static final double SLOWMODE_ROTATION_SPEED_FACTOR = 0.2;
 
   private DriveCommands() {}
 
@@ -37,7 +40,8 @@ public class DriveCommands {
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier) {
+      DoubleSupplier omegaSupplier,
+      BooleanSupplier slowmode) {
     return Commands.run(
         () -> {
           // Apply deadband
@@ -64,9 +68,15 @@ public class DriveCommands {
                   && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
           drive.runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec(),
+                  slowmode.getAsBoolean()
+                      ? linearVelocity.getX() * SLOWMODE_MAX_METERS_PER_SEC
+                      : linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                  slowmode.getAsBoolean()
+                      ? linearVelocity.getY() * SLOWMODE_MAX_METERS_PER_SEC
+                      : linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  slowmode.getAsBoolean()
+                      ? omega * drive.getMaxAngularSpeedRadPerSec() * SLOWMODE_ROTATION_SPEED_FACTOR
+                      : omega * drive.getMaxAngularSpeedRadPerSec(),
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));

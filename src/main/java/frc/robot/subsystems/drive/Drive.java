@@ -16,7 +16,10 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kReverse;
+import static frc.robot.Constants.FieldConstants.getSpeaker;
+import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -43,8 +46,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOInputsAutoLogged;
+import frc.robot.subsystems.notevision.NoteVisionIO;
+import frc.robot.subsystems.notevision.NoteVisionIOInputsAutoLogged;
 import frc.robot.util.LocalADStarAK;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -52,10 +58,10 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(17.14); // MK4i L2+
+  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(18.5); // MK4i L3+
   private static final double TRACK_WIDTH_X = Units.inchesToMeters(22.75); // 28 in square chassis
   private static final double TRACK_WIDTH_Y = Units.inchesToMeters(22.75);
-  private static final double DRIVE_BASE_RADIUS =
+  public static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
   private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
@@ -82,19 +88,26 @@ public class Drive extends SubsystemBase {
   private final AprilTagVisionIOInputsAutoLogged aprilTagVisionInputs =
       new AprilTagVisionIOInputsAutoLogged();
 
+  private final NoteVisionIO noteVisionIO;
+  private final NoteVisionIOInputsAutoLogged noteVisionInputs = new NoteVisionIOInputsAutoLogged();
+
+  @AutoLogOutput public boolean useVision = true;
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
       ModuleIO brModuleIO,
-      AprilTagVisionIO aprilTagVisionIO) {
+      AprilTagVisionIO aprilTagVisionIO,
+      NoteVisionIO noteVisionIO) {
     this.gyroIO = gyroIO;
     modules[0] = new Module(flModuleIO, 0);
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
     this.aprilTagVisionIO = aprilTagVisionIO;
+    this.noteVisionIO = noteVisionIO;
 
     // Start threads (no-op for each if no signals have been created)
     PhoenixOdometryThread.getInstance().start();
@@ -151,8 +164,8 @@ public class Drive extends SubsystemBase {
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null, // Default ramp rate is acceptable
-                Volts.of(4), // Reduce dynamic voltage to 4 to prevent motor brownout
-                Seconds.of(5),
+                Volts.of(6), // Reduce dynamic voltage to 6 to prevent motor brownout
+                Seconds.of(20),
                 // Log state with Phoenix SignalLogger class
                 (state) -> SignalLogger.writeString("state", state.toString())),
             new SysIdRoutine.Mechanism(
@@ -192,7 +205,7 @@ public class Drive extends SubsystemBase {
     // vision also corrects for async odo so maybe just cope
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = sampleTimestamps.length;
+    int sampleCount = min(sampleTimestamps.length, gyroInputs.odometryYawPositions.length);
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
@@ -227,28 +240,51 @@ public class Drive extends SubsystemBase {
     Logger.processInputs("Drive/AprilTagVision", aprilTagVisionInputs);
 
     for (int i = 0; i < aprilTagVisionInputs.timestamps.length; i++) {
-      if (aprilTagVisionInputs.timestamps[i] != 0.0) {
-        // Bounds check the pose is actually on the field
-        if (abs(aprilTagVisionInputs.visionPoses[i].getZ()) > 2.0
-            || aprilTagVisionInputs.visionPoses[i].getX() < 0
-            || aprilTagVisionInputs.visionPoses[i].getX() > 20
-            || aprilTagVisionInputs.visionPoses[i].getY() < 0
-            || aprilTagVisionInputs.visionPoses[i].getY() > 10) continue;
-
-        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i]);
+      if ( // Bounds check the pose is actually on the field
+      aprilTagVisionInputs.timestamps[i] >= 1.0
+          && abs(aprilTagVisionInputs.visionPoses[i].getZ()) < 0.2
+          && aprilTagVisionInputs.visionPoses[i].getX() > 0
+          && aprilTagVisionInputs.visionPoses[i].getX() < 16.5
+          && aprilTagVisionInputs.visionPoses[i].getY() > 0
+          && aprilTagVisionInputs.visionPoses[i].getY() < 8.5
+          && aprilTagVisionInputs.visionPoses[i].getRotation().getX() < 0.2
+          && aprilTagVisionInputs.visionPoses[i].getRotation().getY() < 0.2
+          && aprilTagVisionInputs
+                  .visionPoses[i]
+                  .toPose2d()
+                  .minus(poseEstimator.getEstimatedPosition())
+                  .getTranslation()
+                  .getNorm()
+              < 3.0) { // todo replace this with multi-tag only and no distance cap
+        Logger.recordOutput(
+            "Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i].toPose2d());
         Logger.recordOutput(
             "Drive/AprilTagStdDevs" + i,
             Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
 
-        poseEstimator.addVisionMeasurement(
-            aprilTagVisionInputs.visionPoses[i].toPose2d(),
-            aprilTagVisionInputs.timestamps[i],
-            VecBuilder.fill(
-                aprilTagVisionInputs.visionStdDevs[3 * i],
-                aprilTagVisionInputs.visionStdDevs[3 * i + 1],
-                aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+        if (useVision) {
+          poseEstimator.addVisionMeasurement(
+              aprilTagVisionInputs.visionPoses[i].toPose2d(),
+              aprilTagVisionInputs.timestamps[i],
+              VecBuilder.fill(
+                  aprilTagVisionInputs.visionStdDevs[3 * i],
+                  aprilTagVisionInputs.visionStdDevs[3 * i + 1],
+                  aprilTagVisionInputs.visionStdDevs[3 * i + 2]));
+        }
+      } else {
+        Logger.recordOutput("Drive/AprilTagPose" + i, new Pose2d());
+        Logger.recordOutput("Drive/AprilTagStdDevs" + i, new double[] {0.0, 0.0, 0.0});
       }
+
+      // Update Note Detection
+      noteVisionIO.updateInputs(noteVisionInputs);
     }
+
+    Logger.recordOutput(
+        "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));
+    Logger.recordOutput(
+        "Drive/Running Command",
+        Optional.ofNullable(this.getCurrentCommand()).map(Command::getName).orElse("None"));
   }
 
   /**
@@ -374,6 +410,18 @@ public class Drive extends SubsystemBase {
     return getPose().getRotation();
   }
 
+  /** Get the position of all drive wheels in radians. */
+  public double[] getWheelRadiusCharacterizationPosition() {
+    return Arrays.stream(modules)
+        .mapToDouble((module) -> module.getPosition().distanceMeters / WHEEL_RADIUS)
+        .toArray();
+  }
+
+  /** Gets the raw, unwrapped gyro heading from the gyro. Useful for wheel characterization */
+  public double getRawGyroYaw() {
+    return gyroInputs.yawPosition.getRadians();
+  }
+
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
@@ -404,6 +452,14 @@ public class Drive extends SubsystemBase {
     return MAX_ANGULAR_SPEED;
   }
 
+  public boolean hasNoteTarget() {
+    return noteVisionInputs.hasTarget;
+  }
+
+  public double getNoteLocation() {
+    return noteVisionInputs.targetX;
+  }
+
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
@@ -418,14 +474,11 @@ public class Drive extends SubsystemBase {
     return Commands.sequence(
         this.runOnce(SignalLogger::start),
         moduleSteerRoutine.quasistatic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.quasistatic(kReverse),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.dynamic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         moduleSteerRoutine.dynamic(kReverse),
         this.runOnce(SignalLogger::stop));
   }
@@ -434,15 +487,16 @@ public class Drive extends SubsystemBase {
     return Commands.sequence(
         this.runOnce(SignalLogger::start),
         driveRoutine.quasistatic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.quasistatic(kReverse),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.dynamic(kForward),
-        this.stopCommand(),
-        Commands.waitSeconds(1.0),
+        this.stopCommand().withTimeout(2.0),
         driveRoutine.dynamic(kReverse),
         this.runOnce(SignalLogger::stop));
+  }
+
+  public void setVisionState(boolean state) {
+    useVision = state;
   }
 }

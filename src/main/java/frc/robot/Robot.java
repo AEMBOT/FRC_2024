@@ -13,6 +13,8 @@
 
 package frc.robot;
 
+import static frc.robot.Constants.currentRobot;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -61,8 +63,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(
-            new WPILOGWriter("/home/lvuser/logs")); // Change to /U/logs once usb stick
+        Logger.addDataReceiver(new WPILOGWriter("/U/logs"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -83,7 +84,11 @@ public class Robot extends LoggedRobot {
     // See http://bit.ly/3YIzFZ6 for more information on timestamps in AdvantageKit.
     // Logger.disableDeterministicTimestamps()
 
+    // Log Current Robot
+    Logger.recordMetadata("Current Robot", String.valueOf(currentRobot));
+
     // Start AdvantageKit logger
+    //    Logger.registerURCL(URCL.startExternal());
     Logger.start();
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
@@ -113,6 +118,12 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    robotContainer.indexer.setDefaultCommand(
+        robotContainer
+            .indexer
+            .getDefault(robotContainer.pivot::inHandoffZone)
+            .withName("Indexer Auto Default Run"));
+
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -135,6 +146,10 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    robotContainer.homeClimber();
+    robotContainer.indexer.setDefaultCommand(
+        robotContainer.indexer.run(() -> robotContainer.indexer.indexOffIntakeOff()));
   }
 
   /** This function is called periodically during operator control. */

@@ -13,37 +13,51 @@
 
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.*;
+import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static frc.robot.commands.SpeakerCommands.shootSpeaker;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSparkMax;
+import frc.robot.subsystems.notevision.NoteVisionIO;
+import frc.robot.subsystems.notevision.NoteVisionIOReal;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
+import frc.robot.subsystems.pivot.PivotIOReal;
 import frc.robot.subsystems.pivot.PivotIOSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -54,17 +68,20 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Indexer indexer;
-  private final Pivot pivot;
-  private final Shooter shooter;
+  public final Indexer indexer;
+  public final Pivot pivot;
+  public final Shooter shooter;
+  private final Climber climber;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController backupController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  private final LoggedDashboardNumber flywheelSpeedInput =
-      new LoggedDashboardNumber("Flywheel Speed", 1500.0);
+
+  // LEDs
+  private final SerialPort prettyLights = new SerialPort(115200, SerialPort.Port.kMXP);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -74,21 +91,16 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIONavX(),
-                new ModuleIOAlpha(0),
-                new ModuleIOAlpha(1),
-                new ModuleIOAlpha(2),
-                new ModuleIOAlpha(3),
-                new AprilTagVisionIOReal());
+                new ModuleIOTalonFX(0),
+                new ModuleIOTalonFX(1),
+                new ModuleIOTalonFX(2),
+                new ModuleIOTalonFX(3),
+                new AprilTagVisionIOReal(),
+                new NoteVisionIOReal());
         indexer = new Indexer(new IndexerIOSparkMax());
-        pivot = new Pivot(new PivotIO() {}); // TODO real pivot impl
+        pivot = new Pivot(new PivotIOReal());
         shooter = new Shooter(new ShooterIOReal());
-        // drive = new Drive(
-        // new GyroIOPigeon2(true),
-        // new ModuleIOTalonFX(0),
-        // new ModuleIOTalonFX(1),
-        // new ModuleIOTalonFX(2),
-        // new ModuleIOTalonFX(3));
-        // flywheel = new Flywheel(new FlywheelIOTalonFX());
+        climber = new Climber(new ClimberIOSparkMax());
         break;
 
       case SIM:
@@ -100,10 +112,12 @@ public class RobotContainer {
                 new ModuleIOSim(),
                 new ModuleIOSim(),
                 new ModuleIOSim(),
-                new AprilTagVisionIOSim());
+                new AprilTagVisionIOSim(),
+                new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         shooter = new Shooter(new ShooterIOSim());
+        climber = new Climber(new ClimberIOSim());
         break;
 
       default:
@@ -115,17 +129,71 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new AprilTagVisionIO() {});
+                new AprilTagVisionIO() {},
+                new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
+        climber = new Climber(new ClimberIO() {});
         break;
     }
 
-    // Set up auto routines
+    // Set up auto commands
+    NamedCommands.registerCommand(
+        "shootNoteSubwoofer",
+        Commands.sequence(
+            runOnce(() -> Logger.recordOutput("autoState", -1)),
+            Commands.deadline(
+                Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", 0.05)),
+                    waitSeconds(0.2),
+                    runOnce(() -> Logger.recordOutput("autoState", 0.1)),
+                    waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
+                    runOnce(() -> Logger.recordOutput("autoState", 0.2)),
+                    new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
+                Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", 0.02)),
+                    new ProxyCommand(
+                        pivot
+                            .setPositionCommand(() -> Units.degreesToRadians(60))
+                            .withName("sub"))),
+                Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", 0.04)),
+                    new ProxyCommand(
+                        shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
+            runOnce(() -> Logger.recordOutput("autoState", 0.3)),
+            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
+            new ProxyCommand(
+                pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3))));
+    //    NamedCommands.registerCommand(
+    //        "shootNoteAuto",
+    //        Commands.deadline(
+    //            waitSeconds(0.2)
+    //                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+    //                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+    //            new ProxyCommand(
+    //                pivot.setPositionCommand(
+    //                    () ->
+    //                        interpolator.get(
+    //                            getSpeaker().getDistance(drive.getPose().getTranslation())))),
+    //            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
+    NamedCommands.registerCommand(
+        "shootNoteAuto",
+        Commands.deadline(
+            waitSeconds(0.6)
+                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.4))),
+            shootSpeaker(drive, pivot, () -> 0, () -> 0),
+            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
+    //    NamedCommands.registerCommand(
+    //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
+    NamedCommands.registerCommand(
+        "intakeNote", new InstantCommand(() -> Logger.recordOutput("Intake Scheduled", true)));
+
+    // Set up Auto Routines
     NamedCommands.registerCommand(
         "Nine Piece Auto",
-        Commands.runOnce(
+        runOnce(
                 () ->
                     drive.setPose(
                         PathPlannerPath.fromChoreoTrajectory("ninepieceauto")
@@ -139,8 +207,13 @@ public class RobotContainer {
     // Set up SysId routines
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
+
     // Configure the button bindings
     configureButtonBindings();
+
+    // Configure Light Bindings
+    prettyLights.writeString("l");
+    configureLightBindings();
   }
 
   /**
@@ -155,18 +228,141 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    indexer.setDefaultCommand(indexer.getDefaultCommand());
+            () -> -controller.getRightX(),
+            () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
+    indexer.setDefaultCommand(
+        indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
+    pivot.setDefaultCommand(pivot.getDefault());
+    shooter.setDefaultCommand(shooter.getDefault());
 
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Subwoofer
+    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
+    // Trap
+    controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
+    // Return to Stow
+    controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(35)));
+
+    // Pivot Manual Up
+    controller.povUp().whileTrue(pivot.changeGoalPosition(0.5));
+    controller.povDown().whileTrue(pivot.changeGoalPosition(-0.5));
+
+    // Intake Manual In
+    controller.rightBumper().whileTrue(indexer.getDefault(pivot::inHandoffZone));
+    // Intake Note Vision In
+    //    controller
+    //        .rightBumper()
+    //        .whileTrue(
+    //            intakeNote(
+    //                drive,
+    //                indexer,
+    //                pivot,
+    //                () -> -controller.getLeftY(),
+    //                () -> -controller.getLeftX(),
+    //                () -> -controller.getRightX()));
+    // "Intake Out" - Indexer Manual Run
     controller
-        .b()
+        .leftBumper()
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(1600)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed)
+                        .andThen(indexer.indexerInCommand())));
+
+    // Auto Rotation Lock Shooter Pivot Interp
+    controller
+        .a()
+        .whileTrue(
+            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+
+    // Z, climb up
+    controller.button(10).whileTrue(climber.setPositionCommand(0.75));
+    controller.button(10).onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(120)));
+    controller.button(10).onFalse(pivot.setPositionCommand(() -> Units.degreesToRadians(90)));
+    // C, climb down
+    controller.button(9).whileTrue(climber.setPositionCommand(0.05));
+
+    controller
+        .rightTrigger()
+        .debounce(0.25, Debouncer.DebounceType.kFalling)
+        .whileTrue(
+            shooter
+                .setVelocityRPMCommand(shooterSpeedRPM)
+                .alongWith(
+                    Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
+
+    controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
+
+    new Trigger(indexer::intakedNote)
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
+            Commands.run(
+                    () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
+                .withTimeout(0.2)
+                .andThen(
+                    Commands.runOnce(
+                        () ->
+                            controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
+                .ignoringDisable(true));
+
+    // Intake Indexer Backwards Eject
+    backupController.b().whileTrue(indexer.run(indexer::intakeIndexBackwards));
+    // Climb Manual Up
+    backupController.povRight().whileTrue(climber.runVoltsCommand(6.0));
+    // Climb Manual Down
+    backupController.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
+
+    backupController
+        .a()
+        .onTrue(
+            Commands.sequence(
+                runOnce(() -> Logger.recordOutput("autoState", -1)),
+                Commands.deadline(
+                    Commands.sequence(
+                        waitSeconds(0.2),
+                        runOnce(() -> Logger.recordOutput("autoState", 0.1)),
+                        waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
+                            .withTimeout(0.3),
+                        runOnce(() -> Logger.recordOutput("autoState", 0.2)),
+                        new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+                    pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
+                    shooter.setVelocityRPMCommand(shooterSpeedRPM)),
+                runOnce(() -> Logger.recordOutput("autoState", 0.3)),
+                Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
+                pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
+
+    backupController.x().whileTrue(run(() -> drive.setVisionState(false)));
+  }
+
+  public void configureLightBindings() {
+    Runnable resetColorToIdle =
+        () -> {
+          if (DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            prettyLights.writeString("r");
+          } else if (DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+            prettyLights.writeString("b");
+          }
+        };
+
+    new Trigger(() -> DriverStation.getAlliance().isPresent())
+        .onTrue(Commands.runOnce(resetColorToIdle).ignoringDisable(true));
+
+    new Trigger(indexer::intakedNote)
+        .debounce(2.0, Debouncer.DebounceType.kFalling)
+        .whileTrue(
+            Commands.startEnd(() -> prettyLights.writeString("g"), resetColorToIdle)
+                .ignoringDisable(true));
+
+    new Trigger(indexer::intakedNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("o")));
+    new Trigger(indexer::hasNote).onFalse(Commands.runOnce(resetColorToIdle));
+
+    controller
+        .rightTrigger()
+        .debounce(0.5, Debouncer.DebounceType.kRising)
+        .debounce(1.0, Debouncer.DebounceType.kFalling)
+        .whileTrue(
+            Commands.startEnd(() -> prettyLights.writeString("w"), resetColorToIdle)
                 .ignoringDisable(true));
   }
 
@@ -195,5 +391,9 @@ public class RobotContainer {
     Pose3d[] mechanismPoses = new Pose3d[1];
     mechanismPoses[0] = pivot.getPose3D();
     return mechanismPoses;
+  }
+
+  public void homeClimber() {
+    CommandScheduler.getInstance().schedule(climber.getHomingCommand().withTimeout(10.0));
   }
 }

@@ -1,12 +1,10 @@
 package frc.robot.subsystems.indexer;
 
-import static frc.robot.Constants.IndexerConstants.indexerMotorVoltage;
-import static frc.robot.Constants.IntakeConstants.intakeMotorVoltage;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
-import frc.robot.subsystems.indexer.IndexerIO.IndexerIOInputs.MotorState;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class IndexerIOSim implements IndexerIO {
   private final DIOSim intakeBeamBreak = new DIOSim(0);
@@ -16,6 +14,24 @@ public class IndexerIOSim implements IndexerIO {
 
   private double intakeAppliedVolts = 0.0;
   private double indexerAppliedVolts = 0.0;
+
+  public IndexerIOSim() {
+    new Trigger(() -> intakeSim.getAngularVelocityRPM() > 1.0)
+        .debounce(0.2)
+        .onTrue(Commands.runOnce(() -> intakeBeamBreak.setValue(true)));
+    new Trigger(() -> indexerSim.getAngularVelocityRPM() > 1.0)
+        .debounce(0.2)
+        .onTrue(Commands.runOnce(() -> indexerBeamBreak.setValue(true)));
+
+    new Trigger(() -> indexerSim.getAngularVelocityRPM() > 3000 && indexerBeamBreak.getValue())
+        .debounce(0.1)
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  intakeBeamBreak.setValue(false);
+                  indexerBeamBreak.setValue(false);
+                }));
+  }
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
@@ -30,37 +46,13 @@ public class IndexerIOSim implements IndexerIO {
     inputs.shooterIndexerCurrentAmps = new double[] {indexerSim.getCurrentDrawAmps()};
   }
 
-  @Override
-  public void setShooterIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        indexerSim.setInputVoltage(0);
-        indexerAppliedVolts = 0;
-        break;
-      case IN:
-        indexerSim.setInputVoltage(indexerMotorVoltage);
-        indexerAppliedVolts = indexerMotorVoltage;
-        break;
-      case OUT:
-        indexerSim.setInputVoltage(-indexerMotorVoltage);
-        indexerAppliedVolts = -indexerMotorVoltage;
-    }
+  public void setIndexerVoltage(double voltage) {
+    indexerSim.setInputVoltage(voltage);
+    indexerAppliedVolts = voltage;
   }
 
-  @Override
-  public void setIntakeIndexer(MotorState state) {
-    switch (state) {
-      case OFF:
-        intakeSim.setInputVoltage(0);
-        intakeAppliedVolts = 0;
-        break;
-      case IN:
-        intakeSim.setInputVoltage(intakeMotorVoltage);
-        intakeAppliedVolts = intakeMotorVoltage;
-        break;
-      case OUT:
-        intakeSim.setInputVoltage(-intakeMotorVoltage);
-        intakeAppliedVolts = -intakeMotorVoltage;
-    }
+  public void setIntakeVoltage(double voltage) {
+    intakeSim.setInputVoltage(voltage);
+    intakeAppliedVolts = voltage;
   }
 }
