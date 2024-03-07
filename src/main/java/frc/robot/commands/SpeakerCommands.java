@@ -193,7 +193,7 @@ public class SpeakerCommands {
         return driveTrainCommand.alongWith(indexer.getDefault(pivot::inHandoffZone));
     }
 
-    public Pose2d getAdjustedPose(Drive drive){
+    public static Pose2d getAdjustedPose(Drive drive){
         double distance = getSpeaker().getDistance(drive.getPose().getTranslation());
         Rotation2d rotation = getSpeaker().minus(drive.getPose().getTranslation()).getAngle();
         Translation2d adjustedVelocity = new Translation2d(drive.getVelocity().vxMetersPerSecond,drive.getVelocity().vyMetersPerSecond).rotateBy(rotation.unaryMinus());
@@ -202,5 +202,8 @@ public class SpeakerCommands {
         Translation2d adjustedPosition = new Translation2d(distance, 0).plus(adjustedVelocity.times(flightTime));
         Translation2d realPosition = adjustedPosition.minus(getSpeaker()).rotateBy(rotation).plus(getSpeaker());
         return new Pose2d(realPosition, drive.getPose().getRotation());
+    }
+    public static Command shootMove(Drive drive, Pivot pivot, DoubleSupplier xSupplier, DoubleSupplier ySupplier){
+        return correctionShootSpeaker(drive, pivot, xSupplier, ySupplier, () -> getAdjustedPose(drive));
     }
 }
