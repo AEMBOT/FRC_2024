@@ -172,16 +172,5 @@
       "timestamp": 1.978274789221505
     }
   ],
-  "eventMarkers": [
-    {
-      "name": "Marker",
-      "timestamp": 1.6782747892215049,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "intakeNote"
-        }
-      }
-    }
-  ]
+  "eventMarkers": []
 }

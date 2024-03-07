@@ -264,7 +264,6 @@
   ],
   "eventMarkers": [
     {
-      "name": "Marker",
       "timestamp": 0.29651885966554525,
       "command": {
         "type": "named",

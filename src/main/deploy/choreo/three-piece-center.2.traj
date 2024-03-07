@@ -1099,16 +1099,5 @@
       "timestamp": 3.8866005812086977
     }
   ],
-  "eventMarkers": [
-    {
-      "name": "Marker",
-      "timestamp": 1.5606336747229763,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "intakeNote"
-        }
-      }
-    }
-  ]
+  "eventMarkers": []
 }
