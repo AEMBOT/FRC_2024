@@ -83,4 +83,12 @@ public class Climber extends SubsystemBase {
       return extendCurrentLimit;
     }
   }
+
+  public Command setLeftPositionCommand(double position) {
+    return runOnce(() -> io.setLeftPosition(position));
+  }
+
+  public Command setRightPositionCommand(double position) {
+    return runOnce(() -> io.setRightPosition(position));
+  }
 }

@@ -120,23 +120,38 @@ public class Diagnostics {
 
   // run climber
   public static Command testClimberCommand(Climber climber) {
-    double minClimber = Constants.ClimberConstants.minExtendHardStop;
-    double maxClimber = Constants.ClimberConstants.maxExtendSoftStop;
-    double avgClimber = (minClimber + maxClimber) / 2;
-    double defaultClimber = 0; // TODO cornfirm this value
+    double minClimberHeight = Constants.ClimberConstants.minExtendHardStop;
+    double maxClimberHeight = Constants.ClimberConstants.maxExtendSoftStop;
+    double avgClimberHeight = (minClimberHeight + maxClimberHeight) / 2;
 
     return climber
-        .setPositionCommand(minClimber)
+        .setLeftPositionCommand(minClimberHeight)
         .withTimeout(1)
-        .andThen(climber.setPositionCommand(maxClimber))
+        .andThen(climber.setLeftPositionCommand(maxClimberHeight))
         .withTimeout(1)
-        .andThen(climber.setPositionCommand(avgClimber))
+        .andThen(climber.setLeftPositionCommand(avgClimberHeight))
         .withTimeout(1)
         .andThen(
             testWobble(
-                climber.setPositionCommand(avgClimber + ((maxClimber - minClimber) / 10)),
-                climber.setPositionCommand(avgClimber - ((maxClimber - minClimber) / 10))))
-        .andThen(climber.setPositionCommand(defaultClimber))
+                climber.setLeftPositionCommand(
+                    avgClimberHeight + ((maxClimberHeight - minClimberHeight) / 10)),
+                climber.setLeftPositionCommand(
+                    avgClimberHeight - ((maxClimberHeight - minClimberHeight) / 10))))
+        .andThen(climber.getHomingCommand())
+        .withTimeout(1)
+        .andThen(climber.setRightPositionCommand(minClimberHeight))
+        .withTimeout(1)
+        .andThen(climber.setRightPositionCommand(maxClimberHeight))
+        .withTimeout(1)
+        .andThen(climber.setRightPositionCommand(avgClimberHeight))
+        .withTimeout(1)
+        .andThen(
+            testWobble(
+                climber.setRightPositionCommand(
+                    avgClimberHeight + ((maxClimberHeight - minClimberHeight) / 10)),
+                climber.setRightPositionCommand(
+                    avgClimberHeight - ((maxClimberHeight - minClimberHeight) / 10))))
+        .andThen(climber.getHomingCommand())
         .withTimeout(1);
   }
 

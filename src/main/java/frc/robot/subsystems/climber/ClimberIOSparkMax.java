@@ -128,9 +128,27 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorLeft.setVoltage(volts);
   }
 
+  public void setLeftPosition(double position) {
+    climberSetpoint = position;
+    m_winchMotorLeft.setVoltage(
+        encoderLeft.getPosition() > climberSetpoint
+            ? pidControllerDown.calculate(encoderLeft.getPosition(), position)
+            : pidControllerUp.calculate(encoderLeft.getPosition(), position));
+    openLoop = false;
+  }
+
   public void setRightVoltage(double volts) {
     openLoop = true;
     m_winchMotorRight.setVoltage(volts);
+  }
+
+  public void setRightPosition(double position) {
+    climberSetpoint = position;
+    m_winchMotorRight.setVoltage(
+        encoderRight.getPosition() > climberSetpoint
+            ? pidControllerDown.calculate(encoderRight.getPosition(), position)
+            : pidControllerUp.calculate(encoderRight.getPosition(), position));
+    openLoop = false;
   }
 
   @Override
