@@ -205,7 +205,20 @@ public class Drive extends SubsystemBase {
     // vision also corrects for async odo so maybe just cope
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = min(sampleTimestamps.length, gyroInputs.odometryYawPositions.length);
+    int minTimestamps =
+        min(
+            min(
+                modules[0].getOdometryTimestamps().length,
+                modules[1].getOdometryTimestamps().length),
+            min(
+                modules[2].getOdometryTimestamps().length,
+                modules[3].getOdometryTimestamps().length)); // Check if one wheel data was rejected
+    int sampleCount;
+    if (gyroInputs.connected) {
+      sampleCount = min(minTimestamps, gyroInputs.odometryYawPositions.length);
+    } else {
+      sampleCount = minTimestamps;
+    }
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
       SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
@@ -275,10 +288,10 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput("Drive/AprilTagPose" + i, new Pose2d());
         Logger.recordOutput("Drive/AprilTagStdDevs" + i, new double[] {0.0, 0.0, 0.0});
       }
-
-      // Update Note Detection
-      noteVisionIO.updateInputs(noteVisionInputs);
     }
+
+    // Update Note Detection
+    noteVisionIO.updateInputs(noteVisionInputs);
 
     Logger.recordOutput(
         "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));

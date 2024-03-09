@@ -69,12 +69,14 @@ public class SpeakerCommands {
                       && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      isFlipped
+                          ? -linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()
+                          : linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      isFlipped
+                          ? -linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()
+                          : linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                       omega,
-                      isFlipped // Is this necessary? test on field
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+                      drive.getRotation()));
 
               Logger.recordOutput(
                   "Interpolator Distance", interpolator.get(distance.getAsDouble()));

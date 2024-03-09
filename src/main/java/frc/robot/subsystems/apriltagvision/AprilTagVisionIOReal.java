@@ -75,7 +75,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[0] = new Pose3d();
           timestampArray[0] = 0.0;
-          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
     pose = leftPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -94,7 +93,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[1] = new Pose3d();
           timestampArray[1] = 0.0;
-          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
     pose = rightPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -108,7 +106,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         () -> {
           poseArray[2] = new Pose3d();
           timestampArray[2] = 0.0;
-          arraycopy(infiniteStdevs.getData(), 0, visionStdArray, 0, 3);
         });
   }
 }

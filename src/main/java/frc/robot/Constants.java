@@ -112,21 +112,22 @@ public final class Constants {
   }
 
   public static final class shootingSpeakerConstants {
-    public static double kP = 5;
+    public static double kP = 4;
     public static double kI = 0;
-    public static double kD = 0;
+    public static double kD = 0.02;
     public static double maxVelocity = 2;
     public static double maxAcceleration = 4;
     public static double[][] shooterInterpolationPoints =
         new double[][] {
           new double[] {1.0, Units.degreesToRadians(60)},
-          new double[] {2.0, Units.degreesToRadians(40)},
+          new double[] {2.0, Units.degreesToRadians(42)},
           new double[] {3.0, Units.degreesToRadians(30)},
           new double[] {3.45, 0.483},
-          new double[] {4.0, Units.degreesToRadians(23)},
-          new double[] {4.85, 0.360},
-          new double[] {5.0, 0.350},
-          new double[] {6.0, 0.32},
+          new double[] {3.70, 0.450},
+          new double[] {4.0, Units.degreesToRadians(25)},
+          new double[] {4.85, 0.370},
+          new double[] {5.0, 0.360},
+          new double[] {6.0, 0.33},
           new double[] {7.0, 0.29}
         };
   }
