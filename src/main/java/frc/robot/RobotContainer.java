@@ -21,6 +21,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
@@ -217,66 +219,7 @@ public class RobotContainer {
                     .alongWith(
                         Commands.waitUntil(shooter::isAtShootSpeed)
                             .andThen(indexer.shootCommand())))
-            .withTimeout(5.0)
-            .andThen(drive.runVelocityFieldRelative(() -> new ChassisSpeeds(0.1, 0, 0))));
-
-    autoChooser.addOption(
-        "Score Preload 2 Electric Boogaloo",
-        Commands.sequence(
-            runOnce(() -> Logger.recordOutput("autoState", -1)),
-            Commands.deadline(
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.05)),
-                    waitSeconds(0.2),
-                    runOnce(() -> Logger.recordOutput("autoState", 0.1)),
-                    waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
-                    runOnce(() -> Logger.recordOutput("autoState", 0.2)),
-                    new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.02)),
-                    new ProxyCommand(
-                        pivot
-                            .setPositionCommand(() -> Units.degreesToRadians(60))
-                            .withName("sub"))),
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.04)),
-                    new ProxyCommand(
-                        shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
-            runOnce(() -> Logger.recordOutput("autoState", 0.3)),
-            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
-            new ProxyCommand(
-                pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3))));
-
-    autoChooser.addOption(
-        "REAL FOUR PIECE",
-        Commands.sequence(
-            runOnce(() -> Logger.recordOutput("autoState", -1)),
-            Commands.deadline(
-                    Commands.sequence(
-                        waitSeconds(0.2),
-                        runOnce(() -> Logger.recordOutput("autoState", 0.1)),
-                        waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
-                            .withTimeout(0.3),
-                        runOnce(() -> Logger.recordOutput("autoState", 0.2)),
-                        new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
-                    pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
-                    shooter.setVelocityRPMCommand(shooterSpeedRPM))
-                .andThen(
-                    Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.3))),
-                    pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)),
-            runOnce(() -> Logger.recordOutput("autoState", 1)),
-            AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("four-piece-amp.1")),
-            runOnce(() -> Logger.recordOutput("autoState", 2)),
-            Commands.race(Commands.waitSeconds(1), NamedCommands.getCommand("shootNoteAuto")),
-            runOnce(() -> Logger.recordOutput("autoState", 3)),
-            AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("four-piece-amp.2")),
-            runOnce(() -> Logger.recordOutput("autoState", 4)),
-            Commands.race(Commands.waitSeconds(1), NamedCommands.getCommand("shootNoteAuto")),
-            runOnce(() -> Logger.recordOutput("autoState", 5)),
-            AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("four-piece-amp.3")),
-            runOnce(() -> Logger.recordOutput("autoState", 6)),
-            Commands.race(Commands.waitSeconds(1), NamedCommands.getCommand("shootNoteAuto")),
-            runOnce(() -> Logger.recordOutput("autoState", 7))));
+            .withTimeout(2.0));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -310,7 +253,7 @@ public class RobotContainer {
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
     // Return to Stow
-    controller.x().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(35)));
+    controller.x().whileTrue(pivot.setPositionCommand(() -> 0.44));
 
     // Pivot Manual Up
     controller.povUp().whileTrue(pivot.changeGoalPosition(0.5));
@@ -334,10 +277,8 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             shooter
-                .setVelocityRPMCommand(1600)
-                .alongWith(
-                    Commands.waitUntil(shooter::isAtShootSpeed)
-                        .andThen(indexer.indexerInCommand())));
+                .setVoltageCommand(1.0)
+                .alongWith(Commands.waitSeconds(0.05).andThen(indexer.ampCommand())));
 
     // Auto Rotation Lock Shooter Pivot Interp
     controller
@@ -362,6 +303,7 @@ public class RobotContainer {
                     Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
 
     controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
+    controller.back().onTrue(runOnce(() -> drive.setPose(new Pose2d(7.0, 4.0, new Rotation2d()))));
 
     new Trigger(indexer::intakedNote)
         .onTrue(
@@ -401,6 +343,11 @@ public class RobotContainer {
                 pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
 
     backupController.x().whileTrue(run(() -> drive.setVisionState(false)));
+    backupController
+        .leftTrigger()
+        .whileTrue(
+            new WheelRadiusCharacterization(
+                drive, WheelRadiusCharacterization.Direction.COUNTER_CLOCKWISE));
   }
 
   public void configureLightBindings() {
