@@ -1,7 +1,9 @@
 package frc.robot;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import static edu.wpi.first.wpilibj2.command.Commands.repeatingSequence;
+
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.indexer.Indexer;
@@ -14,47 +16,70 @@ public class Diagnostics {
 
   // wibble wobble switch between two commands for 1 second
   private static Command testWobble(Command minCommand, Command maxCommand) {
-    // TODO check if repeatedly applied to both commands or just maxCommand
-    return minCommand.andThen(maxCommand).repeatedly().withTimeout(1);
+    return repeatingSequence(
+            minCommand.withTimeout(0.25), WaitCommand(0.25), maxCommand.withTimeout(0.25))
+        .withTimeout(2);
+  }
+
+  private static Command WaitCommand(double d) {
+    return Commands.waitSeconds(d);
   }
 
   // run drivebase
   public static Command testDrivetrainCommand(Drive drive) {
-    double minDrive = -drive.getMaxLinearSpeedMetersPerSec();
-    double maxDrive = drive.getMaxLinearSpeedMetersPerSec();
-    double avgDrive = (minDrive + maxDrive) / 2;
-    double defaultDrive = 0;
-
-    return drive
-        .runVelocityCommand(() -> new ChassisSpeeds(minDrive, 0, 0))
-        .andThen(drive.runVelocityCommand(() -> new ChassisSpeeds(maxDrive, 0, 0)))
-        .andThen(drive.runVelocityCommand(() -> new ChassisSpeeds(avgDrive, 0, 0)))
-        .andThen(
-            testWobble(
-                drive.runVelocityCommand(
-                    () -> new ChassisSpeeds(avgDrive + ((maxDrive - minDrive) / 10), 0, 0)),
-                drive.runVelocityCommand(
-                    () -> new ChassisSpeeds(avgDrive - ((maxDrive - minDrive) / 10), 0, 0))))
-        .andThen(drive.runVelocityCommand(() -> new ChassisSpeeds(defaultDrive, 0, 0)));
+    Command driveCommand = WaitCommand(0);
+    frc.robot.subsystems.drive.Module[] modules = drive.returnMotors();
+    for (int i = 0; i < 4; ++i) {
+      driveCommand =
+          driveCommand
+              .andThen(drive.singleMotorDriveTest(modules[i], 4))
+              .withTimeout(1)
+              .andThen(drive.singleMotorDriveTest(modules[i], -4))
+              .withTimeout(1)
+              .andThen(drive.singleMotorDriveTest(modules[i], 0))
+              .withTimeout(1)
+              .andThen(
+                  testWobble(
+                      drive.singleMotorDriveTest(modules[i], 2),
+                      drive.singleMotorDriveTest(modules[i], -2)))
+              .andThen(drive.singleMotorDriveTest(modules[i], 0))
+              .withTimeout(1);
+    }
+    for (int i = 0; i < 4; ++i) {
+      driveCommand =
+          driveCommand
+              .andThen(drive.singleMotorSteerTest(modules[i], 4))
+              .withTimeout(1)
+              .andThen(drive.singleMotorSteerTest(modules[i], -4))
+              .withTimeout(1)
+              .andThen(drive.singleMotorSteerTest(modules[i], 0))
+              .withTimeout(1)
+              .andThen(
+                  testWobble(
+                      drive.singleMotorSteerTest(modules[i], 2),
+                      drive.singleMotorSteerTest(modules[i], -2)))
+              .andThen(drive.singleMotorSteerTest(modules[i], 0))
+              .withTimeout(1);
+    }
+    return driveCommand;
   }
 
   // run shooter
   public static Command testShooterCommand(Shooter shooter) {
     double minShooter = -Constants.ShooterConstants.shooterSpeedRPM;
     double maxShooter = Constants.ShooterConstants.shooterSpeedRPM;
-    double avgShooter = (minShooter + maxShooter) / 2;
     double defaultShooter =
         Constants.ShooterConstants.shooterIdleRPM; // TODO check whether to go to this value or 0
 
     return shooter
         .setVelocityRPMCommand(minShooter)
+        .withTimeout(1)
         .andThen(shooter.setVelocityRPMCommand(maxShooter))
-        .andThen(shooter.setVelocityRPMCommand(avgShooter))
-        .andThen(
-            testWobble(
-                shooter.setVelocityRPMCommand(avgShooter + ((maxShooter - minShooter) / 10)),
-                shooter.setVelocityRPMCommand(avgShooter - ((maxShooter - minShooter) / 10))))
-        .andThen(shooter.setVelocityRPMCommand(defaultShooter));
+        .withTimeout(1)
+        .andThen(shooter.stopCommand())
+        .andThen(testWobble(shooter.setVoltageCommand(4), shooter.setVoltageCommand(-4)))
+        .andThen(shooter.setVelocityRPMCommand(defaultShooter))
+        .withTimeout(1);
   }
 
   // run pivot
@@ -66,23 +91,34 @@ public class Diagnostics {
 
     return pivot
         .setPositionCommand(() -> minPivot)
+        .withTimeout(1)
         .andThen(pivot.setPositionCommand(() -> maxPivot))
+        .withTimeout(1)
         .andThen(pivot.setPositionCommand(() -> avgPivot))
+        .withTimeout(1)
         .andThen(
             testWobble(
                 pivot.setPositionCommand(() -> avgPivot + ((maxPivot - minPivot) / 10)),
                 pivot.setPositionCommand(() -> avgPivot - ((maxPivot - minPivot) / 10))))
-        .andThen(pivot.setPositionCommand(() -> defaultPivot));
+        .andThen(pivot.setPositionCommand(() -> defaultPivot))
+        .withTimeout(1);
   }
 
   // run indexer
   public static Command testIndexerCommand(Indexer indexer) {
-    // TODO make this work like the others somehow
-    return indexer.indexerOnIntakeOnCommand().andThen(indexer.indexerOffIntakeOffCommand());
+    return indexer
+        .intakeInCommand()
+        .alongWith(indexer.indexerInCommand())
+        .andThen(indexer.intakeOutCommand().alongWith(indexer.indexerOutCommand()))
+        .andThen(indexer.indexerOffIntakeOffCommand())
+        .andThen(
+            testWobble(
+                indexer.intakeInCommand().alongWith(indexer.indexerInCommand()),
+                indexer.intakeOutCommand().alongWith(indexer.indexerOutCommand())))
+        .andThen(indexer.indexerOffIntakeOffCommand());
   }
 
   // run climber
-
   public static Command testClimberCommand(Climber climber) {
     double minClimber = Constants.ClimberConstants.minExtendHardStop;
     double maxClimber = Constants.ClimberConstants.maxExtendSoftStop;
@@ -91,18 +127,20 @@ public class Diagnostics {
 
     return climber
         .setPositionCommand(minClimber)
+        .withTimeout(1)
         .andThen(climber.setPositionCommand(maxClimber))
+        .withTimeout(1)
         .andThen(climber.setPositionCommand(avgClimber))
+        .withTimeout(1)
         .andThen(
             testWobble(
                 climber.setPositionCommand(avgClimber + ((maxClimber - minClimber) / 10)),
                 climber.setPositionCommand(avgClimber - ((maxClimber - minClimber) / 10))))
-        .andThen(climber.setPositionCommand(defaultClimber));
+        .andThen(climber.setPositionCommand(defaultClimber))
+        .withTimeout(1);
   }
 
-  // test for logs flashdrive
-
-  // TODO get camera ip adresses,
+  // TODO get camera ip adresses
   // is there clear video feed on all cameras
 
   // TODO can algorithm detect april tags
