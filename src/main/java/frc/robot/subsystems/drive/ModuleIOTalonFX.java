@@ -15,6 +15,7 @@ package frc.robot.subsystems.drive;
 
 import static frc.robot.Constants.currentRobot;
 import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
+import static java.lang.Math.abs;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -225,7 +226,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         Module.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, // Bus is CAN FD, so consider increasing this
+        100.0, // Bus is CAN FD, so consider increasing this
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
@@ -250,6 +251,24 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnVelocity,
         turnAppliedVolts,
         turnCurrent);
+
+    if (abs(drivePosition.getValueAsDouble()) < 0.001) {
+      timestampQueue.clear();
+      drivePositionQueue.clear();
+      turnPositionQueue.clear();
+
+      inputs.odometryTimestamps =
+          timestampQueue.stream().mapToDouble((Double value) -> value).limit(100).toArray();
+      inputs.odometryDrivePositionsMeters =
+          drivePositionQueue.stream().mapToDouble(Double::doubleValue).limit(100).toArray();
+      inputs.odometryTurnPositions =
+          turnPositionQueue.stream()
+              .map(Rotation2d::fromRotations)
+              .limit(100)
+              .toArray(Rotation2d[]::new);
+
+      return;
+    }
 
     inputs.drivePositionMeters = drivePosition.getValueAsDouble();
     inputs.driveVelocityMetersPerSec = driveVelocity.getValueAsDouble();
