@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter;
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
 import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 import static edu.wpi.first.wpilibj.Timer.delay;
-import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
 import static frc.robot.Constants.currentRobot;
 import static frc.robot.util.SparkUtils.Data.*;
 import static frc.robot.util.SparkUtils.Sensor.INTEGRATED;
@@ -164,8 +163,7 @@ public class ShooterIOReal implements ShooterIO {
     inputs.atShootSpeed =
         abs(topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 250
             && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 250
-            && (topShooterSetpoint > (shooterIdleRPM * 1.5)
-                || bottomShooterSetpoint > (shooterIdleRPM * 1.5));
+            && (topShooterSetpoint > 2000 || bottomShooterSetpoint > 2000);
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */

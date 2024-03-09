@@ -49,12 +49,19 @@ public class Shooter extends SubsystemBase {
   public Command getDefault() {
     // If the shooter was running fast and is now coasting down,
     // we don't want to force the speed down-- preserve momentum
+    //    return Commands.waitUntil(
+    //            () -> {
+    //              Logger.recordOutput("shooter min velocity", findMin(inputs.shooterVelocityRPM));
+    //              return findMin(inputs.shooterVelocityRPM) < shooterIdleRPM;
+    //            })
+    //        .andThen(run(() -> setVelocityRPM(shooterIdleRPM)));
+
     return Commands.waitUntil(
             () -> {
               Logger.recordOutput("shooter min velocity", findMin(inputs.shooterVelocityRPM));
               return findMin(inputs.shooterVelocityRPM) < shooterIdleRPM;
             })
-        .andThen(run(() -> setVelocityRPM(shooterIdleRPM)));
+        .andThen(setVoltageCommand(0.5));
   }
 
   public Command setVelocityRPMCommand(double velRPM) {
