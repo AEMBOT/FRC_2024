@@ -205,7 +205,6 @@ public class Drive extends SubsystemBase {
     // vision also corrects for async odo so maybe just cope
     double[] sampleTimestamps =
         modules[0].getOdometryTimestamps(); // All signals are sampled together
-    int sampleCount = min(sampleTimestamps.length, gyroInputs.odometryYawPositions.length);
     int minTimestamps =
         min(
             min(
