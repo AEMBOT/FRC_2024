@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 public class WheelRadiusCharacterization extends Command {
   private static final LoggedDashboardNumber characterizationSpeed =
-      new LoggedDashboardNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 0.1);
+      new LoggedDashboardNumber("WheelRadiusCharacterization/SpeedRadsPerSec", 0.5);
   private static final double driveRadius = Drive.DRIVE_BASE_RADIUS;
 
   public enum Direction {
