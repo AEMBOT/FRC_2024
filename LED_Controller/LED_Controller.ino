@@ -10,6 +10,7 @@
  V6 - Added more features to 'gayFade' function, capitalized the 'r' in the previous version's update
  V7 - Added a function to handle the start of the Underglow strip not being in the middle of the front or back, while still making patterns look cool, updated gayFade's method of exiting function
  V8 - Removed support for off button, added 'gayShoot' function to play while shooting a note
+ V9 - Removed lines that set the brightness to half
 */
 
 /*
