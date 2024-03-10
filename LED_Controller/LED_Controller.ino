@@ -361,10 +361,10 @@ void sawtoothFade(int red, int green, int blue) { //function that plays a sawtoo
 
   }
 
-  Underglow.setBrightness(127);
-  //set underglow brightness to half brightness
-  Mounted.setBrightness(127);
-  //set mounted brightness to half brightness
+  // Underglow.setBrightness(127);
+  // //set underglow brightness to half brightness
+  // Mounted.setBrightness(127);
+  // //set mounted brightness to half brightness
 
   Underglow.show();
   //show the queued pixel colors on the Underglow LED strip all at once
@@ -398,10 +398,10 @@ void gayFade() { //function to play a parade of hue colors until a new input is 
 
     }
 
-    Underglow.setBrightness(127);
-    //sets the brightness of the underglow strips to half brightness
-    Mounted.setBrightness(127);
-    //sets the brightness of the mounted strips to half brightness
+    // Underglow.setBrightness(127);
+    // //sets the brightness of the underglow strips to half brightness
+    // Mounted.setBrightness(127);
+    // //sets the brightness of the mounted strips to half brightness
 
     Underglow.show();
     //shows the queued colors on the underglow strips
