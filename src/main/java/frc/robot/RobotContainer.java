@@ -15,6 +15,7 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static frc.robot.commands.SpeakerCommands.autoAimPivot;
 import static frc.robot.commands.SpeakerCommands.shootSpeaker;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -164,9 +165,7 @@ public class RobotContainer {
                     new ProxyCommand(
                         shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
             runOnce(() -> Logger.recordOutput("autoState", 0.3)),
-            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
-            new ProxyCommand(
-                pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3))));
+            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4)))));
     //    NamedCommands.registerCommand(
     //        "shootNoteAuto",
     //        Commands.deadline(
@@ -182,15 +181,21 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "shootNoteAuto",
         Commands.deadline(
-            waitSeconds(0.6)
+            waitSeconds(0.04)
                 .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.4))),
+                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
             shootSpeaker(drive, pivot, () -> 0, () -> 0),
-            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
+            new ProxyCommand(
+                shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shootNoteAuto Fire"))));
     //    NamedCommands.registerCommand(
     //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
     NamedCommands.registerCommand(
         "intakeNote", new InstantCommand(() -> Logger.recordOutput("Intake Scheduled", true)));
+
+    NamedCommands.registerCommand(
+        "spinUpShooter",
+        new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("Pre-Spinup")));
+    NamedCommands.registerCommand("autoAimPivot", new ProxyCommand(autoAimPivot(drive, pivot)));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(

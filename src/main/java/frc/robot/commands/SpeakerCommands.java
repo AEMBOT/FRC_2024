@@ -5,11 +5,9 @@ import static frc.robot.Constants.shootingSpeakerConstants.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -34,9 +32,7 @@ public class SpeakerCommands {
   public static Command shootSpeaker(
       Drive drive, Pivot pivot, DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
     DoubleSupplier distance = () -> getSpeaker().getDistance(drive.getPose().getTranslation());
-    ProfiledPIDController pidController =
-        new ProfiledPIDController(
-            kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+    PIDController pidController = new PIDController(kP, kI, kD);
     pidController.enableContinuousInput(-Math.PI, Math.PI);
     Command driveTrainCommand =
         Commands.run(
@@ -138,5 +134,10 @@ public class SpeakerCommands {
             drive);
 
     return driveTrainCommand.alongWith(indexer.getDefault(pivot::inHandoffZone));
+  }
+
+  public static Command autoAimPivot(Drive drive, Pivot pivot) {
+    DoubleSupplier distance = () -> getSpeaker().getDistance(drive.getPose().getTranslation());
+    return pivot.setPositionCommand(() -> interpolator.get(distance.getAsDouble()));
   }
 }

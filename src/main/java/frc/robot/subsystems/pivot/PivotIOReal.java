@@ -41,7 +41,7 @@ public class PivotIOReal implements PivotIO {
   private final PIDController pidController =
       switch (currentRobot) {
         case CLEF -> new PIDController(12, 0, 0.00);
-        case LIGHTCYCLE -> new PIDController(35, 0, 0.2);
+        case LIGHTCYCLE -> new PIDController(35, 0, 0.1);
       };
 
   private final TrapezoidProfile pivotProfile =
