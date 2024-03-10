@@ -48,12 +48,20 @@ public class Climber extends SubsystemBase {
     io.setPosition(position);
   }
 
+  private void setPositionClimbing(double position) {
+    io.setPositionClimbing(position);
+  }
+
   public Command runVoltsCommand(double voltage) {
     return run(() -> runVolts(voltage)).finallyDo(() -> runVolts(0.0));
   }
 
   public Command setPositionCommand(double targetPosition) {
     return run(() -> setPosition(targetPosition)).finallyDo(() -> io.setVoltage(0.0));
+  }
+
+  public Command setPositiionCommandClimbing(double targetPosition) {
+    return run(() -> setPositionClimbing(targetPosition)).finallyDo(() -> io.setVoltage(0));
   }
 
   public Command getHomingCommand() {

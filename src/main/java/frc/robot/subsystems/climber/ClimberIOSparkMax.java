@@ -108,6 +108,52 @@ public class ClimberIOSparkMax implements ClimberIO {
   }
 
   @Override
+  public void setPositionClimbing(double position) {
+    if (currentFilterLeftValue > 50) {
+      climberSetpoint = position;
+
+      m_winchMotorLeft.setVoltage(
+          encoderLeft.getPosition() > climberSetpoint
+              ? Math.min(pidControllerDown.calculate(encoderLeft.getPosition(), position), 2)
+              : Math.min(pidControllerUp.calculate(encoderLeft.getPosition(), position), 2));
+
+      m_winchMotorRight.setVoltage(
+          encoderLeft.getPosition() > climberSetpoint
+              ? pidControllerDown.calculate(encoderLeft.getPosition(), position)
+              : pidControllerUp.calculate(encoderLeft.getPosition(), position));
+    } else if (currentFilterRightValue > 50) {
+      climberSetpoint = position;
+
+      m_winchMotorLeft.setVoltage(
+          encoderLeft.getPosition() > climberSetpoint
+              ? pidControllerDown.calculate(encoderLeft.getPosition(), position)
+              : pidControllerUp.calculate(encoderLeft.getPosition(), position));
+
+      m_winchMotorRight.setVoltage(
+          encoderRight.getPosition() > climberSetpoint
+              ? Math.min(pidControllerDown.calculate(encoderRight.getPosition(), position), 2)
+              : Math.min(pidControllerUp.calculate(encoderRight.getPosition(), position), 2));
+    } else {
+      setPosition(position);
+    }
+    openLoop = false;
+  }
+
+  public double currentLimitedClimbing() {
+    // 1 if left climber is current limited
+    // 2 if right climber is current limited
+    // 3 if both
+    if (currentFilterLeftValue > 50 && currentFilterRightValue > 50) {
+      return 3;
+    } else if (currentFilterLeftValue > 50) {
+      return 1;
+    } else if (currentFilterRightValue > 50) {
+      return 2;
+    }
+    return 0;
+  }
+
+  @Override
   public void setVoltage(double volts) {
     openLoop = true;
     m_winchMotorRight.setVoltage(volts);

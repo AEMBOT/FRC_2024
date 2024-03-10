@@ -41,6 +41,16 @@ public class TrapClimbingCommands {
   // bring climber down
   // once thats done sequential command for bring pivot down
 
+  public static Command ClimbStraight(Climber climber) {
+    return Commands.parallel(
+        climber.setPositionCommand(0.15),
+        climber
+            .setPositionCommand(0.75)
+            .until(() -> climber.atGoal())
+            .andThen(new WaitCommand(1))
+            .andThen(climber.setPositionCommand(0.05).until(climber::atGoal)));
+  }
+
   // just for testing right now
   public static Command DriveFastAndClimb(
       Drive drive, Climber climber, Pivot pivot, Shooter shooter) {

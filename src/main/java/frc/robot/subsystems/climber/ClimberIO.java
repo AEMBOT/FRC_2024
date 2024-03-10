@@ -24,6 +24,8 @@ public interface ClimberIO {
   /** Sets the target of the climber * */
   public default void setPosition(double climberPositionRad) {}
 
+  public default void setPositionClimbing(double climberPositionRad) {}
+
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
 

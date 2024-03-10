@@ -30,8 +30,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.ClimbingCommandsRev2;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.TrapClimbingCommands;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
@@ -210,9 +210,14 @@ public class RobotContainer {
                         .andThen(indexer.indexerInCommand())));
 
     // Z, climb up
-    controller.button(10).whileTrue(climber.setPositionCommand(0.75));
+    // controller.button(10).whileTrue(climber.setPositionCommand(0.75));
     // C, climb down
-    controller.button(9).whileTrue(climber.setPositionCommand(0.05));
+    // controller.button(9).whileTrue(climber.setPositionCommand(0.05));
+
+    controller.button(10).whileTrue(ClimbingCommandsRev2.ClimbFirstHalfRev2(climber, shooter));
+    // controller.button(10).onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(120)));
+    // controller.button(10).onFalse(pivot.setPositionCommand(() -> Units.degreesToRadians(90)));
+    controller.button(9).whileTrue(ClimbingCommandsRev2.ClimbSeconHalfRev2(climber, pivot));
 
     controller
         .rightTrigger()
@@ -243,8 +248,8 @@ public class RobotContainer {
     /*controller
     .a()
     .whileTrue(TrapClimbingCommands.DriveFastAndClimb(drive, climber, pivot, shooter));*/
-    controller.a().whileTrue(TrapClimbingCommands.ClimbFirstHalf(climber, pivot, shooter));
-    controller.b().whileTrue(TrapClimbingCommands.ClimbSecondHalf(climber, pivot));
+    // controller.a().whileTrue(TrapClimbingCommands.ClimbFirstHalf(climber, pivot, shooter));
+    // controller.b().whileTrue(TrapClimbingCommands.ClimbSecondHalf(climber, pivot));
   }
 
   /**
