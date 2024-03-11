@@ -407,6 +407,8 @@ public class RobotContainer {
         .whileTrue(
             new WheelRadiusCharacterization(
                 drive, WheelRadiusCharacterization.Direction.COUNTER_CLOCKWISE));
+
+    backupController.leftBumper().onTrue(Diagnostics.testPivotCommand(pivot));
   }
 
   public void configureLightBindings() {
@@ -452,11 +454,13 @@ public class RobotContainer {
   }
 
   public Command getTestingCommand() {
-    return Diagnostics.testDrivetrainCommand(drive)
-        .andThen(Diagnostics.testShooterCommand(shooter))
-        .andThen(Diagnostics.testPivotCommand(pivot))
-        .andThen(Diagnostics.testIndexerCommand(indexer))
-        .andThen(Diagnostics.testClimberCommand(climber));
+    return Diagnostics.testPivotCommand(pivot);
+    /*
+    .andThen(Diagnostics.testShooterCommand(shooter))
+    .andThen(Diagnostics.testIndexerCommand(indexer))
+    .andThen(Diagnostics.testClimberCommand(climber))
+    .andThen(Diagnostics.testDrivetrainCommand(drive));
+    */
   }
 
   @AutoLogOutput
