@@ -1,6 +1,6 @@
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.repeatingSequence;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -14,10 +14,14 @@ public class Diagnostics {
 
   private Diagnostics() {}
 
-  // wibble wobble switch between two commands for 1 second
+  private static final double wobbleStepTimeout = 0.25;
+  private static final double rangeOfMotionTimeout = 1;
+  private static final double rangeOfMotionDelay = 0.2;
+
+  // Alternate / "wobble" between two commands
   private static Command testWobble(Command minCommand, Command maxCommand) {
     return repeatingSequence(
-            minCommand.withTimeout(0.25), WaitCommand(0.25), maxCommand.withTimeout(0.25))
+            minCommand.withTimeout(wobbleStepTimeout), maxCommand.withTimeout(wobbleStepTimeout))
         .withTimeout(2);
   }
 
@@ -33,53 +37,46 @@ public class Diagnostics {
       driveCommand =
           driveCommand
               .andThen(drive.singleMotorDriveTest(modules[i], 4))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(drive.singleMotorDriveTest(modules[i], -4))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(drive.singleMotorDriveTest(modules[i], 0))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(
                   testWobble(
                       drive.singleMotorDriveTest(modules[i], 2),
                       drive.singleMotorDriveTest(modules[i], -2)))
-              .andThen(drive.singleMotorDriveTest(modules[i], 0))
-              .withTimeout(1);
+              .andThen(drive.singleMotorDriveTest(modules[i], 0));
     }
     for (int i = 0; i < 4; ++i) {
       driveCommand =
           driveCommand
               .andThen(drive.singleMotorSteerTest(modules[i], 4))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(drive.singleMotorSteerTest(modules[i], -4))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(drive.singleMotorSteerTest(modules[i], 0))
-              .withTimeout(1)
+              .withTimeout(rangeOfMotionTimeout)
               .andThen(
                   testWobble(
                       drive.singleMotorSteerTest(modules[i], 2),
                       drive.singleMotorSteerTest(modules[i], -2)))
-              .andThen(drive.singleMotorSteerTest(modules[i], 0))
-              .withTimeout(1);
+              .andThen(drive.singleMotorSteerTest(modules[i], 0));
     }
     return driveCommand;
   }
 
   // run shooter
   public static Command testShooterCommand(Shooter shooter) {
-    double minShooter = -Constants.ShooterConstants.shooterSpeedRPM;
-    double maxShooter = Constants.ShooterConstants.shooterSpeedRPM;
-    double defaultShooter =
-        Constants.ShooterConstants.shooterIdleRPM; // TODO check whether to go to this value or 0
-
-    return shooter
-        .setVelocityRPMCommand(minShooter)
-        .withTimeout(1)
-        .andThen(shooter.setVelocityRPMCommand(maxShooter))
-        .withTimeout(1)
-        .andThen(shooter.stopCommand())
-        .andThen(testWobble(shooter.setVoltageCommand(4), shooter.setVoltageCommand(-4)))
-        .andThen(shooter.setVelocityRPMCommand(defaultShooter))
-        .withTimeout(1);
+    return Commands.sequence(
+        waitSeconds(rangeOfMotionDelay), // as an example
+        shooter.setVelocityRPMCommand(0).until(() -> shooter.isAtShootSpeed()),
+        waitSeconds(rangeOfMotionDelay),
+        shooter.setVelocityRPMCommand(Constants.ShooterConstants.shooterSpeedRPM).until(() -> shooter.isAtShootSpeed()),
+        waitSeconds(rangeOfMotionDelay),
+        // Don't do wobble on shooter, unnecessary
+        shooter.setVelocityRPMCommand(Constants.ShooterConstants.shooterIdleRPM).until(() -> shooter.isAtShootSpeed()),
+        waitSeconds(rangeOfMotionDelay));
   }
 
   // run pivot
@@ -87,34 +84,35 @@ public class Diagnostics {
     double minPivot = Constants.PivotConstants.PIVOT_MIN_POS_RAD;
     double maxPivot = Constants.PivotConstants.PIVOT_MAX_POS_RAD;
     double avgPivot = (minPivot + maxPivot) / 2;
-    double defaultPivot = minPivot; // TODO cofirm this value
 
-    return pivot
-        .setPositionCommand(() -> minPivot)
-        .withTimeout(1)
-        .andThen(pivot.setPositionCommand(() -> maxPivot))
-        .withTimeout(1)
-        .andThen(pivot.setPositionCommand(() -> avgPivot))
-        .withTimeout(1)
-        .andThen(
-            testWobble(
-                pivot.setPositionCommand(() -> avgPivot + ((maxPivot - minPivot) / 10)),
-                pivot.setPositionCommand(() -> avgPivot - ((maxPivot - minPivot) / 10))))
-        .andThen(pivot.setPositionCommand(() -> defaultPivot))
-        .withTimeout(1);
+    return Commands.sequence(
+        waitSeconds(rangeOfMotionDelay), // as an example
+        pivot.setPositionCommand(() -> minPivot).until(() -> pivot.atGoal()),
+        waitSeconds(rangeOfMotionDelay),
+        pivot.setPositionCommand(() -> maxPivot).until(() -> pivot.atGoal()),
+        waitSeconds(rangeOfMotionDelay),
+        pivot.setPositionCommand(() -> avgPivot).until(() -> pivot.atGoal()),
+        waitSeconds(rangeOfMotionDelay),
+        testWobble(
+            pivot.setPositionCommand(() -> avgPivot + ((maxPivot - minPivot) / 10)),
+            pivot.setPositionCommand(() -> avgPivot - ((maxPivot - minPivot) / 10))),
+        waitSeconds(rangeOfMotionDelay),
+        pivot.setPositionCommand(() -> avgPivot).until(() -> pivot.atGoal()));
   }
 
   // run indexer
   public static Command testIndexerCommand(Indexer indexer) {
     return indexer
         .intakeInCommand()
-        .alongWith(indexer.indexerInCommand())
-        .andThen(indexer.intakeOutCommand().alongWith(indexer.indexerOutCommand()))
+        .andThen(indexer.indexerInCommand())
+        .withTimeout(rangeOfMotionTimeout)
+        .andThen(indexer.intakeOutCommand().andThen(indexer.indexerOutCommand()))
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(indexer.indexerOffIntakeOffCommand())
         .andThen(
             testWobble(
-                indexer.intakeInCommand().alongWith(indexer.indexerInCommand()),
-                indexer.intakeOutCommand().alongWith(indexer.indexerOutCommand())))
+                indexer.intakeInCommand().andThen(indexer.indexerInCommand()),
+                indexer.intakeOutCommand().andThen(indexer.indexerOutCommand())))
         .andThen(indexer.indexerOffIntakeOffCommand());
   }
 
@@ -125,12 +123,13 @@ public class Diagnostics {
     double avgClimberHeight = (minClimberHeight + maxClimberHeight) / 2;
 
     return climber
-        .setLeftPositionCommand(minClimberHeight)
-        .withTimeout(1)
+        .getHomingCommand()
+        .andThen(climber.setLeftPositionCommand(minClimberHeight))
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(climber.setLeftPositionCommand(maxClimberHeight))
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(climber.setLeftPositionCommand(avgClimberHeight))
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(
             testWobble(
                 climber.setLeftPositionCommand(
@@ -138,13 +137,13 @@ public class Diagnostics {
                 climber.setLeftPositionCommand(
                     avgClimberHeight - ((maxClimberHeight - minClimberHeight) / 10))))
         .andThen(climber.getHomingCommand())
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(climber.setRightPositionCommand(minClimberHeight))
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(climber.setRightPositionCommand(maxClimberHeight))
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(climber.setRightPositionCommand(avgClimberHeight))
-        .withTimeout(1)
+        .withTimeout(rangeOfMotionTimeout)
         .andThen(
             testWobble(
                 climber.setRightPositionCommand(
@@ -152,7 +151,7 @@ public class Diagnostics {
                 climber.setRightPositionCommand(
                     avgClimberHeight - ((maxClimberHeight - minClimberHeight) / 10))))
         .andThen(climber.getHomingCommand())
-        .withTimeout(1);
+        .withTimeout(rangeOfMotionTimeout);
   }
 
   // TODO get camera ip adresses
