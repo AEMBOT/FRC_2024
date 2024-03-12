@@ -274,7 +274,7 @@ public class Drive extends SubsystemBase {
         Logger.recordOutput(
             "Drive/AprilTagStdDevs" + i,
             Arrays.copyOfRange(aprilTagVisionInputs.visionStdDevs, 3 * i, 3 * i + 3));
-        Logger.recordOutput("Drive/AprilTagPose" + i, aprilTagVisionInputs.timestamps[i]);
+        Logger.recordOutput("Drive/AprilTagTimestamps" + i, aprilTagVisionInputs.timestamps[i]);
 
         if (useVision) {
           poseEstimator.addVisionMeasurement(
