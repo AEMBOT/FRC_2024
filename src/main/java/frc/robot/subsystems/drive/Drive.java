@@ -524,4 +524,9 @@ public class Drive extends SubsystemBase {
   public Command singleMotorSteerTest(Module module, double volts) {
     return run(() -> module.runSteerCharacterization(volts));
   }
+
+  public Command singleMotorATWTest(Module module, double volts) {
+    return run(() -> module.runSteerCharacterization(volts))
+        .andThen(() -> module.runDriveCharacterization(volts));
+  }
 }

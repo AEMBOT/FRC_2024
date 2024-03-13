@@ -131,4 +131,17 @@ public final class Constants {
           new double[] {7.0, 0.29}
         };
   }
+
+  public static final class DiagnosticConstants {
+
+    public static final double wobbleStepTimeout = 0.25;
+    public static final double rangeOfMotionTimeout = 1;
+    public static final double rangeOfMotionDelay = 0.2;
+
+    // drive test constants
+    public static final double driveTestVolts = 4;
+    public static final double driveTestWobbleVolts = 2;
+    public static final double driveATWTestVolts = 0.4;
+    public static final double driveATWTestWobbleVolts = 0.2;
+  }
 }
