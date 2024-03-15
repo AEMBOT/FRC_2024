@@ -910,15 +910,5 @@
       "timestamp": 1.9676095084959084
     }
   ],
-  "eventMarkers": [
-    {
-      "timestamp": 1.4676095084959084,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "spinUpShooter"
-        }
-      }
-    }
-  ]
+  "eventMarkers": []
 }
