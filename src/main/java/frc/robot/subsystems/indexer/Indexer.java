@@ -1,7 +1,8 @@
 package frc.robot.subsystems.indexer;
 
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -31,7 +32,7 @@ public class Indexer extends SubsystemBase {
   public Command getDefault(BooleanSupplier pivotHandoff) {
     return runOnce(() -> shootReady = false)
         .andThen(
-            Commands.waitUntil(() -> inputs.shooterBeamBreakState)
+            waitUntil(() -> inputs.shooterBeamBreakState)
                 .deadlineWith(
                     run(this::indexOffIntakeOn)
                         .until(() -> inputs.intakeBeamBreakState)

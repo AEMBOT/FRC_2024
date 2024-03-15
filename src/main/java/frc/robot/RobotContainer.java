@@ -370,21 +370,24 @@ public class RobotContainer {
     new Trigger(() -> DriverStation.getAlliance().isPresent())
         .onTrue(Commands.runOnce(resetColorToIdle).ignoringDisable(true));
 
-    new Trigger(indexer::intakedNote)
-        .debounce(2.0, Debouncer.DebounceType.kFalling)
-        .whileTrue(
-            Commands.startEnd(() -> prettyLights.writeString("g"), resetColorToIdle)
-                .ignoringDisable(true));
+    //    new Trigger(indexer::intakedNote)
+    //        .debounce(2.0, Debouncer.DebounceType.kFalling)
+    //        .whileTrue(
+    //            Commands.startEnd(() -> prettyLights.writeString("g"), resetColorToIdle)
+    //                .ignoringDisable(true));
 
-    new Trigger(indexer::intakedNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("o")));
-    new Trigger(indexer::hasNote).onFalse(Commands.runOnce(resetColorToIdle));
+    new Trigger(indexer::intakedNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("g")));
+    new Trigger(indexer::hasNote)
+        .debounce(2.0, Debouncer.DebounceType.kFalling)
+        .onFalse(Commands.runOnce(resetColorToIdle));
 
     controller
         .rightTrigger()
-        .debounce(0.5, Debouncer.DebounceType.kRising)
-        .debounce(1.0, Debouncer.DebounceType.kFalling)
+        .debounce(2.0, Debouncer.DebounceType.kFalling)
         .whileTrue(
-            Commands.startEnd(() -> prettyLights.writeString("w"), resetColorToIdle)
+            Commands.sequence(
+                    Commands.waitSeconds(0.5),
+                    Commands.startEnd(() -> prettyLights.writeString("w"), resetColorToIdle))
                 .ignoringDisable(true));
   }
 

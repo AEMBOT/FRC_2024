@@ -262,13 +262,14 @@ public class Drive extends SubsystemBase {
           && aprilTagVisionInputs.visionPoses[i].getY() < 8.5
           && aprilTagVisionInputs.visionPoses[i].getRotation().getX() < 0.2
           && aprilTagVisionInputs.visionPoses[i].getRotation().getY() < 0.2
-          && aprilTagVisionInputs
-                  .visionPoses[i]
-                  .toPose2d()
-                  .minus(poseEstimator.getEstimatedPosition())
-                  .getTranslation()
-                  .getNorm()
-              < 3.0) { // todo replace this with multi-tag only and no distance cap
+      //          && aprilTagVisionInputs
+      //                  .visionPoses[i]
+      //                  .toPose2d()
+      //                  .minus(poseEstimator.getEstimatedPosition())
+      //                  .getTranslation()
+      //                  .getNorm()
+      //              < 3.0 // todo replace this with multi-tag only and no distance cap
+      ) {
         Logger.recordOutput(
             "Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i].toPose2d());
         Logger.recordOutput(
@@ -293,6 +294,7 @@ public class Drive extends SubsystemBase {
 
     // Update Note Detection
     noteVisionIO.updateInputs(noteVisionInputs);
+    Logger.processInputs("Drive/NoteVision", noteVisionInputs);
 
     Logger.recordOutput(
         "Distance to Speaker", getSpeaker().getDistance(getPose().getTranslation()));

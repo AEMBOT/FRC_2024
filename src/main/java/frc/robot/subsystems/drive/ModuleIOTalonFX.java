@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.currentRobot;
 import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
 import static java.lang.Math.abs;
@@ -145,7 +146,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     driveConfig.CurrentLimits.SupplyCurrentLimit = 50.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.CurrentLimits.StatorCurrentLimit = 75.0;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio =
@@ -161,7 +162,7 @@ public class ModuleIOTalonFX implements ModuleIO {
       }
       case LIGHTCYCLE -> {
         driveConfig.Slot0.kV = 2.14;
-        driveConfig.Slot0.kA = 0.08;
+        driveConfig.Slot0.kA = 0.45;
         driveConfig.Slot0.kS = 0.11;
         driveConfig.Slot0.kP = 3; // TODO hand tune
         driveConfig.Slot0.kD = 0.005;
@@ -169,7 +170,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     driveTalon.getConfigurator().apply(driveConfig);
+    delay(0.1);
     setDriveBrakeMode(true);
+    delay(0.1);
 
     // Turn Configuration
     var turnConfig = new TalonFXConfiguration();
@@ -204,7 +207,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     turnTalon.getConfigurator().apply(turnConfig);
+    delay(0.1);
     setTurnBrakeMode(true);
+    delay(0.1);
 
     // Status Signals
     timestampQueue = PhoenixOdometryThread.getInstance().makeTimestampQueue();
@@ -270,6 +275,8 @@ public class ModuleIOTalonFX implements ModuleIO {
               .limit(100)
               .toArray(Rotation2d[]::new);
 
+      inputs.moduleDataValid = false;
+
       return;
     }
 
@@ -294,6 +301,9 @@ public class ModuleIOTalonFX implements ModuleIO {
             .map(Rotation2d::fromRotations)
             .limit(100)
             .toArray(Rotation2d[]::new);
+
+    inputs.moduleDataValid = true;
+
     timestampQueue.clear();
     drivePositionQueue.clear();
     turnPositionQueue.clear();
