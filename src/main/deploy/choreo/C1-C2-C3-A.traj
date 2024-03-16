@@ -1459,5 +1459,72 @@
       "timestamp": 12.77150961405578
     }
   ],
-  "eventMarkers": []
+  "eventMarkers": [
+    {
+      "timestamp": 4.2020797632185225,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "spinUpShooter"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "autoAimPivot"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": 7.946164057778951,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "spinUpShooter"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "autoAimPivot"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": 12.27150961405578,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "spinUpShooter"
+              }
+            },
+            {
+              "type": "named",
+              "data": {
+                "name": "autoAimPivot"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
 }
