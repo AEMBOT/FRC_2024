@@ -577,28 +577,5 @@
       "timestamp": 4.7020797632185225
     }
   ],
-  "eventMarkers": [
-    {
-      "timestamp": 4.2020797632185225,
-      "command": {
-        "type": "parallel",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "spinUpShooter"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "autoAimPivot"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ]
+  "eventMarkers": []
 }
