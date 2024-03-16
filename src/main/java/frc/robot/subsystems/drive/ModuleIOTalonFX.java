@@ -91,7 +91,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset =
             switch (currentRobot) {
               case CLEF -> Rotation2d.fromRadians(0.33577);
-              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.521864415283994);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(2.72128);
             };
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
