@@ -515,4 +515,21 @@ public class Drive extends SubsystemBase {
   public void setVisionState(boolean state) {
     useVision = state;
   }
+
+  public Module[] returnMotors() {
+    return modules;
+  }
+
+  public Command singleMotorDriveTest(Module module, double volts) {
+    return run(() -> module.runDriveCharacterization(volts));
+  }
+
+  public Command singleMotorSteerTest(Module module, double volts) {
+    return run(() -> module.runSteerCharacterization(volts));
+  }
+
+  public Command singleMotorATWTest(Module module, double volts) {
+    return run(() -> module.runSteerCharacterization(volts))
+        .andThen(() -> module.runDriveCharacterization(volts));
+  }
 }

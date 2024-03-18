@@ -29,7 +29,11 @@ public interface ClimberIO {
 
   public default void setLeftVoltage(double volts) {}
 
+  public default void setLeftPosition(double position) {}
+
   public default void setRightVoltage(double volts) {}
+
+  public default void setRightPosition(double position) {}
 
   public default void setHoming(boolean homingBool) {}
 
