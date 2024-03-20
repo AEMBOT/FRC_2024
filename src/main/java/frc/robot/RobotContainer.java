@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -92,14 +93,14 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drive =
-            new Drive(
-                new GyroIONavX(),
-                new ModuleIOTalonFX(0),
-                new ModuleIOTalonFX(1),
-                new ModuleIOTalonFX(2),
-                new ModuleIOTalonFX(3),
-                new AprilTagVisionIOReal(),
-                new NoteVisionIOReal());
+                new Drive(
+                        new GyroIONavX(),
+                        new ModuleIOTalonFX(0),
+                        new ModuleIOTalonFX(1),
+                        new ModuleIOTalonFX(2),
+                        new ModuleIOTalonFX(3),
+                        new AprilTagVisionIOReal(),
+                        new NoteVisionIOReal());
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIOReal());
         shooter = new Shooter(new ShooterIOReal());
@@ -109,14 +110,14 @@ public class RobotContainer {
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new AprilTagVisionIOSim(),
-                new NoteVisionIO() {});
+                new Drive(
+                        new GyroIO() {},
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new ModuleIOSim(),
+                        new AprilTagVisionIOSim(),
+                        new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIOSim());
         pivot = new Pivot(new PivotIOSim());
         shooter = new Shooter(new ShooterIOSim());
@@ -126,46 +127,47 @@ public class RobotContainer {
       default:
         // Replayed robot, disable IO implementations
         drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new AprilTagVisionIO() {},
-                new NoteVisionIO() {});
+                new Drive(
+                        new GyroIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new ModuleIO() {},
+                        new AprilTagVisionIO() {},
+                        new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIO() {});
         pivot = new Pivot(new PivotIO() {});
         shooter = new Shooter(new ShooterIO() {});
         climber = new Climber(new ClimberIO() {});
         break;
     }
+    SmartDashboard.putNumber("SubwooferAngle", 60);
 
     // Set up auto commands
     NamedCommands.registerCommand(
-        "shootNoteSubwoofer",
-        Commands.sequence(
-            runOnce(() -> Logger.recordOutput("autoState", -1)),
-            Commands.deadline(
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.05)),
-                    waitSeconds(0.2),
-                    runOnce(() -> Logger.recordOutput("autoState", 0.1)),
-                    waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
-                    runOnce(() -> Logger.recordOutput("autoState", 0.2)),
-                    new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.02)),
-                    new ProxyCommand(
-                        pivot
-                            .setPositionCommand(() -> Units.degreesToRadians(60))
-                            .withName("sub"))),
-                Commands.sequence(
-                    runOnce(() -> Logger.recordOutput("autoState", 0.04)),
-                    new ProxyCommand(
-                        shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
-            runOnce(() -> Logger.recordOutput("autoState", 0.3)),
-            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4)))));
+            "shootNoteSubwoofer",
+            Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", -1)),
+                    Commands.deadline(
+                            Commands.sequence(
+                                    runOnce(() -> Logger.recordOutput("autoState", 0.05)),
+                                    waitSeconds(0.2),
+                                    runOnce(() -> Logger.recordOutput("autoState", 0.1)),
+                                    waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
+                                    runOnce(() -> Logger.recordOutput("autoState", 0.2)),
+                                    new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
+                            Commands.sequence(
+                                    runOnce(() -> Logger.recordOutput("autoState", 0.02)),
+                                    new ProxyCommand(
+                                            pivot
+                                                    .setPositionCommand(() -> Units.degreesToRadians(60))
+                                                    .withName("sub"))),
+                            Commands.sequence(
+                                    runOnce(() -> Logger.recordOutput("autoState", 0.04)),
+                                    new ProxyCommand(
+                                            shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
+                    runOnce(() -> Logger.recordOutput("autoState", 0.3)),
+                    Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4)))));
     //    NamedCommands.registerCommand(
     //        "shootNoteAuto",
     //        Commands.deadline(
@@ -179,35 +181,35 @@ public class RobotContainer {
     //                            getSpeaker().getDistance(drive.getPose().getTranslation())))),
     //            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
     NamedCommands.registerCommand(
-        "shootNoteAuto",
-        Commands.deadline(
-            waitSeconds(0.04)
-                .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
-                .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
-            shootSpeaker(drive, pivot, () -> 0, () -> 0),
-            new ProxyCommand(
-                shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shootNoteAuto Fire"))));
+            "shootNoteAuto",
+            Commands.deadline(
+                    waitSeconds(0.04)
+                            .andThen(waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()))
+                            .andThen(new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+                    shootSpeaker(drive, pivot, () -> 0, () -> 0),
+                    new ProxyCommand(
+                            shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shootNoteAuto Fire"))));
     //    NamedCommands.registerCommand(
     //        "intakeNote", indexer.getDefault(pivot::inHandoffZone).withTimeout(3.0));
     NamedCommands.registerCommand(
-        "intakeNote", new InstantCommand(() -> Logger.recordOutput("Intake Scheduled", true)));
+            "intakeNote", new InstantCommand(() -> Logger.recordOutput("Intake Scheduled", true)));
 
     NamedCommands.registerCommand(
-        "spinUpShooter",
-        new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("Pre-Spinup")));
+            "spinUpShooter",
+            new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("Pre-Spinup")));
     NamedCommands.registerCommand("autoAimPivot", new ProxyCommand(autoAimPivot(drive, pivot)));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(
-        "Nine Piece Auto",
-        runOnce(
-                () ->
-                    drive.setPose(
-                        PathPlannerPath.fromChoreoTrajectory("ninepieceauto")
-                            .getTrajectory(new ChassisSpeeds(), new Rotation2d())
-                            .getInitialTargetHolonomicPose()))
-            .andThen(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("ninepieceauto"))));
+            "Nine Piece Auto",
+            runOnce(
+                    () ->
+                            drive.setPose(
+                                    PathPlannerPath.fromChoreoTrajectory("ninepieceauto")
+                                            .getTrajectory(new ChassisSpeeds(), new Rotation2d())
+                                            .getInitialTargetHolonomicPose()))
+                    .andThen(
+                            AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("ninepieceauto"))));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser.addOption("Nine Piece Auto", NamedCommands.getCommand("Nine Piece Auto"));
@@ -215,16 +217,16 @@ public class RobotContainer {
     autoChooser.addOption("Swerve Drive SysId Routine", drive.runDriveCharacterizationCmd());
     autoChooser.addOption("Swerve Steer SysId Routine", drive.runModuleSteerCharacterizationCmd());
     autoChooser.addOption(
-        "Score Preload",
-        pivot
-            .setPositionCommand(() -> Units.degreesToRadians(60))
-            .alongWith(
-                shooter
-                    .setVelocityRPMCommand(shooterSpeedRPM)
+            "Score Preload",
+            pivot
+                    .setPositionCommand(() -> Units.degreesToRadians(60))
                     .alongWith(
-                        Commands.waitUntil(shooter::isAtShootSpeed)
-                            .andThen(indexer.shootCommand())))
-            .withTimeout(2.0));
+                            shooter
+                                    .setVelocityRPMCommand(shooterSpeedRPM)
+                                    .alongWith(
+                                            Commands.waitUntil(shooter::isAtShootSpeed)
+                                                    .andThen(indexer.shootCommand())))
+                    .withTimeout(2.0));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -242,19 +244,19 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX(),
-            () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
+            DriveCommands.joystickDrive(
+                    drive,
+                    () -> -controller.getLeftY(),
+                    () -> -controller.getLeftX(),
+                    () -> -controller.getRightX(),
+                    () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
     indexer.setDefaultCommand(
-        indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
+            indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
     // Subwoofer
-    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
+    controller.b().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(SmartDashboard.getNumber("SubwooferAngle", 60))));
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
     // Return to Stow
@@ -279,17 +281,17 @@ public class RobotContainer {
     //                () -> -controller.getRightX()));
     // "Intake Out" - Indexer Manual Run
     controller
-        .leftBumper()
-        .whileTrue(
-            shooter
-                .setVoltageCommand(1.0)
-                .alongWith(Commands.waitSeconds(0.05).andThen(indexer.ampCommand())));
+            .leftBumper()
+            .whileTrue(
+                    shooter
+                            .setVoltageCommand(1.0)
+                            .alongWith(Commands.waitSeconds(0.05).andThen(indexer.ampCommand())));
 
     // Auto Rotation Lock Shooter Pivot Interp
     controller
-        .a()
-        .whileTrue(
-            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
+            .a()
+            .whileTrue(
+                    shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX()));
 
     // Z, climb up
     controller.button(10).whileTrue(climber.setPositionCommand(0.75));
@@ -299,27 +301,27 @@ public class RobotContainer {
     controller.button(9).whileTrue(climber.setPositionCommand(0.05));
 
     controller
-        .rightTrigger()
-        .debounce(0.25, Debouncer.DebounceType.kFalling)
-        .whileTrue(
-            shooter
-                .setVelocityRPMCommand(shooterSpeedRPM)
-                .alongWith(
-                    Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
+            .rightTrigger()
+            .debounce(0.25, Debouncer.DebounceType.kFalling)
+            .whileTrue(
+                    shooter
+                            .setVelocityRPMCommand(shooterSpeedRPM)
+                            .alongWith(
+                                    Commands.waitUntil(shooter::isAtShootSpeed).andThen(indexer.shootCommand())));
 
     controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
     controller.back().onTrue(runOnce(() -> drive.setPose(new Pose2d(7.0, 4.0, new Rotation2d()))));
 
     new Trigger(indexer::intakedNote)
-        .onTrue(
-            Commands.run(
-                    () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
-                .withTimeout(0.2)
-                .andThen(
-                    Commands.runOnce(
-                        () ->
-                            controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
-                .ignoringDisable(true));
+            .onTrue(
+                    Commands.run(
+                                    () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
+                            .withTimeout(0.2)
+                            .andThen(
+                                    Commands.runOnce(
+                                            () ->
+                                                    controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
+                            .ignoringDisable(true));
 
     // Intake Indexer Backwards Eject
     backupController.b().whileTrue(indexer.run(indexer::intakeIndexBackwards));
@@ -329,46 +331,46 @@ public class RobotContainer {
     backupController.povLeft().whileTrue(climber.runVoltsCommand(-6.0));
 
     backupController
-        .a()
-        .onTrue(
-            Commands.sequence(
-                runOnce(() -> Logger.recordOutput("autoState", -1)),
-                Commands.deadline(
+            .a()
+            .onTrue(
                     Commands.sequence(
-                        waitSeconds(0.2),
-                        runOnce(() -> Logger.recordOutput("autoState", 0.1)),
-                        waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
-                            .withTimeout(0.3),
-                        runOnce(() -> Logger.recordOutput("autoState", 0.2)),
-                        new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
-                    pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
-                    shooter.setVelocityRPMCommand(shooterSpeedRPM)),
-                runOnce(() -> Logger.recordOutput("autoState", 0.3)),
-                Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
-                pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
+                            runOnce(() -> Logger.recordOutput("autoState", -1)),
+                            Commands.deadline(
+                                    Commands.sequence(
+                                            waitSeconds(0.2),
+                                            runOnce(() -> Logger.recordOutput("autoState", 0.1)),
+                                            waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed())
+                                                    .withTimeout(0.3),
+                                            runOnce(() -> Logger.recordOutput("autoState", 0.2)),
+                                            new ProxyCommand(indexer.shootCommand().withTimeout(0.3))),
+                                    pivot.setPositionCommand(() -> Units.degreesToRadians(60)),
+                                    shooter.setVelocityRPMCommand(shooterSpeedRPM)),
+                            runOnce(() -> Logger.recordOutput("autoState", 0.3)),
+                            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4))),
+                            pivot.setPositionCommand(() -> Units.degreesToRadians(40)).withTimeout(0.3)));
 
     backupController.x().whileTrue(run(() -> drive.setVisionState(false)));
     backupController
-        .leftTrigger()
-        .whileTrue(
-            new WheelRadiusCharacterization(
-                drive, WheelRadiusCharacterization.Direction.COUNTER_CLOCKWISE));
+            .leftTrigger()
+            .whileTrue(
+                    new WheelRadiusCharacterization(
+                            drive, WheelRadiusCharacterization.Direction.COUNTER_CLOCKWISE));
   }
 
   public void configureLightBindings() {
     Runnable resetColorToIdle =
-        () -> {
-          if (DriverStation.getAlliance().isPresent()
-              && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            prettyLights.writeString("r");
-          } else if (DriverStation.getAlliance().isPresent()
-              && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-            prettyLights.writeString("b");
-          }
-        };
+            () -> {
+              if (DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+                prettyLights.writeString("r");
+              } else if (DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+                prettyLights.writeString("b");
+              }
+            };
 
     new Trigger(() -> DriverStation.getAlliance().isPresent())
-        .onTrue(Commands.runOnce(resetColorToIdle).ignoringDisable(true));
+            .onTrue(Commands.runOnce(resetColorToIdle).ignoringDisable(true));
 
     //    new Trigger(indexer::intakedNote)
     //        .debounce(2.0, Debouncer.DebounceType.kFalling)
@@ -378,17 +380,17 @@ public class RobotContainer {
 
     new Trigger(indexer::intakedNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("g")));
     new Trigger(indexer::hasNote)
-        .debounce(2.0, Debouncer.DebounceType.kFalling)
-        .onFalse(Commands.runOnce(resetColorToIdle));
+            .debounce(2.0, Debouncer.DebounceType.kFalling)
+            .onFalse(Commands.runOnce(resetColorToIdle));
 
     controller
-        .rightTrigger()
-        .debounce(2.0, Debouncer.DebounceType.kFalling)
-        .whileTrue(
-            Commands.sequence(
-                    Commands.waitSeconds(0.5),
-                    Commands.startEnd(() -> prettyLights.writeString("w"), resetColorToIdle))
-                .ignoringDisable(true));
+            .rightTrigger()
+            .debounce(2.0, Debouncer.DebounceType.kFalling)
+            .whileTrue(
+                    Commands.sequence(
+                                    Commands.waitSeconds(0.5),
+                                    Commands.startEnd(() -> prettyLights.writeString("w"), resetColorToIdle))
+                            .ignoringDisable(true));
   }
 
   /**
