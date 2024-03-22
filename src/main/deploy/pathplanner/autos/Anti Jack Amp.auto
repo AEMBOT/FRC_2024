@@ -1,0 +1,55 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7259598970413208,
+      "y": 6.681408882141113
+    },
+    "rotation": -119.74486811509864
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteSubwoofer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Jack Amp v2.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Jack Amp v2.2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Jack Amp v2.3"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

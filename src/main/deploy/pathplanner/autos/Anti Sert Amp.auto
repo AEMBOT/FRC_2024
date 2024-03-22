@@ -1,0 +1,61 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7612067461013794,
+      "y": 6.655539035797119
+    },
+    "rotation": -120.96374516747339
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteSubwoofer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Sert Amp.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Sert Amp.2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Sert Amp.3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

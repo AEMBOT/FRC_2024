@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7041450142860413,
+      "y": 4.42900276184082
+    },
+    "rotation": 116.56503473815837
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Stormbots Open.1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Stormbots Open.2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Stormbots Open.3"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}
