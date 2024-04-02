@@ -90,8 +90,7 @@ public class SpeakerCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
-    PIDController pidController = new PIDController(1, 0, 0);
-    pidController.enableContinuousInput(-Math.PI, Math.PI);
+    PIDController pidController = new PIDController(0.1, 0, 0);
     Command driveTrainCommand =
         Commands.run(
             () -> {
@@ -105,8 +104,10 @@ public class SpeakerCommands {
               double omega;
               if (drive.hasNoteTarget()) {
                 omega = pidController.calculate(drive.getNoteLocation(), 0);
+                Logger.recordOutput("NoteVision/PIDCalculated", omega);
               } else {
                 omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+                Logger.recordOutput("NoteVision/PIDCalculated", 0);
               }
 
               // Square values
@@ -124,12 +125,59 @@ public class SpeakerCommands {
                       && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
               drive.runVelocity(
                   ChassisSpeeds.fromFieldRelativeSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                      isFlipped
+                          ? -linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec()
+                          : linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                      isFlipped
+                          ? -linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec()
+                          : linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                       omega,
-                      isFlipped // Is this necessary? test on field
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation()));
+                      drive.getRotation()));
+            },
+            drive);
+
+    return driveTrainCommand.alongWith(indexer.getDefault(pivot::inHandoffZone));
+  }
+
+  public static Command intakeNoteVectorLock(
+      Drive drive,
+      Indexer indexer,
+      Pivot pivot,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier) {
+    PIDController pidController = new PIDController(0.1, 0, 0);
+    Command driveTrainCommand =
+        Commands.run(
+            () -> {
+              // Apply deadband
+              double linearMagnitude =
+                  MathUtil.applyDeadband(
+                      Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), DEADBAND);
+              Rotation2d linearDirection =
+                  new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+              double omega;
+              if (drive.hasNoteTarget()) {
+                omega = pidController.calculate(drive.getNoteLocation(), 0);
+                Logger.recordOutput("NoteVision/PIDCalculated", omega);
+              } else {
+                omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+                Logger.recordOutput("NoteVision/PIDCalculated", 0);
+              }
+
+              // Square values
+              linearMagnitude = linearMagnitude * linearMagnitude;
+
+              // Calcaulate new linear velocity
+              Translation2d linearVelocity =
+                  new Pose2d(new Translation2d(), linearDirection)
+                      .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
+                      .getTranslation();
+
+              drive.runVelocity(
+                  new ChassisSpeeds(
+                      -linearVelocity.getNorm() * drive.getMaxLinearSpeedMetersPerSec(), 0, omega));
             },
             drive);
 

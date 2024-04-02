@@ -72,6 +72,10 @@ public class Pivot extends SubsystemBase {
     return new Pose3d(-0.2, 0, 0.255, new Rotation3d(0, -inputs.pivotAbsolutePositionRad, 0));
   }
 
+  public double getPosRad() {
+    return inputs.pivotAbsolutePositionRad;
+  }
+
   public Command runVoltsCommand(double volts) {
     return run(() -> runVolts(volts)).finallyDo(() -> runVolts(0.0));
   }

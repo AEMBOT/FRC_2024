@@ -348,6 +348,10 @@ public class Drive extends SubsystemBase {
     return runVelocityCommand(ChassisSpeeds::new);
   }
 
+  public Command stopWithXCommand() {
+    return run(this::stopWithX);
+  }
+
   public Command runVelocityFieldRelative(Supplier<ChassisSpeeds> speeds) {
     return this.runVelocityCommand(
         () -> ChassisSpeeds.fromFieldRelativeSpeeds(speeds.get(), getRotation()));
