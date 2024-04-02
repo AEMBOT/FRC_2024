@@ -131,7 +131,7 @@ public class ShooterIOReal implements ShooterIO {
         }); // Divide by 10 because of voltage compensation
     bottomMotorPID.setFF(
         switch (currentRobot) {
-          case CLEF -> 1.05 * 0.0010492 / 10.0;
+          case CLEF -> 1.04 * 0.0010492 / 10.0;
           case LIGHTCYCLE -> 0.98 * 0.001137 / 10.0;
         });
 
@@ -162,7 +162,7 @@ public class ShooterIOReal implements ShooterIO {
     inputs.bottomShooterSetpoint = bottomShooterSetpoint;
     inputs.atShootSpeed =
         abs(topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 250
-            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 250
+            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 500
             && (topShooterSetpoint > 2000 || bottomShooterSetpoint > 2000);
   }
 
@@ -178,6 +178,16 @@ public class ShooterIOReal implements ShooterIO {
     openLoop = false;
     topShooterSetpoint = velocityRPM * 1.05;
     bottomShooterSetpoint = velocityRPM;
+    // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
+    topMotorPID.setReference(topShooterSetpoint, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(
+        bottomShooterSetpoint, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
+  }
+
+  public void setVelocity(double topRPM, double bottomRPM) {
+    openLoop = false;
+    topShooterSetpoint = topRPM;
+    bottomShooterSetpoint = bottomRPM;
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
     topMotorPID.setReference(topShooterSetpoint, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
     bottomMotorPID.setReference(

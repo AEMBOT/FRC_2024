@@ -71,6 +71,10 @@ public class Shooter extends SubsystemBase {
     return run(() -> setVelocityRPM(velRPM)).finallyDo(io::stop);
   }
 
+  public Command setVelocityRPMCommand(double topRPM, double bottomRPM) {
+    return run(() -> io.setVelocity(topRPM, bottomRPM)).finallyDo(io::stop);
+  }
+
   public Command stopCommand() {
     return runOnce(() -> io.setVoltage(0.0));
   }
