@@ -1,4 +1,4 @@
- {
+{
   "version": 1.0,
   "startingPose": {
     "position": {
@@ -24,27 +24,53 @@
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "shootNoteAuto"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Anti Chill Open.2"
+            "pathName": "Anti CPR Open.2"
           }
         },
         {
-          "type": "named",
+          "type": "race",
           "data": {
-            "name": "shootNoteAuto"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Anti Chill Open.3"
+            "pathName": "Anti CPR Open.3"
           }
         },
         {

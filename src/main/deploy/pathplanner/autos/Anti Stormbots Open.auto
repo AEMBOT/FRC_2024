@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7041450142860413,
-      "y": 4.42900276184082
+      "x": 0.7452476620674133,
+      "y": 4.4355363845825195
     },
-    "rotation": 116.56503473815837
+    "rotation": 121.13895719407874
   },
   "command": {
     "type": "sequential",
@@ -20,7 +20,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Anti Stormbots Open.1"
+            "pathName": "Anti Stormbots Open V2.1"
           }
         },
         {
@@ -45,7 +45,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Anti Stormbots Open.2"
+            "pathName": "Anti Stormbots Open V2.2"
           }
         },
         {
@@ -70,7 +70,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Anti Stormbots Open.3"
+            "pathName": "Anti Stormbots Open V2.3"
           }
         },
         {
