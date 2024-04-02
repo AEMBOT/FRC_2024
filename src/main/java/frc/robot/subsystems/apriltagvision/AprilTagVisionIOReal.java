@@ -32,6 +32,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
   private Pose3d[] poseArray = new Pose3d[3];
   private double[] timestampArray = new double[3];
   private double[] visionStdArray = new double[9];
+  private int count = 0;
 
   public AprilTagVisionIOReal() {
     frontCam = new PhotonCamera("front");
@@ -58,6 +59,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
     inputs.visionPoses = poseArray;
     inputs.timestamps = timestampArray;
     inputs.visionStdDevs = visionStdArray;
+    count += 1;
+    if (count % 500 == 0) {
+      frontCam.takeOutputSnapshot();
+      leftCam.takeOutputSnapshot();
+      rightCam.takeOutputSnapshot();
+    }
   }
 
   public void getEstimatedPoseUpdates() {
@@ -100,7 +107,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           poseArray[2] = estimatedRobotPose.estimatedPose;
           timestampArray[2] = estimatedRobotPose.timestampSeconds;
           Matrix<N3, N1> stdDevs =
-              getEstimationStdDevs(estimatedRobotPose, CameraResolution.NORMAL);
+              getEstimationStdDevs(
+                  estimatedRobotPose,
+                  switch (currentRobot) {
+                    case CLEF -> CameraResolution.NORMAL;
+                    case LIGHTCYCLE -> CameraResolution.HIGH_RES;
+                  });
           arraycopy(stdDevs.getData(), 0, visionStdArray, 6, 3);
         },
         () -> {

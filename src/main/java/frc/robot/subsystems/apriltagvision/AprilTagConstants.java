@@ -42,12 +42,24 @@ public final class AprilTagConstants {
       };
 
   public static final Transform3d rightCamToRobot =
-      new Transform3d(
-          new Translation3d(
-              Units.inchesToMeters(-12.01),
-              Units.inchesToMeters(-11.65),
-              Units.inchesToMeters(10.58)),
-          new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(-147)));
+      switch (currentRobot) {
+        case CLEF -> new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-12.01),
+                Units.inchesToMeters(-11.65),
+                Units.inchesToMeters(10.58)),
+            new Rotation3d(0.0, Units.degreesToRadians(-23.5), Units.degreesToRadians(-147)));
+        case LIGHTCYCLE -> new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-12.01),
+                Units.inchesToMeters(-11.65),
+                Units.inchesToMeters(10.58)),
+            new Rotation3d(
+                Units.degreesToRadians(180),
+                Units.degreesToRadians(-23.5),
+                Units.degreesToRadians(-147)));
+      };
+
   public static final Matrix<N3, N1> highResSingleTagStdDev =
       VecBuilder.fill(0.4, 0.4, Double.MAX_VALUE);
   public static final Matrix<N3, N1> normalSingleTagStdDev =
