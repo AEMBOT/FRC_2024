@@ -16,9 +16,11 @@ public class NoteVisionIOReal implements NoteVisionIO {
     if (result.hasTargets()) {
       PhotonTrackedTarget target = result.getBestTarget();
       inputs.hasTarget = true;
+      inputs.lastTargetX = inputs.targetX;
       inputs.targetX = target.getYaw();
     } else {
       inputs.hasTarget = false;
+      inputs.lastTargetX = inputs.targetX;
       inputs.targetX = 0.0;
     }
   }

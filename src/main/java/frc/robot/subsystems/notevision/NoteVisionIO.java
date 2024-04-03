@@ -7,6 +7,7 @@ public interface NoteVisionIO {
   public static class NoteVisionIOInputs {
     public boolean hasTarget = false;
     public double targetX = 0.0;
+    public double lastTargetX = 0.0;
   }
 
   /** Updates the set of loggable inputs. */

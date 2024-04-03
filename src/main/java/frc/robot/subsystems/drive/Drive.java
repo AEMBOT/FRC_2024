@@ -480,6 +480,10 @@ public class Drive extends SubsystemBase {
     return noteVisionInputs.targetX;
   }
 
+  public double getLastNoteLocation() {
+    return noteVisionInputs.lastTargetX;
+  }
+
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {

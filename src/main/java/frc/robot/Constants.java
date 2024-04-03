@@ -79,6 +79,7 @@ public final class Constants {
   }
 
   public static final class IntakeConstants {
+    public static final double noteLockTolerance = 10.0;
     public static final int intakeMotorPortBottom = 13;
     public static final int intakeMotorPortTop = 12;
     public static final int intakeBeamBrake = 7;
