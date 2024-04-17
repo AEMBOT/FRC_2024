@@ -147,18 +147,24 @@ public class RobotContainer {
             runOnce(() -> Logger.recordOutput("autoState", -1)),
             Commands.deadline(
                 Commands.sequence(
-                    waitSeconds(0.04),
+                    runOnce(() -> Logger.recordOutput("autoState", 0.05)),
+                    waitSeconds(0.2),
                     runOnce(() -> Logger.recordOutput("autoState", 0.1)),
                     waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
                     runOnce(() -> Logger.recordOutput("autoState", 0.2)),
                     new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
                 Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", 0.02)),
                     new ProxyCommand(
                         pivot
                             .setPositionCommand(() -> Units.degreesToRadians(60))
                             .withName("sub"))),
-                new ProxyCommand(
-                    shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))));
+                Commands.sequence(
+                    runOnce(() -> Logger.recordOutput("autoState", 0.04)),
+                    new ProxyCommand(
+                        shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("shoot")))),
+            runOnce(() -> Logger.recordOutput("autoState", 0.3)),
+            Commands.sequence(runOnce(() -> Logger.recordOutput("autoState", 0.4)))));
     //    NamedCommands.registerCommand(
     //        "shootNoteAuto",
     //        Commands.deadline(
@@ -254,7 +260,7 @@ public class RobotContainer {
                 .setPositionCommand(() -> Units.degreesToRadians(60))
                 .alongWith(drive.stopWithXCommand()));
     // Trap
-    controller.y().whileTrue(pivot.setPositionCommand(() -> 1.96));
+    controller.y().whileTrue(pivot.setPositionCommand(() -> 1.81));
     // Return to Stow
     //    controller.x().whileTrue(pivot.setPositionCommand(() -> 0.44));
 

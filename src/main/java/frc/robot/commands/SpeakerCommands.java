@@ -149,7 +149,8 @@ public class SpeakerCommands {
       DoubleSupplier omegaSupplier) {
     PIDController pidController = new PIDController(0.1, 0, 0);
     Command driveTrainCommand =
-        Commands.race(
+        Commands.sequence(
+            Commands.race(
                 Commands.run(
                     () -> {
                       // Apply deadband
@@ -157,8 +158,6 @@ public class SpeakerCommands {
                           MathUtil.applyDeadband(
                               Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()),
                               DEADBAND);
-                      Rotation2d linearDirection =
-                          new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
                       double omega;
                       if (drive.hasNoteTarget()) {
@@ -172,54 +171,33 @@ public class SpeakerCommands {
                       // Square values
                       linearMagnitude = linearMagnitude * linearMagnitude;
 
-                      // Calcaulate new linear velocity
-                      Translation2d linearVelocity =
-                          new Pose2d(new Translation2d(), linearDirection)
-                              .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
-                              .getTranslation();
-
                       drive.runVelocity(
                           new ChassisSpeeds(
-                              -linearVelocity.getNorm() * drive.getMaxLinearSpeedMetersPerSec(),
-                              0,
-                              omega));
+                              -linearMagnitude * drive.getMaxLinearSpeedMetersPerSec(), 0, omega));
                     },
                     drive),
                 Commands.waitUntil(
                     () ->
                         Math.abs(drive.getLastNoteLocation() - drive.getNoteLocation())
-                            < Constants.IntakeConstants.noteLockTolerance))
-            .andThen(
-                Commands.run(
-                    () -> {
-                      // Apply deadband
-                      double linearMagnitude =
-                          MathUtil.applyDeadband(
-                              Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()),
-                              DEADBAND);
-                      Rotation2d linearDirection =
-                          new Rotation2d(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+                                > Constants.IntakeConstants.noteLockTolerance
+                            && drive.lastHasNoteTarget())),
+            Commands.run(
+                () -> {
+                  // Apply deadband
+                  double linearMagnitude =
+                      MathUtil.applyDeadband(
+                          Math.hypot(xSupplier.getAsDouble(), ySupplier.getAsDouble()), DEADBAND);
 
-                      double omega;
-                      omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-                      Logger.recordOutput("NoteVision/PIDCalculated", 0);
+                  // Square values
+                  linearMagnitude = linearMagnitude * linearMagnitude;
 
-                      // Square values
-                      linearMagnitude = linearMagnitude * linearMagnitude;
+                  Logger.recordOutput("NoteVision/PIDCalculated", 0);
 
-                      // Calcaulate new linear velocity
-                      Translation2d linearVelocity =
-                          new Pose2d(new Translation2d(), linearDirection)
-                              .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
-                              .getTranslation();
-
-                      drive.runVelocity(
-                          new ChassisSpeeds(
-                              -linearVelocity.getNorm() * drive.getMaxLinearSpeedMetersPerSec(),
-                              0,
-                              omega));
-                    },
-                    drive));
+                  drive.runVelocity(
+                      new ChassisSpeeds(
+                          -linearMagnitude * drive.getMaxLinearSpeedMetersPerSec(), 0, 0));
+                },
+                drive));
 
     return driveTrainCommand.alongWith(indexer.getDefault(pivot::inHandoffZone));
   }

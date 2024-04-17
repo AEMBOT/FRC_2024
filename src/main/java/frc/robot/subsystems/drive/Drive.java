@@ -476,6 +476,10 @@ public class Drive extends SubsystemBase {
     return noteVisionInputs.hasTarget;
   }
 
+  public boolean lastHasNoteTarget() {
+    return noteVisionInputs.lastHasTarget;
+  }
+
   public double getNoteLocation() {
     return noteVisionInputs.targetX;
   }
