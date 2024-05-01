@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
 import static frc.robot.commands.SpeakerCommands.*;
+import static java.lang.Math.abs;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -152,7 +153,7 @@ public class RobotContainer {
                     runOnce(() -> Logger.recordOutput("autoState", 0.1)),
                     waitUntil(() -> pivot.atGoal() && shooter.isAtShootSpeed()).withTimeout(0.3),
                     runOnce(() -> Logger.recordOutput("autoState", 0.2)),
-                    new ProxyCommand(indexer.shootCommand().withTimeout(0.3).withName("shoot"))),
+                    new ProxyCommand(indexer.shootCommand().withTimeout(0.25).withName("shoot"))),
                 Commands.sequence(
                     runOnce(() -> Logger.recordOutput("autoState", 0.02)),
                     new ProxyCommand(
@@ -195,6 +196,7 @@ public class RobotContainer {
         "spinUpShooter",
         new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM).withName("Pre-Spinup")));
     NamedCommands.registerCommand("autoAimPivot", new ProxyCommand(autoAimPivot(drive, pivot)));
+    NamedCommands.registerCommand("spit", new ProxyCommand(indexer.spitCommand().withTimeout(0.5)));
 
     // Set up Auto Routines
     NamedCommands.registerCommand(
@@ -252,13 +254,18 @@ public class RobotContainer {
     pivot.setDefaultCommand(pivot.getDefault());
     shooter.setDefaultCommand(shooter.getDefault());
 
-    // Subwoofer
+    // Passing
     controller
         .b()
         .whileTrue(
-            pivot
-                .setPositionCommand(() -> Units.degreesToRadians(60))
-                .alongWith(drive.stopWithXCommand()));
+            shootPass(
+                drive,
+                pivot,
+                shooter,
+                indexer,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX()));
+
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.81));
     // Return to Stow
@@ -332,6 +339,14 @@ public class RobotContainer {
                             controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0)))
                 .ignoringDisable(true));
 
+    // Subwoofer
+    backupController
+        .a()
+        .whileTrue(
+            pivot
+                .setPositionCommand(() -> Units.degreesToRadians(60))
+                .alongWith(drive.stopWithXCommand()));
+
     // Intake Indexer Backwards Eject
     backupController.b().whileTrue(indexer.run(indexer::intakeIndexBackwards));
     // Climb Manual Up
@@ -348,8 +363,12 @@ public class RobotContainer {
 
     backupController.povDown().whileTrue(climber.getHomingCommand());
 
-    backupController.y().whileTrue(shooter.setVelocityRPMCommand(8000, 0));
-    backupController.leftBumper().whileTrue(shooter.setVelocityRPMCommand(0, 8000));
+    new Trigger(
+            () ->
+                abs(backupController.getLeftY()) > 0.05 || abs(backupController.getRightY()) > 0.05)
+        .whileTrue(
+            climber.runManualClimberCommand(
+                () -> -backupController.getLeftY(), () -> -backupController.getRightY()));
   }
 
   public void configureLightBindings() {

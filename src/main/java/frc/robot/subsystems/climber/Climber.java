@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
@@ -43,6 +44,14 @@ public class Climber extends SubsystemBase {
 
   private void setPosition(double position) {
     io.setPosition(position);
+  }
+
+  public Command runManualClimberCommand(DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+    return run(() -> {
+          io.setLeftVoltage(leftSpeed.getAsDouble() * 3.0);
+          io.setRightVoltage(rightSpeed.getAsDouble() * 3.0);
+        })
+        .finallyDo(() -> io.setVoltage(0.0));
   }
 
   public Command runVoltsCommand(double voltage) {

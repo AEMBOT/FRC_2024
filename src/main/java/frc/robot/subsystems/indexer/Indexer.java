@@ -126,6 +126,14 @@ public class Indexer extends SubsystemBase {
         });
   }
 
+  public Command spitCommand() {
+    return run(
+        () -> {
+          io.setIndexerVoltage(8.0);
+          io.setIntakeVoltage(IndexerConstants.indexerMotorVoltage);
+        });
+  }
+
   public Command intakeInCommand() {
     return runOnce(this::intakeIn);
   }

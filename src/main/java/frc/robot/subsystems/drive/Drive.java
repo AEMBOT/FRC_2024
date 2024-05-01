@@ -20,6 +20,7 @@ import static frc.robot.Constants.FieldConstants.getSpeaker;
 import static frc.robot.subsystems.drive.Module.WHEEL_RADIUS;
 import static java.lang.Math.abs;
 import static java.lang.Math.min;
+import static org.littletonrobotics.junction.Logger.getTimestamp;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -270,6 +271,11 @@ public class Drive extends SubsystemBase {
       //                  .getNorm()
       //              < 3.0 // todo replace this with multi-tag only and no distance cap
       ) {
+        if (aprilTagVisionInputs.timestamps[i] > (getTimestamp() / 1.0e6)) {
+          aprilTagVisionInputs.timestamps[i] =
+              (getTimestamp() / 1.0e6) - aprilTagVisionInputs.latency[i];
+        }
+
         Logger.recordOutput(
             "Drive/AprilTagPose" + i, aprilTagVisionInputs.visionPoses[i].toPose2d());
         Logger.recordOutput(

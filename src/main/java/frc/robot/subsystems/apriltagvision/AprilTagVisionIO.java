@@ -20,6 +20,7 @@ public interface AprilTagVisionIO {
     public Pose3d[] visionPoses =
         List.of(new Pose3d(), new Pose3d(), new Pose3d()).toArray(new Pose3d[0]);
     public double[] timestamps = new double[3];
+    public double[] latency = new double[3];
     public double[] visionStdDevs = new double[9];
   }
 

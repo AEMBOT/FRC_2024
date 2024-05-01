@@ -16,6 +16,7 @@ package frc.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -97,8 +98,20 @@ public final class Constants {
       AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
   public final class FieldConstants {
-    public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
-    public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
+    //    public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473,
+    // 5.757474);
+    //    public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722,
+    // 5.757474);
+
+    //    public static final Translation2d BLUE_SPEAKER_POSE =
+    //                    new Translation2d(-0.0381 + Units.inchesToMeters(10), 5.547868);
+    //    public static final Translation2d RED_SPEAKER_POSE =
+    //                    new Translation2d(16.579342 - Units.inchesToMeters(10), 5.547868);
+
+    public static final Translation2d BLUE_SPEAKER_POSE =
+        new Translation2d(-0.0381 - Units.inchesToMeters(2), 5.547868);
+    public static final Translation2d RED_SPEAKER_POSE =
+        new Translation2d(16.579342 + Units.inchesToMeters(2), 5.547868);
 
     public static Translation2d getSpeaker() {
       if (DriverStation.getAlliance().isPresent()) {
@@ -107,6 +120,20 @@ public final class Constants {
             : BLUE_SPEAKER_POSE;
       } else {
         return BLUE_SPEAKER_POSE; // default to blue
+      }
+    }
+
+    public static final Translation2d BLUE_PASS_POSE = new Translation2d(1.5, 8.211);
+
+    public static final Translation2d RED_PASS_POSE = new Translation2d(16.541 - 1.5, 8.211 - 4.0);
+
+    public static Translation2d getPass() {
+      if (DriverStation.getAlliance().isPresent()) {
+        return DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+            ? RED_PASS_POSE
+            : BLUE_PASS_POSE;
+      } else {
+        return BLUE_PASS_POSE; // default to blue
       }
     }
   }
@@ -151,18 +178,35 @@ public final class Constants {
     //        };
 
     // Ishaan Config
+
+    // Blue
     public static double[][] shooterInterpolationPoints =
         new double[][] {
-          new double[] {1.0, 1.065 - 0.02},
-          new double[] {2.2, 0.842 + 0.04},
-          new double[] {3.0, 0.624 + 0.05},
-          new double[] {3.45, 0.552 + 0.05},
-          new double[] {3.80, 0.540 + 0.04},
-          new double[] {4.1, 0.532 + 0.03},
-          new double[] {4.7, 0.515 + 0.005},
-          new double[] {5.4, 0.453},
-          new double[] {6.4, 0.428},
-          new double[] {7.4, 0.390}
+          new double[] {1.0, 1.040},
+          new double[] {2.2, 0.847},
+          new double[] {3.0, 0.639},
+          new double[] {3.45, 0.572},
+          new double[] {3.80, 0.550},
+          new double[] {4.1, 0.532 - 0.005},
+          new double[] {4.7, 0.500 - 0.005},
+          new double[] {5.4, 0.433 - 0.005},
+          new double[] {6.4, 0.413 - 0.005},
+          new double[] {7.4, 0.380 - 0.005}
         };
+
+    // Red
+    //    public static double[][] shooterInterpolationPoints =
+    //        new double[][] {
+    //          new double[] {1.0, 1.040},
+    //          new double[] {2.2, 0.847 - 0.03},
+    //          new double[] {3.0, 0.639 - 0.02},
+    //          new double[] {3.45, 0.572 - 0.02},
+    //          new double[] {3.80, 0.550 - 0.02},
+    //          new double[] {4.1, 0.532 - 0.02},
+    //          new double[] {4.7, 0.500},
+    //          new double[] {5.4, 0.433},
+    //          new double[] {6.4, 0.413},
+    //          new double[] {7.4, 0.380}
+    //        };
   }
 }

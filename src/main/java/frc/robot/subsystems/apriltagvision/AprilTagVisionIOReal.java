@@ -32,6 +32,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
   private Pose3d[] poseArray = new Pose3d[3];
   private double[] timestampArray = new double[3];
   private double[] visionStdArray = new double[9];
+  private double[] latencyArray = new double[3];
   private int count = 0;
 
   public AprilTagVisionIOReal() {
@@ -59,6 +60,7 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
     inputs.visionPoses = poseArray;
     inputs.timestamps = timestampArray;
     inputs.visionStdDevs = visionStdArray;
+    inputs.latency = latencyArray;
     count += 1;
     if (count % 500 == 0) {
       frontCam.takeOutputSnapshot();
@@ -78,10 +80,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
           Matrix<N3, N1> stdDevs =
               getEstimationStdDevs(estimatedRobotPose, CameraResolution.HIGH_RES);
           arraycopy(stdDevs.getData(), 0, visionStdArray, 0, 3);
+          latencyArray[0] = frontCam.getLatestResult().getLatencyMillis() / 1.0e3;
         },
         () -> {
           poseArray[0] = new Pose3d();
           timestampArray[0] = 0.0;
+          latencyArray[0] = 0.0;
         });
     pose = leftPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -96,10 +100,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
                     case LIGHTCYCLE -> CameraResolution.HIGH_RES;
                   });
           arraycopy(stdDevs.getData(), 0, visionStdArray, 3, 3);
+          latencyArray[1] = leftCam.getLatestResult().getLatencyMillis() / 1.0e3;
         },
         () -> {
           poseArray[1] = new Pose3d();
           timestampArray[1] = 0.0;
+          latencyArray[1] = 0.0;
         });
     pose = rightPhotonPoseEstimator.update();
     pose.ifPresentOrElse(
@@ -114,10 +120,12 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
                     case LIGHTCYCLE -> CameraResolution.HIGH_RES;
                   });
           arraycopy(stdDevs.getData(), 0, visionStdArray, 6, 3);
+          latencyArray[2] = leftCam.getLatestResult().getLatencyMillis() / 1.0e3;
         },
         () -> {
           poseArray[2] = new Pose3d();
           timestampArray[2] = 0.0;
+          latencyArray[2] = 0.0;
         });
   }
 }
