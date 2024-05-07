@@ -60,6 +60,7 @@ import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -82,6 +83,7 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardBoolean babyModeSetter;
 
   // LEDs
   private final SerialPort prettyLights = new SerialPort(115200, SerialPort.Port.kMXP);
@@ -233,6 +235,8 @@ public class RobotContainer {
     // Configure Light Bindings
     prettyLights.writeString("l");
     configureLightBindings();
+
+    babyModeSetter = new LoggedDashboardBoolean("Baby Mode", false);
   }
 
   /**
@@ -245,9 +249,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX(),
+            () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
+            () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0),
+            () -> -controller.getRightX() * (babyModeSetter.get() ? 0.25 : 1.0),
             () -> controller.getLeftTriggerAxis() > 0.5)); // Trigger locks make trigger 0/1
     indexer.setDefaultCommand(
         indexer.getDefault(pivot::inHandoffZone).withName("Indexer Auto Default Run"));
@@ -263,8 +267,8 @@ public class RobotContainer {
                 pivot,
                 shooter,
                 indexer,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX()));
+                () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
+                () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0)));
 
     // Trap
     controller.y().whileTrue(pivot.setPositionCommand(() -> 1.81));
@@ -291,9 +295,9 @@ public class RobotContainer {
                 drive,
                 indexer,
                 pivot,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> -controller.getRightX()));
+                () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
+                () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0),
+                () -> -controller.getRightX() * (babyModeSetter.get() ? 0.25 : 1.0)));
     // "Intake Out" - Indexer Manual Run
     controller
         .leftBumper()
@@ -306,7 +310,11 @@ public class RobotContainer {
     controller
         .a()
         .whileTrue(
-            shootSpeaker(drive, pivot, () -> -controller.getLeftY(), () -> -controller.getLeftX())
+            shootSpeaker(
+                    drive,
+                    pivot,
+                    () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
+                    () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0))
                 .alongWith(new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
 
     // Z, climb up
