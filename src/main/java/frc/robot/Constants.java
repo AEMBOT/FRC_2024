@@ -73,7 +73,11 @@ public final class Constants {
     /* PORTS */
     public static final int indexerMotorPortBottom = 16;
     public static final int indexerMotorPortTop = 19;
-    public static final int indexerBeamBrake = 9;
+    public static final int indexerBeamBrake =
+        currentRobot == Robot.LIGHTCYCLE
+            ? 9
+            : 7; // They swapped the wiring to the indexer and intake sensors on Clef and there is
+    // no time to switch back
 
     /* VOLTAGES */
     public static final double indexerMotorVoltage = 1;
@@ -83,7 +87,7 @@ public final class Constants {
     public static final double noteLockTolerance = 10.0;
     public static final int intakeMotorPortBottom = 13;
     public static final int intakeMotorPortTop = 12;
-    public static final int intakeBeamBrake = 7;
+    public static final int intakeBeamBrake = currentRobot == Robot.LIGHTCYCLE ? 7 : 9;
 
     /*VOLTAGES*/
     public static final double intakeMotorVoltage = 12;

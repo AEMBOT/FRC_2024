@@ -74,7 +74,7 @@ public class PivotIOReal implements PivotIO {
 
     encoder.setPositionOffset(
         switch (currentRobot) {
-          case CLEF -> 2.85765 / (2 * Math.PI);
+          case CLEF -> 4.04433682 / (2 * Math.PI);
           case LIGHTCYCLE -> 0.1974 / (2 * Math.PI);
         }); // Convert from offset rads to offset rotations
 
