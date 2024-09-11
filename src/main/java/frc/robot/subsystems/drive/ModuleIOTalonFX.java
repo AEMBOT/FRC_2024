@@ -90,7 +90,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(26, "*");
         absoluteEncoderOffset =
             switch (currentRobot) {
-              case CLEF -> Rotation2d.fromRadians(2.356);
+              case CLEF -> Rotation2d.fromRadians(-0.8206797215188181 + Math.PI);
               case LIGHTCYCLE -> Rotation2d.fromRadians(2.629243070435989);
             };
         isDriveMotorInverted = true;
@@ -102,7 +102,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(24, "*");
         absoluteEncoderOffset =
             switch (currentRobot) {
-              case CLEF -> Rotation2d.fromRadians(2.428 + Math.PI);
+              case CLEF -> Rotation2d.fromRadians(2.4559032414049113 + Math.PI);
               case LIGHTCYCLE -> Rotation2d.fromRadians(Math.PI - 2.8884858235886623);
             };
         isDriveMotorInverted = true;
@@ -114,7 +114,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(25, "*");
         absoluteEncoderOffset =
             switch (currentRobot) {
-              case CLEF -> Rotation2d.fromRadians(1.8438);
+              case CLEF -> Rotation2d.fromRadians(1.863786657281054);
               case LIGHTCYCLE -> Rotation2d.fromRadians(1.0722525707320631);
             };
         isDriveMotorInverted = true;
@@ -126,7 +126,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         cancoder = new CANcoder(23, "*");
         absoluteEncoderOffset =
             switch (currentRobot) {
-              case CLEF -> Rotation2d.fromRadians(1.70425 + Math.PI);
+              case CLEF -> Rotation2d.fromRadians(-1.4388739790367313);
               case LIGHTCYCLE -> Rotation2d.fromRadians(Math.PI - 2.448233337465483);
             };
         isDriveMotorInverted = false;
