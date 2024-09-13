@@ -433,4 +433,8 @@ public class RobotContainer {
   public void homeClimber() {
     CommandScheduler.getInstance().schedule(climber.getHomingCommand().withTimeout(10.0));
   }
+
+  public void homeFieldCentricDrive() {
+    CommandScheduler.getInstance().schedule(runOnce(() -> drive.setYaw(new Rotation2d())));
+  }
 }
