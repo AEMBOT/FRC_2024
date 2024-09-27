@@ -149,41 +149,6 @@ public final class Constants {
     public static double maxVelocity = 2;
     public static double maxAcceleration = 4;
 
-    // Original Config
-    //    public static double[][] shooterInterpolationPoints =
-    //        new double[][] {
-    //          new double[] {1.0, 1.065 - 0.02},
-    //          new double[] {2.0, 0.759 + 0.04},
-    //          new double[] {3.0, 0.550 + 0.02 + 0.04},
-    //          new double[] {3.45, 0.483 + 0.02 + 0.02 + 0.04},
-    //          new double[] {3.70, 0.450 + 0.015 + 0.02 + 0.04},
-    //          new double[] {4.0, 0.471 + 0.02 + 0.04},
-    //          new double[] {4.08, 0.463 + 0.02 + 0.04},
-    //          new double[] {4.85, 0.370 + 0.013 + 0.02 + 0.04},
-    //          new double[] {5.0, 0.360 + 0.01 + 0.02 + 0.04},
-    //          new double[] {6.0, 0.33 + 0.007 + 0.02 + 0.04},
-    //          new double[] {7.0, 0.29 + 0.005 + 0.02 + 0.04}
-    //        };
-
-    // Sean Config
-    //    public static double[][] shooterInterpolationPoints =
-    //        new double[][] {
-    //          new double[] {1.0, 1.065 - 0.02},
-    //          new double[] {2.0, 0.759 + 0.03},
-    //          new double[] {3.0, 0.550 + 0.04},
-    //          new double[] {3.45, 0.483 + 0.04},
-    //          new double[] {3.70, 0.450 + 0.03},
-    //          new double[] {4.0, 0.491},
-    //          new double[] {4.2, 0.483},
-    //          new double[] {4.85, 0.440},
-    //          new double[] {5.4, 0.410},
-    //          new double[] {6.4, 0.370},
-    //          new double[] {7.3, 0.360}
-    //        };
-
-    // Ishaan Config
-
-    // Blue
     public static double[][] shooterInterpolationPoints =
         new double[][] {
           new double[] {1.0, 1.040},
@@ -197,20 +162,5 @@ public final class Constants {
           new double[] {6.4, 0.413 - 0.005},
           new double[] {7.4, 0.380 - 0.005}
         };
-
-    // Red
-    //    public static double[][] shooterInterpolationPoints =
-    //        new double[][] {
-    //          new double[] {1.0, 1.040},
-    //          new double[] {2.2, 0.847 - 0.03},
-    //          new double[] {3.0, 0.639 - 0.02},
-    //          new double[] {3.45, 0.572 - 0.02},
-    //          new double[] {3.80, 0.550 - 0.02},
-    //          new double[] {4.1, 0.532 - 0.02},
-    //          new double[] {4.7, 0.500},
-    //          new double[] {5.4, 0.433},
-    //          new double[] {6.4, 0.413},
-    //          new double[] {7.4, 0.380}
-    //        };
   }
 }

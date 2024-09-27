@@ -20,7 +20,7 @@ import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
-  public static final double WHEEL_RADIUS = Units.inchesToMeters(1.955);
+  public static final double WHEEL_RADIUS = Units.inchesToMeters(1.906);
   public static final double ODOMETRY_FREQUENCY = 200.0; // default 250, limited to 200 by NavX
 
   private final ModuleIO io;

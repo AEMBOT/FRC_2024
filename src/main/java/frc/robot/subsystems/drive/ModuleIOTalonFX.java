@@ -91,7 +91,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset =
             switch (currentRobot) {
               case CLEF -> Rotation2d.fromRadians(-0.8206797215188181 + Math.PI);
-              case LIGHTCYCLE -> Rotation2d.fromRadians(2.629243070435989);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(2.641514916739074);
             };
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
@@ -103,7 +103,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset =
             switch (currentRobot) {
               case CLEF -> Rotation2d.fromRadians(2.4559032414049113 + Math.PI);
-              case LIGHTCYCLE -> Rotation2d.fromRadians(Math.PI - 2.8884858235886623);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.9099615546190614);
             };
         isDriveMotorInverted = true;
         isTurnMotorInverted = true;
@@ -115,7 +115,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset =
             switch (currentRobot) {
               case CLEF -> Rotation2d.fromRadians(1.863786657281054);
-              case LIGHTCYCLE -> Rotation2d.fromRadians(1.0722525707320631);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(1.0538448012774355);
             };
         isDriveMotorInverted = true;
         isTurnMotorInverted = false;
@@ -127,7 +127,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         absoluteEncoderOffset =
             switch (currentRobot) {
               case CLEF -> Rotation2d.fromRadians(-1.4388739790367313);
-              case LIGHTCYCLE -> Rotation2d.fromRadians(Math.PI - 2.448233337465483);
+              case LIGHTCYCLE -> Rotation2d.fromRadians(-2.4298255680108560);
             };
         isDriveMotorInverted = false;
         isTurnMotorInverted = true;
@@ -146,7 +146,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     driveConfig.CurrentLimits.SupplyCurrentLimit = 50.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveConfig.CurrentLimits.StatorCurrentLimit = 40.0;
+    driveConfig.CurrentLimits.StatorCurrentLimit = 80.0;
     driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     driveConfig.Feedback.SensorToMechanismRatio =

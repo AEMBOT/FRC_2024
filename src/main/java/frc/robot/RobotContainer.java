@@ -352,8 +352,8 @@ public class RobotContainer {
         .a()
         .whileTrue(
             pivot
-                .setPositionCommand(() -> Units.degreesToRadians(60))
-                .alongWith(drive.stopWithXCommand()));
+                .setPositionCommand(() -> Units.degreesToRadians(60)));
+    //            .alongWith(drive.stopWithXCommand()));
 
     // Intake Indexer Backwards Eject
     backupController.b().whileTrue(indexer.run(indexer::intakeIndexBackwards));
