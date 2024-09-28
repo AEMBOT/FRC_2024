@@ -18,7 +18,7 @@ public class NoteVisionIOReal implements NoteVisionIO {
       inputs.lastHasTarget = inputs.hasTarget;
       inputs.hasTarget = true;
       inputs.lastTargetX = inputs.targetX;
-      inputs.targetX = -target.getYaw();
+      inputs.targetX = target.getYaw();
     } else {
       inputs.lastHasTarget = inputs.hasTarget;
       inputs.hasTarget = false;
