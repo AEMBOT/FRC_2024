@@ -348,11 +348,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Subwoofer
-    backupController
-        .a()
-        .whileTrue(
-            pivot
-                .setPositionCommand(() -> Units.degreesToRadians(60)));
+    backupController.a().whileTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(60)));
     //            .alongWith(drive.stopWithXCommand()));
 
     // Intake Indexer Backwards Eject

@@ -75,8 +75,10 @@ public class DriveCommands {
                       ? linearVelocity.getY() * SLOWMODE_MAX_METERS_PER_SEC
                       : linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   slowmode.getAsBoolean()
-                      ? omega * drive.getMaxAngularSpeedRadPerSec() * SLOWMODE_ROTATION_SPEED_FACTOR
-                      : omega * drive.getMaxAngularSpeedRadPerSec(),
+                      ? omega
+                          * -drive.getMaxAngularSpeedRadPerSec()
+                          * SLOWMODE_ROTATION_SPEED_FACTOR
+                      : omega * -drive.getMaxAngularSpeedRadPerSec(),
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation()));
