@@ -146,7 +146,6 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    robotContainer.homeFieldCentricDrive();
     robotContainer.homeClimber();
     robotContainer.indexer.setDefaultCommand(
         robotContainer.indexer.run(() -> robotContainer.indexer.indexOffIntakeOff()));
