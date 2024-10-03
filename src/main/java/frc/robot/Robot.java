@@ -33,7 +33,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-
+  private Boolean fieldCentricDriveSet = false;
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -124,6 +124,8 @@ public class Robot extends LoggedRobot {
             .withName("Indexer Auto Default Run"));
 
     autonomousCommand = robotContainer.getAutonomousCommand();
+    // Running autonomous automatically sets field centric drive
+    fieldCentricDriveSet = true;
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
@@ -144,6 +146,11 @@ public class Robot extends LoggedRobot {
     // this line or comment it out.
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
+    }
+    // If field centric drive has not yet been set then set it, otherwise skip
+    if (!fieldCentricDriveSet) {
+      robotContainer.homeFieldCentricDrive();
+      fieldCentricDriveSet = true;
     }
 
     robotContainer.homeClimber();
