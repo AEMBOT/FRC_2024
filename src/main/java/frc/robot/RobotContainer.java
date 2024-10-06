@@ -15,6 +15,7 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.Constants.ShooterConstants.shooterSpeedRPM;
+import static frc.robot.Constants.currentRobot;
 import static frc.robot.commands.SpeakerCommands.*;
 import static java.lang.Math.abs;
 
@@ -307,16 +308,21 @@ public class RobotContainer {
                 .alongWith(Commands.waitSeconds(0.05).andThen(indexer.ampCommand())));
 
     // Auto Rotation Lock Shooter Pivot Interp
-    controller
-        .a()
-        .whileTrue(
-            shootSpeaker(
-                    drive,
-                    pivot,
-                    () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
-                    () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0))
-                .alongWith(new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
-
+    // If on clef, reset field centric drive
+    switch (currentRobot) {
+      case CLEF -> controller
+          .a()
+          .onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
+      case LIGHTCYCLE -> controller
+          .a()
+          .whileTrue(
+              shootSpeaker(
+                      drive,
+                      pivot,
+                      () -> -controller.getLeftY() * (babyModeSetter.get() ? 0.25 : 1.0),
+                      () -> -controller.getLeftX() * (babyModeSetter.get() ? 0.25 : 1.0))
+                  .alongWith(new ProxyCommand(shooter.setVelocityRPMCommand(shooterSpeedRPM))));
+    }
     // Z, climb up
     controller.button(10).whileTrue(climber.setPositionCommand(0.75));
     controller.button(10).onTrue(pivot.setPositionCommand(() -> Units.degreesToRadians(120)));

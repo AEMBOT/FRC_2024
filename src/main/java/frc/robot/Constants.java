@@ -149,7 +149,21 @@ public final class Constants {
     public static double maxVelocity = 2;
     public static double maxAcceleration = 4;
 
-    public static double[][] shooterInterpolationPoints =
+    public static double[][] redShooterInterpolationPoints =
+        new double[][] {
+          new double[] {1.0, 1.040 + 0.01},
+          new double[] {2.2, 0.847 + 0.01},
+          new double[] {3.0, 0.639 + 0.01},
+          new double[] {3.45, 0.572 + 0.01},
+          new double[] {3.80, 0.550 + 0.01},
+          new double[] {4.1, 0.532 + 0.005},
+          new double[] {4.7, 0.500 + 0.005},
+          new double[] {5.4, 0.433 + 0.005},
+          new double[] {6.4, 0.413 + 0.005},
+          new double[] {7.4, 0.380 + 0.005}
+        };
+
+    public static double[][] blueShooterInterpolationPoints =
         new double[][] {
           new double[] {1.0, 1.040},
           new double[] {2.2, 0.847},
@@ -162,5 +176,17 @@ public final class Constants {
           new double[] {6.4, 0.413 - 0.005},
           new double[] {7.4, 0.380 - 0.005}
         };
+
+    public static double[][] getShooterInterpPoints() {
+      if (DriverStation.getAlliance().isPresent()) {
+        return DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+            ? redShooterInterpolationPoints
+            : blueShooterInterpolationPoints;
+      } else {
+        return blueShooterInterpolationPoints; // default to blue
+      }
+    }
+
+    public static double[][] shooterInterpolationPoints = getShooterInterpPoints();
   }
 }
