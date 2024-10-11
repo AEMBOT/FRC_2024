@@ -79,6 +79,7 @@ public class PivotIOReal implements PivotIO {
         }); // Convert from offset rads to offset rotations
 
     while (getAbsoluteEncoderPosition() < 0.1 || getAbsoluteEncoderPosition() > 3) {
+      System.out.println("ERROR: Invalid pivot encoder position. Is the pivot encoder unplugged?");
       delay(1);
     }
     pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
