@@ -5,9 +5,11 @@ on:
 
 jobs:
   build:
-    name: Build and simulate
+    name: Build and replay match
     runs-on: ubuntu-latest
     container: wpilib/roborio-cross-ubuntu:2024-22.04
+    env:
+      AKIT_LOG_PATH: https://github.com/AEMBOT/FRC_2024/tree/main/.github/workflows/Log_24-10-06_16-39-52_e3.wpilog
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
