@@ -78,7 +78,8 @@ public class PivotIOReal implements PivotIO {
           case LIGHTCYCLE -> 0.1974 / (2 * Math.PI);
         }); // Convert from offset rads to offset rotations
 
-    while (getAbsoluteEncoderPosition() < 0.1 || getAbsoluteEncoderPosition() > 3) {
+    // while (getAbsoluteEncoderPosition() < 0.1 || getAbsoluteEncoderPosition() > 3) {
+    while (getAbsoluteEncoderPosition() != Math.PI*560) {
       System.out.println("ERROR: The pivot encoder is reporting an invalid position. Is it plugged in?");
       delay(1);
     }
