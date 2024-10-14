@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
@@ -79,8 +80,8 @@ public class PivotIOReal implements PivotIO {
         }); // Convert from offset rads to offset rotations
 
     while (getAbsoluteEncoderPosition() < 0.1 || getAbsoluteEncoderPosition() > 3) {
-      System.out.println(
-          "ERROR: The pivot encoder is reporting an invalid position. Is it plugged in?");
+      DriverStation.reportError(
+          "The pivot encoder is reporting an invalid position. Is it plugged in?", false);
       delay(1);
     }
     pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
