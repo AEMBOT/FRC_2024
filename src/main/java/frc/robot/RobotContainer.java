@@ -336,7 +336,7 @@ public class RobotContainer {
     controller.start().onTrue(runOnce(() -> drive.setYaw(new Rotation2d())).ignoringDisable(true));
     controller.back().onTrue(runOnce(() -> drive.setPose(new Pose2d(7.0, 4.0, new Rotation2d()))));
 
-    new Trigger(indexer::intakedNote)
+    new Trigger(indexer::hasNote)
         .onTrue(
             Commands.run(
                     () -> controller.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5))
@@ -396,7 +396,7 @@ public class RobotContainer {
     //            Commands.startEnd(() -> prettyLights.writeString("g"), resetColorToIdle)
     //                .ignoringDisable(true));
 
-    new Trigger(indexer::intakedNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("g")));
+    new Trigger(indexer::hasNote).onTrue(Commands.runOnce(() -> prettyLights.writeString("g")));
     new Trigger(indexer::hasNote)
         .debounce(2.0, Debouncer.DebounceType.kFalling)
         .onFalse(Commands.runOnce(resetColorToIdle));
