@@ -139,7 +139,7 @@ public class ModuleIOAlpha implements ModuleIO {
     inputs.drivePositionMeters = driveEncoder.getPosition();
     inputs.driveVelocityMetersPerSec = driveEncoder.getVelocity();
     inputs.driveAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
-    inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
+    inputs.driveStatorCurrentAmps = driveSparkMax.getOutputCurrent();
 
     inputs.turnAbsolutePosition =
         Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
