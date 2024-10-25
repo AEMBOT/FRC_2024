@@ -5,6 +5,7 @@
 
 
 # Reviewer
+[ ] Is this change approved by team systems conference?
 [ ] Are hardware errors possible, and are they handled properly?
 [ ] Do the changes affect end users (drive team), and have they tried the change / approve of it?
 [ ] Was an on-robot basic test + functionality test run?
