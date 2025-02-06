@@ -81,8 +81,6 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController backupController = new CommandXboxController(1);
 
-  private SerialPort serial;
-
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   private final LoggedDashboardBoolean babyModeSetter;
@@ -232,7 +230,6 @@ public class RobotContainer {
             .withTimeout(2.0));
 
     // Configure the button bindings
-    serial = new SerialPort(115200, SerialPort.Port.kMXP);
     configureButtonBindings();
 
     // Configure Light Bindings
