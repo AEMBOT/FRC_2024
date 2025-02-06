@@ -1,6 +1,7 @@
 package frc.robot.subsystems.indexer;
 
 import static com.revrobotics.CANSparkLowLevel.MotorType.kBrushless;
+import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.IndexerConstants.*;
 import static frc.robot.Constants.IntakeConstants.*;
 
@@ -36,6 +37,13 @@ public class IndexerIOSparkMax implements IndexerIO {
 
     indexerMotorBottom.follow(indexerMotorTop);
     intakeMotorBottom.follow(intakeMotorTop);
+
+    delay(0.25);
+
+    intakeMotorTop.burnFlash();
+    intakeMotorBottom.burnFlash();
+    indexerMotorTop.burnFlash();
+    indexerMotorBottom.burnFlash();
   }
 
   @Override

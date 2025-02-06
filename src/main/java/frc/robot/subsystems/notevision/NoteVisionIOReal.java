@@ -15,10 +15,14 @@ public class NoteVisionIOReal implements NoteVisionIO {
     var result = intakeCam.getLatestResult();
     if (result.hasTargets()) {
       PhotonTrackedTarget target = result.getBestTarget();
+      inputs.lastHasTarget = inputs.hasTarget;
       inputs.hasTarget = true;
+      inputs.lastTargetX = inputs.targetX;
       inputs.targetX = target.getYaw();
     } else {
+      inputs.lastHasTarget = inputs.hasTarget;
       inputs.hasTarget = false;
+      inputs.lastTargetX = inputs.targetX;
       inputs.targetX = 0.0;
     }
   }

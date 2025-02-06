@@ -2,6 +2,7 @@ package frc.robot.subsystems.climber;
 
 import static edu.wpi.first.wpilibj.Timer.delay;
 import static frc.robot.Constants.ClimberConstants.*;
+import static frc.robot.Constants.currentRobot;
 
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
@@ -44,8 +45,16 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorRight.setSmartCurrentLimit(homingCurrentLimit);
     m_winchMotorLeft.setSmartCurrentLimit(homingCurrentLimit);
 
-    m_winchMotorRight.setInverted(true);
-    m_winchMotorLeft.setInverted(false);
+    switch (currentRobot) {
+      case CLEF -> {
+        m_winchMotorRight.setInverted(true);
+        m_winchMotorLeft.setInverted(false);
+      }
+      case LIGHTCYCLE -> {
+        m_winchMotorRight.setInverted(false);
+        m_winchMotorLeft.setInverted(true);
+      }
+    }
 
     encoderLeft.setPositionConversionFactor(Math.PI * SPOOL_DIAMETER / GEAR_RATIO); // Rot to m
     encoderRight.setPositionConversionFactor(Math.PI * SPOOL_DIAMETER / GEAR_RATIO); // Rot to m
@@ -114,6 +123,16 @@ public class ClimberIOSparkMax implements ClimberIO {
     m_winchMotorLeft.setVoltage(volts);
   }
 
+  public void setLeftVoltage(double volts) {
+    openLoop = true;
+    m_winchMotorLeft.setVoltage(volts);
+  }
+
+  public void setRightVoltage(double volts) {
+    openLoop = true;
+    m_winchMotorRight.setVoltage(volts);
+  }
+
   @Override
   public void resetEncoder(final double position) {
     encoderRight.setPosition(position);
@@ -122,5 +141,13 @@ public class ClimberIOSparkMax implements ClimberIO {
 
   public boolean isCurrentLimited() {
     return currentFilterLeftValue > 20 && currentFilterRightValue > 20;
+  }
+
+  public boolean isLeftCurrentLimited() {
+    return currentFilterLeftValue > 20;
+  }
+
+  public boolean isRightCurrentLimited() {
+    return currentFilterRightValue > 20;
   }
 }

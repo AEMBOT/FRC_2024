@@ -1,0 +1,112 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.360748291015625,
+      "y": 5.571338653564453
+    },
+    "rotation": -179.5416578630885
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteSubwoofer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W2-W1-C2-C1-S.1"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W2-W1-C2-C1-S.2"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W2-W1-C2-C1-S.3"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W2-W1-C2-C1-S.4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

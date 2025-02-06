@@ -1,0 +1,93 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.6568298935890198,
+      "y": 4.376604080200195
+    },
+    "rotation": 119.48890598522028
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteSubwoofer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W3-C4-C5-O.1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W3-C4-C5-O.2"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W3-C4-C5-O.3"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.5
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shootNoteAuto"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "W3-C4-C5-O.4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

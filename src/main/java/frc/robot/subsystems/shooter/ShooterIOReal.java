@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter;
 import static com.revrobotics.CANSparkBase.ControlType.kVelocity;
 import static com.revrobotics.CANSparkBase.IdleMode.kCoast;
 import static edu.wpi.first.wpilibj.Timer.delay;
-import static frc.robot.Constants.ShooterConstants.shooterIdleRPM;
 import static frc.robot.Constants.currentRobot;
 import static frc.robot.util.SparkUtils.Data.*;
 import static frc.robot.util.SparkUtils.Sensor.INTEGRATED;
@@ -61,10 +60,10 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorFollower.enableVoltageCompensation(10.0);
 
     // Tune acceptable current limit, don't want to use all power if shoot while moving
-    topMotorLeader.setSmartCurrentLimit(60);
-    topMotorFollower.setSmartCurrentLimit(60);
-    bottomMotorLeader.setSmartCurrentLimit(60);
-    bottomMotorFollower.setSmartCurrentLimit(60);
+    topMotorLeader.setSmartCurrentLimit(50);
+    topMotorFollower.setSmartCurrentLimit(50);
+    bottomMotorLeader.setSmartCurrentLimit(50);
+    bottomMotorFollower.setSmartCurrentLimit(50);
 
     topMotorLeader.getEncoder().setVelocityConversionFactor(2);
     topMotorFollower.getEncoder().setVelocityConversionFactor(2);
@@ -76,6 +75,21 @@ public class ShooterIOReal implements ShooterIO {
     bottomMotorLeader.setIdleMode(kCoast);
     bottomMotorFollower.setIdleMode(kCoast);
 
+    configureFrameStrategy(
+        topMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(topMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
+
+    configureFrameStrategy(
+        bottomMotorLeader,
+        Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
+        Set.of(INTEGRATED),
+        true);
+
+    configureFrameStrategy(bottomMotorFollower, Set.of(CURRENT), Set.of(INTEGRATED), false);
     configureFrameStrategy(
         topMotorLeader,
         Set.of(POSITION, VELOCITY, CURRENT, INPUT_VOLTAGE, APPLIED_OUTPUT),
@@ -117,7 +131,7 @@ public class ShooterIOReal implements ShooterIO {
         }); // Divide by 10 because of voltage compensation
     bottomMotorPID.setFF(
         switch (currentRobot) {
-          case CLEF -> 1.05 * 0.0010492 / 10.0;
+          case CLEF -> 1.04 * 0.0010492 / 10.0;
           case LIGHTCYCLE -> 0.98 * 0.001137 / 10.0;
         });
 
@@ -148,9 +162,8 @@ public class ShooterIOReal implements ShooterIO {
     inputs.bottomShooterSetpoint = bottomShooterSetpoint;
     inputs.atShootSpeed =
         abs(topShooterSetpoint - inputs.shooterVelocityRPM[0]) < 250
-            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 250
-            && (topShooterSetpoint > (shooterIdleRPM * 1.5)
-                || bottomShooterSetpoint > (shooterIdleRPM * 1.5));
+            && abs(bottomShooterSetpoint - inputs.shooterVelocityRPM[1]) < 500
+            && (topShooterSetpoint > 2000 || bottomShooterSetpoint > 2000);
   }
 
   /** Run open loop at the specified voltage. Primarily for characterization. */
@@ -166,8 +179,19 @@ public class ShooterIOReal implements ShooterIO {
     topShooterSetpoint = velocityRPM * 1.05;
     bottomShooterSetpoint = velocityRPM;
     // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
-    topMotorPID.setReference(velocityRPM * 1.05, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
-    bottomMotorPID.setReference(velocityRPM, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
+    topMotorPID.setReference(topShooterSetpoint, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(
+        bottomShooterSetpoint, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
+  }
+
+  public void setVelocity(double topRPM, double bottomRPM) {
+    openLoop = false;
+    topShooterSetpoint = topRPM;
+    bottomShooterSetpoint = bottomRPM;
+    // Use FF (kV) + PID on-smax, arbFF pass in kS to linearize system, kA unnecessary, low inertia
+    topMotorPID.setReference(topShooterSetpoint, kVelocity, 0, topMotorkS, ArbFFUnits.kVoltage);
+    bottomMotorPID.setReference(
+        bottomShooterSetpoint, kVelocity, 0, bottomMotorkS, ArbFFUnits.kVoltage);
   }
 
   /** Stop in open loop. */

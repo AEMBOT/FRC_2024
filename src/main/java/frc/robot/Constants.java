@@ -17,7 +17,9 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -28,8 +30,9 @@ import edu.wpi.first.wpilibj.DriverStation;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final Mode currentMode = Mode.REAL;
-  public static final Robot currentRobot = Robot.LIGHTCYCLE;
+  public static final DigitalInput robotJumper = new DigitalInput(0);
+  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
+  public static final Robot currentRobot = robotJumper.get() ? Robot.CLEF : Robot.LIGHTCYCLE;
 
   public enum Mode {
     /** Running on a real robot. */
@@ -70,19 +73,24 @@ public final class Constants {
     /* PORTS */
     public static final int indexerMotorPortBottom = 16;
     public static final int indexerMotorPortTop = 19;
-    public static final int indexerBeamBrake = 9;
+    public static final int indexerBeamBrake =
+        currentRobot == Robot.LIGHTCYCLE
+            ? 9
+            : 7; // They swapped the wiring to the indexer and intake sensors on Clef and there is
+    // no time to switch back
 
     /* VOLTAGES */
-    public static final double indexerMotorVoltage = 1.5;
+    public static final double indexerMotorVoltage = 1;
   }
 
   public static final class IntakeConstants {
+    public static final double noteLockTolerance = 10.0;
     public static final int intakeMotorPortBottom = 13;
     public static final int intakeMotorPortTop = 12;
-    public static final int intakeBeamBrake = 7;
+    public static final int intakeBeamBrake = currentRobot == Robot.LIGHTCYCLE ? 7 : 9;
 
     /*VOLTAGES*/
-    public static final double intakeMotorVoltage = 10;
+    public static final double intakeMotorVoltage = 12;
   }
 
   public static final class ShooterConstants {
@@ -94,8 +102,20 @@ public final class Constants {
       AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
   public final class FieldConstants {
-    public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473, 5.757474);
-    public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722, 5.757474);
+    //    public static final Translation2d BLUE_SPEAKER_POSE = new Translation2d(-0.086473,
+    // 5.757474);
+    //    public static final Translation2d RED_SPEAKER_POSE = new Translation2d(16.389722,
+    // 5.757474);
+
+    //    public static final Translation2d BLUE_SPEAKER_POSE =
+    //                    new Translation2d(-0.0381 + Units.inchesToMeters(10), 5.547868);
+    //    public static final Translation2d RED_SPEAKER_POSE =
+    //                    new Translation2d(16.579342 - Units.inchesToMeters(10), 5.547868);
+
+    public static final Translation2d BLUE_SPEAKER_POSE =
+        new Translation2d(-0.0381 - Units.inchesToMeters(2), 5.547868);
+    public static final Translation2d RED_SPEAKER_POSE =
+        new Translation2d(16.579342 + Units.inchesToMeters(2), 5.547868);
 
     public static Translation2d getSpeaker() {
       if (DriverStation.getAlliance().isPresent()) {
@@ -106,25 +126,41 @@ public final class Constants {
         return BLUE_SPEAKER_POSE; // default to blue
       }
     }
+
+    public static final Translation2d BLUE_PASS_POSE = new Translation2d(1.5, 8.211);
+
+    public static final Translation2d RED_PASS_POSE = new Translation2d(16.541 - 1.5, 8.211 - 4.0);
+
+    public static Translation2d getPass() {
+      if (DriverStation.getAlliance().isPresent()) {
+        return DriverStation.getAlliance().get() == DriverStation.Alliance.Red
+            ? RED_PASS_POSE
+            : BLUE_PASS_POSE;
+      } else {
+        return BLUE_PASS_POSE; // default to blue
+      }
+    }
   }
 
   public static final class shootingSpeakerConstants {
     public static double kP = 5;
     public static double kI = 0;
-    public static double kD = 0;
+    public static double kD = 0.02;
     public static double maxVelocity = 2;
     public static double maxAcceleration = 4;
+
     public static double[][] shooterInterpolationPoints =
         new double[][] {
-          new double[] {1.0, Units.degreesToRadians(60)},
-          new double[] {2.0, Units.degreesToRadians(40)},
-          new double[] {3.0, Units.degreesToRadians(30)},
-          new double[] {3.45, 0.483},
-          new double[] {4.0, Units.degreesToRadians(23)},
-          new double[] {4.85, 0.360},
-          new double[] {5.0, 0.350},
-          new double[] {6.0, 0.32},
-          new double[] {7.0, 0.29}
+          new double[] {1.0, 1.040},
+          new double[] {2.2, 0.847},
+          new double[] {3.0, 0.639},
+          new double[] {3.45, 0.572},
+          new double[] {3.80, 0.550},
+          new double[] {4.1, 0.532 - 0.005},
+          new double[] {4.7, 0.500 - 0.005},
+          new double[] {5.4, 0.433 - 0.005},
+          new double[] {6.4, 0.413 - 0.005},
+          new double[] {7.4, 0.380 - 0.005}
         };
   }
 }

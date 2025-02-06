@@ -41,7 +41,7 @@ public class PivotIOReal implements PivotIO {
   private final PIDController pidController =
       switch (currentRobot) {
         case CLEF -> new PIDController(12, 0, 0.00);
-        case LIGHTCYCLE -> new PIDController(35, 0, 0.0);
+        case LIGHTCYCLE -> new PIDController(35, 0, 0.1);
       };
 
   private final TrapezoidProfile pivotProfile =
@@ -74,7 +74,7 @@ public class PivotIOReal implements PivotIO {
 
     encoder.setPositionOffset(
         switch (currentRobot) {
-          case CLEF -> 2.85765 / (2 * Math.PI);
+          case CLEF -> 4.04433682 / (2 * Math.PI);
           case LIGHTCYCLE -> 0.1974 / (2 * Math.PI);
         }); // Convert from offset rads to offset rotations
 
@@ -119,8 +119,7 @@ public class PivotIOReal implements PivotIO {
         //            pivotSetpoint.velocity,
         //            (pivotSetpoint.velocity - currentVelocity) / UPDATE_PERIOD);
         pivotFFModel.calculate(pivotGoal.position, 0);
-    double pidOutput =
-        pidController.calculate(getAbsoluteEncoderPosition(), pivotSetpoint.position);
+    double pidOutput = pidController.calculate(getAbsoluteEncoderPosition(), pivotGoal.position);
 
     Logger.recordOutput("Pivot/CalculatedFFVolts", feedForward);
     Logger.recordOutput("Pivot/PIDCommandVolts", pidOutput);

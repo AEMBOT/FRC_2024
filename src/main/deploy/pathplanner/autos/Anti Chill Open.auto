@@ -1,0 +1,61 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7041450142860413,
+      "y": 4.42900276184082
+    },
+    "rotation": 116.56503473815837
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteSubwoofer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Chill Open.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Chill Open.2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Anti Chill Open.3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteAuto"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}

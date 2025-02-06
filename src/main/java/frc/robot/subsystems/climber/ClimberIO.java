@@ -27,6 +27,10 @@ public interface ClimberIO {
   /** Run open loop at the specified voltage. */
   public default void setVoltage(double volts) {}
 
+  public default void setLeftVoltage(double volts) {}
+
+  public default void setRightVoltage(double volts) {}
+
   public default void setHoming(boolean homingBool) {}
 
   public default void resetEncoder(final double position) {}
@@ -36,6 +40,14 @@ public interface ClimberIO {
   }
 
   public default boolean isCurrentLimited() {
+    return false;
+  }
+
+  public default boolean isLeftCurrentLimited() {
+    return false;
+  }
+
+  public default boolean isRightCurrentLimited() {
     return false;
   }
 }

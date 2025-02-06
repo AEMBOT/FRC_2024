@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
@@ -45,6 +46,14 @@ public class Climber extends SubsystemBase {
     io.setPosition(position);
   }
 
+  public Command runManualClimberCommand(DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+    return run(() -> {
+          io.setLeftVoltage(leftSpeed.getAsDouble() * 3.0);
+          io.setRightVoltage(rightSpeed.getAsDouble() * 3.0);
+        })
+        .finallyDo(() -> io.setVoltage(0.0));
+  }
+
   public Command runVoltsCommand(double voltage) {
     return run(() -> runVolts(voltage)).finallyDo(() -> runVolts(0.0));
   }
@@ -56,7 +65,13 @@ public class Climber extends SubsystemBase {
   public Command getHomingCommand() {
     return Commands.sequence(
         runOnce(() -> io.setHoming(true)),
-        runVoltsCommand(-2.0).until(io::isCurrentLimited),
+        Commands.parallel(
+            Commands.run(() -> io.setLeftVoltage(-2.0))
+                .until(io::isLeftCurrentLimited)
+                .finallyDo(() -> io.setLeftVoltage(0.0)),
+            Commands.run(() -> io.setRightVoltage(-2.0))
+                .until(io::isRightCurrentLimited)
+                .finallyDo(() -> io.setRightVoltage(0.0))),
         runOnce(io::resetEncoder),
         runOnce(() -> io.setHoming(false)));
   }

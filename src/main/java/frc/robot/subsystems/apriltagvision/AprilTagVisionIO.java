@@ -20,6 +20,7 @@ public interface AprilTagVisionIO {
     public Pose3d[] visionPoses =
         List.of(new Pose3d(), new Pose3d(), new Pose3d()).toArray(new Pose3d[0]);
     public double[] timestamps = new double[3];
+    public double[] latency = new double[3];
     public double[] visionStdDevs = new double[9];
   }
 
@@ -57,15 +58,25 @@ public interface AprilTagVisionIO {
               .getTranslation()
               .getNorm();
     }
+
     if (numTags == 0) return estStdDevs;
     avgDist /= numTags;
+
     // Decrease std devs if multiple targets are visible
-    if (numTags > 1)
+    if (numTags > 1
+        && avgDist
+            > switch (resolution) {
+              case HIGH_RES -> 8;
+              case NORMAL -> 5;
+            }) {
+      estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+    } else {
       estStdDevs =
           switch (resolution) {
             case HIGH_RES -> highResMultiTagStdDev;
             case NORMAL -> normalMultiTagStdDev;
           };
+    }
     // Increase std devs based on (average) distance
     if (numTags == 1
         && avgDist
@@ -75,7 +86,7 @@ public interface AprilTagVisionIO {
             }) {
       estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     } else {
-      estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+      estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 20));
     }
 
     return estStdDevs;
