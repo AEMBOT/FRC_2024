@@ -78,9 +78,12 @@ public class PivotIOReal implements PivotIO {
           case LIGHTCYCLE -> 0.1974 / (2 * Math.PI);
         }); // Convert from offset rads to offset rotations
 
+    // TODO: Need updated abs encoder offset and valid range
+    /*
     while (getAbsoluteEncoderPosition() < 0.1 || getAbsoluteEncoderPosition() > 3) {
       delay(1);
     }
+    */
     pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
     pivotSetpoint = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
   }
