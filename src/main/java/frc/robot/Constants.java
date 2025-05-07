@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static final DigitalInput robotJumper = new DigitalInput(0);
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
-  public static final Robot currentRobot = robotJumper.get() ? Robot.CLEF : Robot.LIGHTCYCLE;
+  public static final Robot currentRobot = robotJumper.get() ? Robot.LIGHTCYCLE : Robot.CLEF;
 
   public enum Mode {
     /** Running on a real robot. */
