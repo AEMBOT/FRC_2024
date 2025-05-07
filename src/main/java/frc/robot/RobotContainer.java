@@ -37,19 +37,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.WheelRadiusCharacterization;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOReal;
 import frc.robot.subsystems.apriltagvision.AprilTagVisionIOSim;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.climber.ClimberIOSparkMax;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSim;
 import frc.robot.subsystems.indexer.IndexerIOSparkMax;
 import frc.robot.subsystems.notevision.NoteVisionIO;
-import frc.robot.subsystems.notevision.NoteVisionIOReal;
 import frc.robot.subsystems.pivot.Pivot;
 import frc.robot.subsystems.pivot.PivotIO;
 import frc.robot.subsystems.pivot.PivotIOReal;
@@ -100,12 +97,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(1),
                 new ModuleIOTalonFX(2),
                 new ModuleIOTalonFX(3),
-                new AprilTagVisionIOReal(),
-                new NoteVisionIOReal());
+                new AprilTagVisionIO() {},
+                new NoteVisionIO() {});
         indexer = new Indexer(new IndexerIOSparkMax());
         pivot = new Pivot(new PivotIOReal());
         shooter = new Shooter(new ShooterIOReal());
-        climber = new Climber(new ClimberIOSparkMax());
+        climber = new Climber(new ClimberIO() {});
         break;
 
       case SIM:
