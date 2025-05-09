@@ -84,6 +84,14 @@ public class PivotIOReal implements PivotIO {
       delay(1);
     }
     */
+
+    while (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD
+        || getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
+      System.out.println(
+          "WARNING: ENCODER OUTSIDE ACCEPTABLE RANGE\nOPERATION HALTED UNTIL PUT IN PLACE");
+      delay(1);
+    }
+
     pivotGoal = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
     pivotSetpoint = new TrapezoidProfile.State(getAbsoluteEncoderPosition(), 0);
   }
@@ -116,6 +124,7 @@ public class PivotIOReal implements PivotIO {
                 : 0.02,
             pivotSetpoint,
             pivotGoal);
+            
     double feedForward =
         //        pivotFFModel.calculate(
         //            pivotSetpoint.position,
@@ -157,10 +166,10 @@ public class PivotIOReal implements PivotIO {
 
   private void setMotorVoltage(double volts) {
     if (getAbsoluteEncoderPosition() < PIVOT_MIN_POS_RAD) {
-      volts = clamp(volts, -1, Double.MAX_VALUE);
+      volts = clamp(volts, 1, Double.MAX_VALUE);
     }
     if (getAbsoluteEncoderPosition() > PIVOT_MAX_POS_RAD) {
-      volts = clamp(volts, -Double.MAX_VALUE, 1);
+      volts = clamp(volts, -Double.MAX_VALUE, -1);
     }
 
     motorLeader.setVoltage(volts);
